@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trucoteca page</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module">
+        // Importar Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJIe2dSGgzPGmzu1xsMbYJMbRlBsPtMXQ",
+            authDomain: "dbxd-7b391.firebaseapp.com",
+            databaseURL: "https://dbxd-7b391-default-rtdb.firebaseio.com",
+            projectId: "dbxd-7b391",
+            storageBucket: "dbxd-7b391.firebasestorage.app",
+            messagingSenderId: "183155393407",
+            appId: "1:183155393407:web:b952a84d71b4f98c30104a",
+            measurementId: "G-CHLKYMQ695"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // ID del chat (puedes cambiarlo según tus necesidades)
+        const chatId = 'chat1'; // Cambia esto si tienes múltiples chats
+
+        // Solicitar permiso para notificaciones
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+
+        // Función para enviar mensajes
+        function sendMessage(sender, messageText) {
+            const messageId = Date.now(); // Usar timestamp como ID único
+            set(ref(database, 'chats/' + chatId + '/messages/' + messageId), {
+                sender: sender,
+                text: messageText,
+                timestamp: messageId
+            });
+        }
+
+        // Función para escuchar mensajes
+        function listenForMessages() {
+            const messagesRef = ref(database, 'chats/' + chatId + '/messages');
+            onValue(messagesRef, (snapshot) => {
+                const messages = snapshot.val();
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = ''; // Limpiar mensajes anteriores
+
+                if (messages) {
+                    // Iterar sobre los mensajes y mostrarlos
+                    Object.keys(messages).forEach((key) => {
+                        const message = messages[key];
+                        const messageElement = document.createElement('div');
+                        messageElement.textContent = `${message.sender}: ${message.text}`;
+                        messagesDiv.appendChild(messageElement);
+                    });
+
+                    // Mostrar notificación para el último mensaje
+                    const lastMessage = messages[Object.keys(messages).pop()];
+                    if (lastMessage && Notification.permission === "granted") {
+                        new Notification(`Nuevo mensaje de ${lastMessage.sender}`, {
+                            body: lastMessage.text,
+                            icon: 'icon.png' // Puedes poner la ruta a un icono si lo deseas
+                        });
+                    }
+                }
+            });
+        }
+
+        // Manejar el envío del formulario
+        document.getElementById('chatForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evitar que la página se recargue
+            const nameText = document.getElementById('nameInput').value; // Obtener el nombre del usuario
+            const messageText = document.getElementById('messageInput').value; // Obtener el mensaje
+            sendMessage(nameText, messageText); // Usar el nombre ingresado
+            document.getElementById('messageInput').value = ''; // Limpiar el campo de entrada del mensaje
+        });
+
+        // Iniciar la escucha de mensajes
+        listenForMessages();
+
+    </script>
+</head>
+<body>
+    <header>
+        <h1>trucoteca page</h1>
+        <nav>
+            <ul>
+                <li><a href="#presentacion">Bienvenido</a></li>
+                <li><a href="#habilidades">Trucos</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section id="presentacion">
+            <h2>Bienvenido</h2>
+            <p>bienvenido a la trucopagina </p>
+        </section>
+        
+        <section id="habilidades">
+            <h2>Habilidades</h2>
+            <ul>
+                <li><a href="https://online2pdf.com" target="_blank">PDF Gen</a></li>
+                <li><a href="https://online2pdf.com" target="_blank">PDF Gen</a></li>
+                <li><a href="https://online2pdf.com" target="_blank">PDF Gen</a></li>
+                <li><a href="https://online2pdf.com" target="_blank">PDF Gen</a></li>
+                <li><a href="https://online2pdf.com" target="_blank">PDF Gen</a></li>
+                <li><a href="https://online2pdf.com" target="_blank">PDF Gen</a></li>
+                <li><a href="https://online2pdf.com" target="_blank">PDF Gen</a></li>
+                <li><a href="https://online2pdf.com" target="_blank">PDF Gen</a></li>
+                <li><a href="https://online2pdf.com" target="_blank">PDF Gen</a></li>
+                <li><a href="https://online2pdf.com" target="_blank">PDF Gen</a></li>
+                <li><a href="https://online2pdf.com" target="_blank">PDF Gen</a></li>
+                <li><a href="https://online2pdf.com" target="_blank">PDF Gen</a></li>
+            </ul>
+        </section>
+
+        <section id="chat">
+            <h2>Trucochat solo usalo si no tienes metodos de comunicacion (no hay filtros creo)</h2>
+            <p>AVISO:la pagina pide si puede mostrar notificaciones es por cada mensaje nuevo que llega si no lo requieren no lo acepten y ya </p>
+            <div id="messages"></div>
+                <form id="chatForm">
+                    <input type="text" id="nameInput" placeholder="Ingresa tu nombre" required>
+                    <input type="text" id="messageInput" placeholder="Escribe tu mensaje aquí..." required>
+                    <button type="submit">Enviar</button>
+                </form>
+        </section>
+        
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 trucoteca page by s12. Todos los derechos reservados.</p>
+    </footer>
+
+    
+</body>
+</html>
