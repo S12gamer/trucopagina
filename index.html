@@ -10,8 +10,6 @@
         // Importar Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging.js";
 
         // Configuración de Firebase
         const firebaseConfig = {
@@ -28,7 +26,7 @@
         // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        const messaging = getMessaging(app);
+
 
         // ID del chat (puedes cambiarlo según tus necesidades)
         const chatId = 'chat1'; // Cambia esto si tienes múltiples chats
@@ -37,35 +35,6 @@
         if (Notification.permission !== "granted") {
             Notification.requestPermission();
         }
-
-
-        // Solicitar permiso para recibir notificaciones
-        messaging.requestPermission()
-            .then(() => {
-                console.log("Permiso concedido");
-                return messaging.getToken();
-            })
-            .then((token) => {
-                console.log("Token de FCM:", token);
-                // Aquí puedes enviar el token a tu servidor para almacenar y enviar notificaciones
-            })
-            .catch((err) => {
-                console.error("Error al obtener el permiso:", err);
-            });
-
-        // Manejar la recepción de mensajes en primer plano
-        messaging.onMessage((payload) => {
-            console.log("Mensaje recibido. ", payload);
-            // Personaliza la notificación aquí
-            const notificationTitle = payload.notification.title;
-            const notificationOptions = {
-                body: payload.notification.body,
-                icon: 'icon.png' // Ruta a tu icono
-            };
-
-            // Mostrar la notificación
-            return new Notification(notificationTitle, notificationOptions);
-        });
         // Función para enviar mensajes
         function sendMessage(sender, messageText) {
             const messageId = Date.now(); // Usar timestamp como ID único
