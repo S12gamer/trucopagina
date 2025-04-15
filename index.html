@@ -10,23 +10,14 @@
         // Importar Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
-
         // Configuración de Firebase
         const firebaseConfig = {
-            
-            authDomain: "dbxd-7b391.firebaseapp.com",
             databaseURL: "https://dbxd-7b391-default-rtdb.firebaseio.com",
-            projectId: "dbxd-7b391",
-            storageBucket: "dbxd-7b391.firebasestorage.app",
-            messagingSenderId: "183155393407",
-            appId: "1:183155393407:web:b952a84d71b4f98c30104a",
-            measurementId: "G-CHLKYMQ695"
         };
 
         // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-
 
         // ID del chat (puedes cambiarlo según tus necesidades)
         const chatId = 'chat1'; // Cambia esto si tienes múltiples chats
@@ -87,6 +78,7 @@
         listenForMessages();
 
     </script>
+
 </head>
 <body>
     <header>
@@ -96,6 +88,7 @@
                 <li><a href="#presentacion">Bienvenido</a></li>
                 <li><a href="#trucos">Trucos</a></li>
                 <li><a href="#trucochat">Trucochat</a></li>
+                <li><a href="pdfgen.html">Calculadora</a></li>
             </ul>
         </nav>
     </header>
