@@ -3,30 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acerca de</title>
+    <title>Calculadora de Frecuencias</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>pdf Gen</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Inicio</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <main>
-        <h2>PDF Gen</h2>
-        <p>Este es un generador de pdf con imagenes sin anuncios (no hecho por trucoteca asi que tener cuidado)</p>
-        
-        <!-- Embed del video de YouTube -->
-        <h3>PDF Gen</h3>
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/LEWiWzSMh1U" frameborder="0" allowfullscreen></iframe>
-    </main>
-    
-    <footer>
-        <p>&copy; 2025 trucoteca page by s12. Todos los derechos reservados. </p>
-    </footer>
+    <h2>Calculadora de Frecuencias</h2>
+    <label for="dataInput">Ingrese los datos (separados por comas):</label>
+    <input type="text" id="dataInput" placeholder="Ej: 1,2,3,4,5">
+    <button onclick="calcularFrecuencias()">Calcular Frecuencias</button>
+    <div id="resultados"></div>
+    <script src="scripta.js"></script>
 </body>
 </html>
