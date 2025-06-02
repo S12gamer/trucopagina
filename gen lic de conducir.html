@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Generador de Licencia de Conducir</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            background: #fff;
+            width: 90%;
+            max-width: 900px;
+            border-radius: 10px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-wrap: wrap;
+            padding: 30px;
+            gap: 30px;
+        }
+
+        form {
+            flex: 1 1 350px;
+            min-width: 300px;
+        }
+
+        form h2 {
+            margin-bottom: 20px;
+            color: #4b3f72;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 20px;
+            border: 1.8px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="file"]:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        button {
+            background: #667eea;
+            color: #fff;
+            border: none;
+            padding: 14px 22px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #564abb;
+        }
+
+        .license-preview {
+            flex: 1 1 400px;
+            min-width: 320px;
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            border-radius: 15px;
+            color: #fff;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 16px;
+            line-height: 1.4;
+            user-select: none;
+            max-height: 450px;
+        }
+
+        .license-header {
+            font-weight: 900;
+            font-size: 20px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #fff;
+            width: 100%;
+            text-align: center;
+            padding-bottom: 8px;
+        }
+
+        .photo-container {
+            width: 140px;
+            height: 180px;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+        }
+
+        .photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Preview licencia con campos en blanco para ser llenados a mano */
+        .license-preview .info-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .info-label {
+            font-weight: 700;
+            color: #e0d7f5;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #e7dbfc;
+            max-width: 60%;
+            text-align: right;
+            word-wrap: break-word;
+        }
+
+        .footer-note {
+            position: absolute;
+            bottom: 15px;
+            font-size: 10px;
+            color: #ccc;
+            text-align: center;
+            width: 100%;
+            font-style: italic;
+            user-select: text;
+        }
+
+        /* Container for printing 4 licenses */
+        #printArea {
+            display: none;
+        }
+
+        .print-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 30px;
+            padding: 20px;
+            width: 100vw;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .print-license {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            border-radius: 15px;
+            color: #fff;
+            padding: 25px;
+            font-size: 14px;
+            line-height: 1.3;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            box-shadow: none;
+            max-height: none;
+            width: 100%;
+        }
+
+        .print-license .license-header {
+            font-size: 16px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #fff;
+            width: 100%;
+            text-align: center;
+            padding-bottom: 6px;
+            letter-spacing: 1.5px;
+        }
+
+        .print-license .photo-container {
+            width: 120px;
+            height: 160px;
+            margin-bottom: 15px;
+            box-shadow: none;
+            border-radius: 10px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .print-license .photo-container img {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+        }
+
+        .print-license .info-row {
+            margin-bottom: 8px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .print-license .info-label {
+            font-weight: 700;
+            color: #e0d7f5;
+        }
+
+        .print-license .info-value {
+            font-weight: 600;
+            color: #e7dbfc;
+            max-width: 60%;
+            text-align: right;
+            word-wrap: break-word;
+        }
+
+        .print-license .footer-note {
+            position: absolute;
+            bottom: 12px;
+            font-size: 8px;
+            width: 100%;
+            color: #ccc;
+            font-style: italic;
+            text-align: center;
+            user-select: text;
+        }
+
+        /* Print Styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printArea, #printArea * {
+                visibility: visible;
+            }
+            #printArea {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: #fff;
+                padding: 10mm 15mm;
+                box-sizing: border-box;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(2, 1fr);
+                gap: 20mm;
+            }
+            #printArea .print-license {
+                box-shadow: none;
+                border: none;
+                page-break-inside: avoid;
+                overflow: visible;
+            }
+        }
+
+
+        @media (max-width: 720px) {
+            .container {
+                flex-direction: column;
+                padding: 20px;
+            }
+
+            .license-preview {
+                max-height: none;
+                width: 100%;
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="form-license" autocomplete="off" novalidate>
+            <h2>Generar Licencia de Conducir</h2>
+
+            <label for="photos">Subir hasta 4 Fotos</label>
+            <input type="file" id="photos" name="photos" accept="image/*" multiple />
+
+            <button type="submit">Mostrar Vista Previa</button>
+            <button type="button" id="btnPrint">Imprimir 4 Licencias</button>
+        </form>
+
+        <div class="license-preview" id="licensePreview" aria-label="Vista previa de la licencia generada">
+            <div class="license-header">LICENCIA DE CONDUCIR</div>
+            <div class="photo-container" id="photoContainer">
+                <img src="" alt="Foto de conductor" id="licensePhoto" />
+            </div>
+            <div class="info-row">
+                <div class="info-label">Nombre:</div>
+                <div class="info-value blank">____________________</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Fecha de Nacimiento:</div>
+                <div class="info-value blank">____________________</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Número Licencia:</div>
+                <div class="info-value blank">____________________</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Expira:</div>
+                <div class="info-value blank">____________________</div>
+            </div>
+            <div class="footer-note">Licencia generada digitalmente - No válida para uso oficial</div>
+        </div>
+    </div>
+
+    <!-- Área oculta para impresión -->
+    <div id="printArea" aria-hidden="true"></div>
+
+    <script>
+        const photosInput = document.getElementById('photos');
+        const licensePhoto = document.getElementById('licensePhoto');
+        const photoContainer = document.getElementById('photoContainer');
+        const printArea = document.getElementById('printArea');
+        const btnPrint = document.getElementById('btnPrint');
+        const form = document.getElementById('form-license');
+
+        // Almacena las imágenes cargadas en data URLs
+        let uploadedImages = [];
+
+        photosInput.addEventListener('change', () => {
+            uploadedImages = [];
+            if (photosInput.files.length > 0) {
+                const files = Array.from(photosInput.files).slice(0, 4); // máximo 4 imágenes
+                let loadedCount = 0;
+
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        uploadedImages.push(e.target.result);
+                        loadedCount++;
+                        // Mostrar preview con la primera imagen cargada
+                        if (loadedCount === 1) {
+                            licensePhoto.src = e.target.result;
+                            photoContainer.style.background = '#fff';
+                        }
+                        // Si ya se cargaron todas imágenes
+                        if (loadedCount === files.length && files.length < 1) {
+                            licensePhoto.src = '';
+                            photoContainer.style.background = '#ccc';
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                licensePhoto.src = '';
+                photoContainer.style.background = '#ccc';
+                uploadedImages = [];
+            }
+        });
+
+        // Mostrar preview (solo muestra la primera imagen subida)
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            if (uploadedImages.length > 0) {
+                licensePhoto.src = uploadedImages[0];
+                photoContainer.style.background = '#fff';
+            } else {
+                licensePhoto.src = '';
+                photoContainer.style.background = '#ccc';
+            }
+        });
+
+        btnPrint.addEventListener('click', () => {
+            printArea.innerHTML = '';
+            // Rellenar con 4 imágenes o placeholders
+            for (let i = 0; i < 4; i++) {
+                const imgSrc = uploadedImages[i] || uploadedImages[uploadedImages.length - 1] || getPlaceholderImage();
+                const license = createPrintLicense(imgSrc);
+                printArea.appendChild(license);
+            }
+            printArea.style.display = 'grid';
+            window.print();
+            printArea.style.display = 'none';
+        });
+
+        function createPrintLicense(imageSrc) {
+            const licenseDiv = document.createElement('div');
+            licenseDiv.className = 'print-license';
+
+            const header = document.createElement('div');
+            header.className = 'license-header';
+            header.textContent = 'LICENCIA DE CONDUCIR';
+
+            const photoCont = document.createElement('div');
+            photoCont.className = 'photo-container';
+
+            const img = document.createElement('img');
+            img.alt = 'Foto de conductor';
+            img.src = imageSrc;
+
+            photoCont.appendChild(img);
+
+            licenseDiv.appendChild(header);
+            licenseDiv.appendChild(photoCont);
+
+            // Campos en blanco para escribir
+            const fields = ['Nombre:', 'Fecha de Nacimiento:', 'Expira:', 'Firma:'];
+            fields.forEach(labelText => {
+                const row = document.createElement('div');
+                row.className = 'info-row';
+
+                const label = document.createElement('div');
+                label.className = 'info-label';
+                label.textContent = labelText;
+
+                const value = document.createElement('div');
+                value.className = 'info-value blank';
+                value.textContent = '____________________';
+
+                row.appendChild(label);
+                row.appendChild(value);
+                licenseDiv.appendChild(row);
+            });
+
+            const footer = document.createElement('div');
+            footer.className = 'footer-note';
+            footer.textContent = 'Secretaria De Movilidad De CEILI';
+            licenseDiv.appendChild(footer);
+
+            return licenseDiv;
+        }
+
+        function getPlaceholderImage() {
+            return 'https://via.placeholder.com/140x180/cccccc/666666?text=Foto';
+        }
+    </script>
+</body>
+</html>
+
