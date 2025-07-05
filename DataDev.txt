@@ -1,0 +1,2 @@
+data1,.com.my.seachs,myseach
+data2,vibe.tune,vibetune
