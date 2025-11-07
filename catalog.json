@@ -281,9 +281,9 @@
       "genre": "nextgen",
       "source": "https://firebasestorage.googleapis.com/v0/b/dbaa-758ab.appspot.com/o/test%20001.mp3?alt=media",
       "image": "https://storage.googleapis.com/automotive-media/album_art_2.jpg",
-      "trackNumber": 4,
-      "totalTrackCount": 7,
-      "duration": 220,
+      "trackNumber": 1,
+      "totalTrackCount": 1,
+      "duration": 2729,
       "site": "https://www.youtube.com/audiolibrary/music"
     },
     {
