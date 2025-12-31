@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Image to PDF Generator</title>
+<!-- Hello bro this page can be open source just copy al the code and paste it :) -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- HEIC converter -->
+<script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f2f2;
+  padding: 15px;
+}
+
+.container {
+  background: white;
+  max-width: 750px;
+  margin: auto;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,.1);
+}
+
+h2 {
+  text-align: center;
+}
+
+input, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+button.main {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+
+button.main:hover {
+  background: #4CAF50;
+}
+
+.preview {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.image-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fafafa;
+}
+
+.image-item img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  flex: 1;
+}
+
+.controls button {
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.up { background: #6c757d; color: white; }
+.down { background: #6c757d; color: white; }
+.rotate { background: #17a2b8; color: white; }
+.remove { background: #dc3545; color: white; }
+
+.controls button:hover {
+  opacity: 0.85;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h2>Imagen a PDF</h2>
+
+  <!-- Add images anytime -->
+  <input type="file" id="images" accept="image/*,.heic,.heif" multiple>
+
+  <input type="text" id="pdfName" placeholder="Enter PDF file name">
+
+  <div class="preview" id="preview"></div>
+
+  <button class="main" onclick="generatePDF()">Generate PDF</button>
+</div>
+
+<script>
+let imageList = [];
+
+document.getElementById("images").addEventListener("change", async (e) => {
+  const files = Array.from(e.target.files);
+  for (const file of files) {
+    await addImage(file);
+  }
+  e.target.value = "";
+  render();
+});
+
+async function addImage(file) {
+  let dataUrl, type = file.type;
+
+  if (type === "image/heic" || type === "image/heif") {
+    const converted = await heic2any({
+      blob: file,
+      toType: "image/png"
+    });
+    dataUrl = await blobToDataURL(converted);
+    type = "image/png";
+  } else {
+    dataUrl = await blobToDataURL(file);
+  }
+
+  imageList.push({
+    dataUrl,
+    type,
+    rotation: 0
+  });
+}
+
+function render() {
+  const preview = document.getElementById("preview");
+  preview.innerHTML = "";
+
+  imageList.forEach((img, i) => {
+    const item = document.createElement("div");
+    item.className = "image-item";
+
+    const image = document.createElement("img");
+    image.src = img.dataUrl;
+    image.style.transform = `rotate(${img.rotation}deg)`;
+
+    const controls = document.createElement("div");
+    controls.className = "controls";
+
+    controls.innerHTML = `
+      <button class="up">⬆ Up</button>
+      <button class="down">⬇ Down</button>
+      <button class="rotate">↺ Rotate</button>
+      <button class="remove">❌ Remove</button>
+    `;
+
+    controls.children[0].onclick = () => move(i, -1);
+    controls.children[1].onclick = () => move(i, 1);
+    controls.children[2].onclick = () => rotate(i);
+    controls.children[3].onclick = () => remove(i);
+
+    item.appendChild(image);
+    item.appendChild(controls);
+    preview.appendChild(item);
+  });
+}
+
+function move(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= imageList.length) return;
+  [imageList[i], imageList[j]] = [imageList[j], imageList[i]];
+  render();
+}
+
+function rotate(i) {
+  imageList[i].rotation = (imageList[i].rotation + 90) % 360;
+  render();
+}
+
+function remove(i) {
+  imageList.splice(i, 1);
+  render();
+}
+
+async function generatePDF() {
+  const { jsPDF } = window.jspdf;
+
+  if (!imageList.length) {
+    alert("Please add images");
+    return;
+  }
+
+  const name = document.getElementById("pdfName").value.trim() || "my-pdf";
+  let pdf;
+
+  for (let i = 0; i < imageList.length; i++) {
+    const imgObj = imageList[i];
+    const img = await loadImage(imgObj.dataUrl);
+
+    const pxToMm = 0.264583;
+    let w = img.width * pxToMm;
+    let h = img.height * pxToMm;
+
+    if (imgObj.rotation % 180 !== 0) {
+      [w, h] = [h, w];
+    }
+
+    const orientation = w > h ? "l" : "p";
+
+    if (i === 0) {
+      pdf = new jsPDF({ unit: "mm", format: [w, h], orientation });
+    } else {
+      pdf.addPage([w, h], orientation);
+    }
+
+    pdf.addImage(
+      imgObj.dataUrl,
+      imgObj.type.split("/")[1].toUpperCase(),
+      0, 0, w, h,
+      undefined,
+      "FAST",
+      imgObj.rotation
+    );
+  }
+
+  pdf.save(name + ".pdf");
+}
+
+function blobToDataURL(blob) {
+  return new Promise(res => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.readAsDataURL(blob);
+  });
+}
+
+function loadImage(src) {
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.src = src;
+  });
+}
+</script>
+</body>
+</html>
