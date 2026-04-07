@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centro de Recursos Académicos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink:        #1a1a2e;
+      --paper:      #f5f0e8;
+      --gold:       #c9a84c;
+      --gold-light: #e8d5a3;
+      --rust:       #8b3a2a;
+      --teal:       #2a6b7c;
+      --green:      #2e6b4a;
+      --purple:     #4a2e6b;
+      --shadow:     rgba(26,26,46,0.12);
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family:'DM Sans',sans-serif;
+      background-color:var(--paper);
+      color:var(--ink); min-height:100vh; overflow-x:hidden;
+    }
+    body::before {
+      content:''; position:fixed; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events:none; z-index:100; opacity:.5;
+    }
+
+    /* ── Layout ── */
+    .layout { display:flex; min-height:100vh; }
+
+    /* ── Sidebar ── */
+    nav {
+      width:230px; background:var(--ink); flex-shrink:0;
+      display:flex; flex-direction:column;
+      position:sticky; top:0; height:100vh; overflow-y:auto;
+    }
+    .nav-logo {
+      padding:1.8rem 1.5rem 1.4rem;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .nav-logo .mark {
+      width:42px; height:42px; background:var(--gold); border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Playfair Display',serif; font-weight:900; font-size:1.3rem; color:var(--ink);
+      margin-bottom:.75rem;
+    }
+    .nav-logo h1 { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:#fff; line-height:1.3; }
+    .nav-logo p  { font-size:.72rem; color:var(--gold-light); margin-top:.2rem; font-weight:300; }
+    .nav-links { padding:1.2rem .8rem; flex:1; }
+    .nav-section-title {
+      font-size:.65rem; font-weight:600; letter-spacing:.1em;
+      text-transform:uppercase; color:rgba(255,255,255,.35);
+      padding:.6rem .7rem .35rem;
+    }
+    .nav-link {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.65rem .9rem; border-radius:8px;
+      color:rgba(255,255,255,.65); font-size:.85rem;
+      cursor:pointer; transition:all .18s;
+      border:none; background:none; width:100%; text-align:left; margin-bottom:.15rem;
+    }
+    .nav-link:hover { background:rgba(255,255,255,.07); color:#fff; }
+    .nav-link.active { background:rgba(201,168,76,.18); color:var(--gold); font-weight:500; }
+    .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .dot-teal   { background:var(--teal);   }
+    .dot-rust   { background:var(--rust);   }
+    .dot-green  { background:var(--green);  }
+    .dot-purple { background:var(--purple); }
+
+    /* ── Content ── */
+    .content { flex:1; overflow:hidden; }
+    .page { display:none; }
+    .page.active { display:block; }
+
+    /* ── Page header ── */
+    .page-header {
+      padding:2.2rem 3rem 1.8rem;
+      border-bottom:1px solid var(--gold-light);
+      background:#fff; position:relative;
+    }
+    .page-header::before {
+      content:''; position:absolute; left:0; top:0; bottom:0;
+      width:4px; border-radius:0 4px 4px 0;
+    }
+    .ph-teal::before   { background:var(--teal);   }
+    .ph-rust::before   { background:var(--rust);   }
+    .ph-green::before  { background:var(--green);  }
+    .ph-purple::before { background:var(--purple); }
+    .page-header h2 { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:var(--ink); }
+    .page-header p  { color:#888; font-size:.85rem; margin-top:.3rem; }
+
+    /* ── Search ── */
+    .search-row { padding:1.5rem 3rem; background:var(--paper); }
+    .search-box {
+      display:flex; align-items:center; background:#fff;
+      border:2px solid var(--gold-light); border-radius:8px;
+      padding:.58rem 1.1rem; gap:.7rem; max-width:480px; transition:border-color .2s;
+    }
+    .search-box:focus-within { border-color:var(--gold); }
+    .search-box svg { color:var(--gold); flex-shrink:0; }
+    .search-box input {
+      border:none; outline:none; font-family:'DM Sans',sans-serif;
+      font-size:.9rem; color:var(--ink); background:transparent; flex:1;
+    }
+    .search-box input::placeholder { color:#bbb; }
+
+    /* ── Download Cards ── */
+    .card-area { padding:0 3rem 3rem; }
+    .card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(255px,1fr)); gap:1.2rem; }
+    .card {
+      background:#fff; border-radius:12px; border:1.5px solid #ece6d8;
+      overflow:hidden; transition:transform .22s,box-shadow .22s,border-color .22s;
+      display:flex; flex-direction:column; animation:fadeUp .35s ease both;
+    }
+    .card:hover { transform:translateY(-4px); box-shadow:0 12px 32px var(--shadow); }
+    .card-teal:hover  { border-color:var(--teal);  }
+    .card-rust:hover  { border-color:var(--rust);  }
+    .card-green:hover { border-color:var(--green); }
+    .card-thumb {
+      height:120px; display:flex; align-items:center;
+      justify-content:center; position:relative; overflow:hidden;
+    }
+    .thumb-teal  { background:linear-gradient(135deg,#e8f4f8,#cce8ef); }
+    .thumb-rust  { background:linear-gradient(135deg,#fdf3e3,#f2e0c4); }
+    .thumb-green { background:linear-gradient(135deg,#e6f4ec,#c8e8d4); }
+    .thumb-icon { font-size:3rem; opacity:.85; transition:transform .3s; }
+    .card:hover .thumb-icon { transform:scale(1.1) rotate(-4deg); }
+    .badge {
+      position:absolute; top:.65rem; right:.65rem;
+      font-size:.65rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em;
+      padding:.22rem .55rem; border-radius:4px;
+    }
+    .badge-teal  { background:var(--teal);  color:#fff; }
+    .badge-rust  { background:var(--rust);  color:#fff; }
+    .badge-green { background:var(--green); color:#fff; }
+    .card-body { padding:1rem 1.1rem 1.15rem; flex:1; display:flex; flex-direction:column; }
+    .card-title { font-family:'Playfair Display',serif; font-size:.98rem; font-weight:700; color:var(--ink); line-height:1.35; margin-bottom:.35rem; }
+    .card-meta  { font-size:.78rem; color:#999; margin-bottom:.85rem; flex:1; }
+    .btn-dl {
+      display:flex; align-items:center; justify-content:center; gap:.45rem;
+      padding:.54rem .9rem; border-radius:7px; border:none;
+      font-family:'DM Sans',sans-serif; font-size:.82rem; font-weight:500;
+      cursor:pointer; text-decoration:none; transition:filter .18s; color:#fff;
+    }
+    .btn-dl:hover { filter:brightness(1.12); }
+    .btn-teal  { background:var(--teal);  }
+    .btn-rust  { background:var(--rust);  }
+    .btn-green { background:var(--green); }
+    .empty-msg { color:#ccc; font-size:.85rem; grid-column:1/-1; padding:2rem 0; }
+
+    /* ════════════════════════════════════
+       ATRIBUTOS DE EGRESO
+    ════════════════════════════════════ */
+    .ae-wrap { padding:1.5rem 3rem 4rem; }
+
+    /* Search for materias */
+    .ae-search-row { padding:1.5rem 3rem .2rem; }
+
+    /* Materia accordion */
+    .materia-card {
+      background:#fff; border:1.5px solid #ece6d8; border-radius:14px;
+      margin-bottom:1.1rem; overflow:hidden;
+      box-shadow:0 2px 8px rgba(0,0,0,.04);
+      transition:box-shadow .22s; animation:fadeUp .35s ease both;
+    }
+    .materia-card:hover { box-shadow:0 6px 24px var(--shadow); }
+
+    .materia-header {
+      display:flex; align-items:center; gap:1rem;
+      padding:1.2rem 1.5rem; cursor:pointer; user-select:none;
+      transition:background .18s;
+    }
+    .materia-header:hover { background:#faf7f2; }
+
+    .materia-icon {
+      width:44px; height:44px; border-radius:10px;
+      background:linear-gradient(135deg,var(--purple),#7b52a8);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.2rem; flex-shrink:0;
+      box-shadow:0 3px 10px rgba(74,46,107,.25);
+    }
+    .materia-info { flex:1; }
+    .materia-info h3 { font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:var(--ink); }
+    .materia-info .materia-sub { font-size:.76rem; color:#999; margin-top:.18rem; }
+
+    .materia-badge {
+      font-size:.68rem; font-weight:600; text-transform:uppercase; letter-spacing:.07em;
+      padding:.22rem .65rem; border-radius:20px;
+      background:rgba(74,46,107,.1); color:var(--purple);
+      flex-shrink:0;
+    }
+    .materia-chevron { color:#ccc; transition:transform .25s; flex-shrink:0; }
+    .materia-card.open .materia-chevron { transform:rotate(180deg); }
+
+    .materia-body { max-height:0; overflow:hidden; transition:max-height .4s ease; }
+    .materia-card.open .materia-body { max-height:1400px; }
+
+    .materia-body-inner {
+      padding:0 1.5rem 1.6rem;
+      border-top:1px solid #f0ebe0;
+    }
+
+    /* ── Atributo de egreso box ── */
+    .atributo-box {
+      margin:1.2rem 0 1.4rem;
+      background:linear-gradient(135deg,#f0ebf8 0%,#e8e0f5 100%);
+      border-radius:10px; padding:1.1rem 1.3rem;
+      border-left:4px solid var(--purple);
+    }
+    .box-label {
+      font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+      color:var(--purple); margin-bottom:.5rem;
+      display:flex; align-items:center; gap:.4rem;
+    }
+    .atributo-box p { font-size:.9rem; color:#333; line-height:1.6; }
+
+    /* ── Objetivo box ── */
+    .objetivo-box {
+      background:linear-gradient(135deg,#fdf8ec 0%,#f8efd0 100%);
+      border-radius:10px; padding:1.1rem 1.3rem;
+      border-left:4px solid var(--gold);
+      margin-bottom:1.4rem;
+    }
+    .objetivo-box p { font-size:.9rem; color:#444; line-height:1.6; }
+
+    /* ── Indicadores section ── */
+    .ind-section-title {
+      font-size:.7rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:.1em; margin:1.4rem 0 .7rem;
+      display:flex; align-items:center; gap:.5rem;
+    }
+    .ind-section-title::after {
+      content:''; flex:1; height:1px; background:currentColor; opacity:.15;
+    }
+    .ind-section-title.general  { color:var(--teal);  }
+    .ind-section-title.especifico { color:var(--rust); }
+
+    /* Indicator row */
+    .ind-row {
+      display:flex; align-items:flex-start; gap:.85rem;
+      padding:.7rem 1rem; border-radius:8px;
+      background:var(--paper); margin-bottom:.45rem;
+      border:1px solid transparent;
+      transition:border-color .18s, background .18s;
+    }
+    .ind-row:hover { background:#fff; border-color:var(--gold-light); }
+
+    /* Letter badge */
+    .ind-letter {
+      width:26px; height:26px; border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Playfair Display',serif; font-weight:700; font-size:.85rem;
+      flex-shrink:0; margin-top:.05rem;
+    }
+    .letter-general    { background:rgba(42,107,124,.12); color:var(--teal);  }
+    .letter-especifico { background:rgba(139,58,42,.12);  color:var(--rust);  }
+
+    .ind-content { flex:1; }
+    .ind-text { font-size:.86rem; color:#333; line-height:1.5; }
+    .ind-meta-row { display:flex; align-items:center; gap:.5rem; margin-top:.35rem; flex-wrap:wrap; }
+
+    .ind-tipo {
+      font-size:.65rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em;
+      padding:.15rem .5rem; border-radius:4px;
+    }
+    .tipo-general    { background:rgba(42,107,124,.1);  color:var(--teal);  }
+    .tipo-especifico { background:rgba(139,58,42,.1);   color:var(--rust);  }
+
+    .ind-alcance {
+      font-size:.65rem; font-weight:600;
+      padding:.15rem .5rem; border-radius:4px;
+    }
+    .alc-alto   { background:#d4edda; color:#155724; }
+    .alc-medio  { background:#fff3cd; color:#856404; }
+    .alc-basico { background:#f8d7da; color:#721c24; }
+
+    /* ── Responsive ── */
+    @media(max-width:800px){
+      nav { width:200px; }
+      .page-header,.search-row,.card-area,.ae-wrap,.ae-search-row { padding-left:1.4rem; padding-right:1.4rem; }
+    }
+    @media(max-width:640px){
+      .layout { flex-direction:column; }
+      nav { width:100%; height:auto; position:relative; }
+      .nav-links { display:flex; flex-wrap:wrap; padding:.8rem; gap:.3rem; }
+      .nav-link { width:auto; flex:1 1 auto; justify-content:center; font-size:.78rem; padding:.5rem .7rem; }
+      .nav-section-title { display:none; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <nav>
+    <div class="nav-logo">
+      <div class="mark">CR</div>
+      <h1>Centro de Recursos</h1>
+      <p>Plataforma académica</p>
+    </div>
+    <div class="nav-links">
+      <div class="nav-section-title">Descargas</div>
+      <button class="nav-link active" onclick="showPage('membretes',this)">
+        <span class="dot dot-teal"></span> Membretes
+      </button>
+      <button class="nav-link" onclick="showPage('formatos',this)">
+        <span class="dot dot-rust"></span> Formatos
+      </button>
+      <button class="nav-link" onclick="showPage('instrumentaciones',this)">
+        <span class="dot dot-green"></span> Instrumentaciones
+      </button>
+      <div class="nav-section-title" style="margin-top:.8rem;">Consulta</div>
+      <button class="nav-link" onclick="showPage('atributos',this)">
+        <span class="dot dot-purple"></span> Atributos de Egreso
+      </button>
+    </div>
+  </nav>
+
+  <div class="content">
+
+    <div class="page active" id="page-membretes">
+      <div class="page-header ph-teal">
+        <h2>🖼️ Membretes</h2>
+        <p>Imágenes oficiales para documentos institucionales. Formato PNG / JPG.</p>
+      </div>
+      <div class="search-row">
+        <div class="search-box">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar membrete…" oninput="filterGrid('gridMem',membretes,'teal',this.value)"/>
+        </div>
+      </div>
+      <div class="card-area"><div class="card-grid" id="gridMem"></div></div>
+    </div>
+
+    <div class="page" id="page-formatos">
+      <div class="page-header ph-rust">
+        <h2>📄 Formatos de Evidencia</h2>
+        <p>Plantillas Word para registro y documentación de evidencias. Formato DOCX.</p>
+      </div>
+      <div class="search-row">
+        <div class="search-box">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar formato…" oninput="filterGrid('gridFmt',formatos,'rust',this.value)"/>
+        </div>
+      </div>
+      <div class="card-area"><div class="card-grid" id="gridFmt"></div></div>
+    </div>
+
+    <div class="page" id="page-instrumentaciones">
+      <div class="page-header ph-green">
+        <h2>📋 Instrumentaciones</h2>
+        <p>Documentos de planeación didáctica e instrumentación de materias. Formato DOCX.</p>
+      </div>
+      <div class="search-row">
+        <div class="search-box">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar instrumentación…" oninput="filterGrid('gridInst',instrumentaciones,'green',this.value)"/>
+        </div>
+      </div>
+      <div class="card-area"><div class="card-grid" id="gridInst"></div></div>
+    </div>
+
+    <div class="page" id="page-atributos">
+      <div class="page-header ph-purple">
+        <h2>🎓 Atributos de Egreso</h2>
+        <p>Atributo de egreso, objetivo e indicadores de alcance generales y específicos por materia.</p>
+      </div>
+
+      <div class="ae-search-row">
+        <div class="search-box" style="max-width:480px;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar materia…" oninput="filterMaterias(this.value)"/>
+        </div>
+      </div>
+
+      <div class="ae-wrap" id="aeContainer"></div>
+    </div>
+
+  </div></div><script src="app.js"></script>
+
+</body>
+</html>
