@@ -7,16 +7,28 @@ const membretes = [
   { id:2, name:"Membrete Oficial PI",       desc:"Uso vertical Inferior",                 url:"https://drive.google.com/uc?export=download&id=1vBb9mY5NX6r1JB0FaEDcO0RnKJxQ-aUX" },
   { id:3, name:"Membrete Oficial PS Horizontal",  desc:"Uso horizontal Superior",               url:"https://drive.google.com/uc?export=download&id=1-xAeQV0TdWiM4RcIw2wpfrvPxo_cWRlG" },
   { id:4, name:"Membrete Oficial PI Horizontal",          desc:"Uso horizontal Inferior",              url:"https://drive.google.com/uc?export=download&id=1QJwbhkDU_KDQLzc_9bnj68uRqag9ZnTi" },
+  { id:5, name:"Membrete Oficial Pajaro PS",          desc:"Uso vertical Superior (solo en docs oficiales)",              url:"https://drive.google.com/uc?export=download&id=1zoOcVsd0rAsii8j_b4mb9PvNqCfONSNH" },
+  { id:6, name:"Membrete Oficial Pajaro PI",          desc:"Uso vertical Inferior(solo en docs oficiales)",              url:"https://drive.google.com/uc?export=download&id=1JaqsRhII0VOA9rg5zLcZC2R1rnCUPysu" },
 ];
 
 const formatos = [
   { id:1, name:"Formato Probabilidad",  desc:"Lidia González González",                            url:"https://drive.google.com/uc?export=download&id=1KWvFgXadQB92KiBse6GagPoR4bB6xX8C" },
+  { id:2, name:"Formato Fisica Gen",  desc:"Jessica Linnete Morales Hernández",                     url:"https://drive.google.com/uc?export=download&id=1WSqHHTgocPbgg-Y_9vTcN_4ujdyBJ6WI" },
+  { id:3, name:"Formato Algebra Lin",    desc:"José Juan santana Ortiz",        url:"https://drive.google.com/uc?export=download&id=1fGJapgubiQTlxdwj9BNgqejENbc9Mt6Z" },
+  { id:4, name:"Formato Contabilidad",      desc:"Miriam Juárez Gutiérrez",         url:"https://drive.google.com/uc?export=download&id=1WgRi46MP3lINGlevafaJyZRFHBf1YyD0" },
+  { id:5, name:"Formato Calculo Int",      desc:"Brian Antonio Mejía Díaz",         url:"https://drive.google.com/uc?export=download&id=1LByc9bIXhi24O3rP4TVfu1QXUxu1jUJ8" },
+  { id:6, name:"Formato en Blanco",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1nnNn-clnrsO2IaELLLb6eLd0Jo4ZnNcY" },
+  { id:7, name:"Formato Membrete",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1AKJGf0J50JLBezSxDx3ToCDeIHivWK2a" },
+  { id:7, name:"Portafolio Calculo Int",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1Tfet0QQcinRFSIKr5VCT-GIDr_eU5env" },
 ];
 
 const instrumentaciones = [
-  { id:1, name:"Instrumentación Algebra Lin",      desc:"Planeación semestral — Ing. en Sistemas",      url:"https://drive.google.com/uc?export=download&id=19vlAwJTEoCbp7EcuyKQVJmK7FmE8t4jR" },
-  { id:2, name:"Instrumentación Probabilidad",     desc:"Planeación semestral — Ing. en Sistemas",       url:"https://drive.google.com/uc?export=download&id=1WKMWFkHZDJcKCAsGD2GpVe1SgtWNgTyy" },
-  { id:3, name:"Instrumentación Contabilidad",       desc:"Planeación semestral — Ing. en Sistemas", url:"https://drive.google.com/uc?export=download&id=1fbFq6p6c7_IixfQmfKTwZKCfplO4jmUi" },
+  { id:1, name:"Instrumentación Cálculo Int",        desc:"Planeación semestral — Ing. en Sistemas",           url:"https://drive.google.com/uc?export=download&id=1n_PpXeGg2JuK6nJbkADMl2yO-S-ZA0cd" },
+  { id:2, name:"Instrumentación Física Gen",         desc:"Planeación semestral — Ing. en Sistemas",      url:"https://drive.google.com/uc?export=download&id=1Y7S_qjhCObFferQf_2rA18ZORquL1ds1" },
+  { id:3, name:"Instrumentación Algebra Lin",      desc:"Planeación semestral — Ing. en Sistemas",      url:"https://drive.google.com/uc?export=download&id=19vlAwJTEoCbp7EcuyKQVJmK7FmE8t4jR" },
+  { id:4, name:"Instrumentación Probabilidad",     desc:"Planeación semestral — Ing. en Sistemas",       url:"https://drive.google.com/uc?export=download&id=1WKMWFkHZDJcKCAsGD2GpVe1SgtWNgTyy" },
+  { id:5, name:"Instrumentación Contabilidad",       desc:"Planeación semestral — Ing. en Sistemas", url:"https://drive.google.com/uc?export=download&id=1fbFq6p6c7_IixfQmfKTwZKCfplO4jmUi" },
+  { id:6, name:"Instrumentación Nivel 3 y 4 Ingles",       desc:"Planeación semestral — Ing. en Sistemas/ Coordinacion de Lenguas Extranjeras", url:"https://drive.google.com/uc?export=download&id=1k4tEpzfDz2WFzENnyknNk9uLUOUUhB1h" },
 ];
 
 /* ══════════════════════════════════════════
