@@ -17,7 +17,7 @@ const formatos = [
   { id:3, name:"Formato Algebra Lin",    desc:"José Juan santana Ortiz",        url:"https://drive.google.com/uc?export=download&id=1fGJapgubiQTlxdwj9BNgqejENbc9Mt6Z" },
   { id:4, name:"Formato Contabilidad",      desc:"Miriam Juárez Gutiérrez",         url:"https://drive.google.com/uc?export=download&id=1WgRi46MP3lINGlevafaJyZRFHBf1YyD0" },
   { id:5, name:"Formato Calculo Int",      desc:"Brian Antonio Mejía Díaz",         url:"https://drive.google.com/uc?export=download&id=1LByc9bIXhi24O3rP4TVfu1QXUxu1jUJ8" },
- { id:6, name:"Formato Programación Ori A Objs",       desc:"David Teran Gomez",          url:"https://drive.google.com/uc?export= download&id=1KuZG9Hn2wliRv3f-jbDsE5rSguCAtN_d" },
+ { id:6, name:"Formato Programación Ori A Objs",       desc:"David Teran Gomez",          url:"https://drive.google.com/uc?export=download&id=1KuZG9Hn2wliRv3f-jbDsE5rSguCAtN_d" },
   { id:7, name:"Formato en Blanco",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1nnNn-clnrsO2IaELLLb6eLd0Jo4ZnNcY" },
   { id:8, name:"Formato Membrete",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1AKJGf0J50JLBezSxDx3ToCDeIHivWK2a" },
   { id:9, name:"Portafolio Calculo Int",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1Tfet0QQcinRFSIKr5VCT-GIDr_eU5env" },
