@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avance Programático · FO-205P11000-14</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0f0e0c;
+  --paper:#f7f4ee;
+  --cream:#ede9df;
+  --warm:#d4c9a8;
+  --accent:#b85c20;
+  --accent2:#1d4e4a;
+  --accent2-light:#e8f0ef;
+  --gold:#c9972a;
+  --border:#c8c0a8;
+  --text2:#5a5446;
+  --text3:#9a9080;
+  --success:#1d4e4a;
+  --success-bg:#e8f0ef;
+  --error:#8b2020;
+  --error-bg:#fdf0f0;
+  --r:6px;
+  --r2:12px;
+}
+html{font-size:16px}
+body{
+  font-family:'Fraunces',Georgia,serif;
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+  padding-bottom:4rem;
+}
+
+/* ── HEADER ── */
+.site-header{
+  background:var(--ink);
+  color:var(--paper);
+  padding:1.5rem 1.25rem 1.25rem;
+  position:relative;
+  overflow:hidden;
+}
+.site-header::before{
+  content:'';
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    45deg,
+    transparent,transparent 20px,
+    rgba(255,255,255,.025) 20px,rgba(255,255,255,.025) 21px
+  );
+  pointer-events:none;
+}
+.header-badge{
+  display:inline-block;
+  font-family:'DM Mono',monospace;
+  font-size:10px;letter-spacing:.12em;
+  color:var(--gold);border:1px solid var(--gold);
+  padding:3px 10px;border-radius:99px;margin-bottom:.75rem;
+  text-transform:uppercase;
+}
+.site-header h1{
+  font-size:clamp(1.4rem,5vw,2rem);
+  font-weight:600;line-height:1.15;
+  font-style:italic;
+  color:#fff;
+}
+.site-header p{
+  font-family:'DM Mono',monospace;
+  font-size:11px;color:rgba(255,255,255,.45);
+  margin-top:.5rem;letter-spacing:.04em;
+}
+
+/* ── LAYOUT ── */
+.wrap{max-width:620px;margin:0 auto;padding:0 1rem}
+
+/* ── STEPPER ── */
+.steps{
+  display:flex;gap:0;
+  margin:1.5rem 0 .5rem;
+  border:1px solid var(--border);
+  border-radius:var(--r2);
+  overflow:hidden;
+  background:var(--cream);
+}
+.step{
+  flex:1;padding:.55rem .25rem;text-align:center;
+  font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:.06em;color:var(--text3);
+  border-right:1px solid var(--border);
+  transition:all .2s;cursor:default;
+  position:relative;
+}
+.step:last-child{border-right:none}
+.step.active{background:var(--ink);color:#fff}
+.step.done{background:var(--accent2);color:#fff}
+.step span{display:block;font-size:16px;margin-bottom:1px}
+
+/* ── CARD ── */
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--r2);
+  padding:1.25rem;
+  margin-bottom:1rem;
+}
+.card-title{
+  font-family:'DM Mono',monospace;
+  font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  margin-bottom:1rem;
+  display:flex;align-items:center;gap:8px;
+}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── FIELDS ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid1{display:grid;grid-template-columns:1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{
+  font-family:'DM Mono',monospace;
+  font-size:11px;letter-spacing:.05em;
+  color:var(--text2);
+}
+.field input,.field select,.field textarea{
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  font-size:14px;font-family:'Fraunces',serif;
+  color:var(--ink);background:var(--paper);
+  outline:none;transition:border-color .15s,box-shadow .15s;
+  appearance:none;-webkit-appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--accent2);
+  box-shadow:0 0 0 3px rgba(29,78,74,.12);
+  background:#fff;
+}
+.field textarea{resize:vertical;min-height:72px;line-height:1.55}
+.field select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+  padding-right:36px;cursor:pointer;
+}
+
+/* ── COMPETENCIA GRID ── */
+.comp-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(64px,1fr));
+  gap:8px;
+  margin-top:4px;
+}
+.comp-btn{
+  aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fraunces',serif;font-size:1.3rem;font-weight:600;
+  border:1.5px solid var(--border);border-radius:var(--r);
+  background:var(--paper);color:var(--text2);
+  cursor:pointer;transition:all .15s;
+  user-select:none;
+}
+.comp-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--cream)}
+.comp-btn.active{
+  background:var(--accent);color:#fff;
+  border-color:var(--accent);
+  box-shadow:0 3px 12px rgba(184,92,32,.3);
+}
+
+/* ── INDICADORES ── */
+.ind-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.ind-btn{
+  padding:10px 0;
+  min-width:48px;flex:1;
+  font-family:'Fraunces',serif;font-size:1rem;font-weight:600;
+  border:1.5px solid var(--border);border-radius:var(--r);
+  background:var(--paper);color:var(--text2);
+  cursor:pointer;transition:all .15s;text-align:center;
+  user-select:none;
+}
+.ind-btn:hover{border-color:var(--accent2);color:var(--accent2);background:var(--accent2-light)}
+.ind-btn.active{
+  background:var(--accent2);color:#fff;
+  border-color:var(--accent2);
+  box-shadow:0 3px 10px rgba(29,78,74,.25);
+}
+
+/* ── DESCRIPCION PREVIEW ── */
+.desc-preview{
+  margin-top:10px;padding:12px 14px;
+  background:var(--cream);border-left:3px solid var(--accent);
+  border-radius:0 var(--r) var(--r) 0;
+  font-size:13px;line-height:1.6;color:var(--text2);
+  display:none;
+}
+.desc-preview.show{display:block}
+
+/* ── GENERATE BTN ── */
+.generate-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;max-width:620px;margin:0 auto;
+  padding:16px;
+  background:var(--ink);color:var(--paper);
+  border:none;border-radius:var(--r2);
+  font-family:'Fraunces',serif;font-size:1.05rem;font-style:italic;font-weight:600;
+  cursor:pointer;transition:opacity .15s,transform .1s;
+  letter-spacing:.01em;
+}
+.generate-btn:hover{opacity:.85}
+.generate-btn:active{transform:scale(.985)}
+.generate-btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-icon{font-style:normal;font-size:1.2rem}
+
+/* ── BANNERS ── */
+.banner{
+  display:none;max-width:620px;margin:1rem auto 0;
+  padding:14px 16px;border-radius:var(--r2);
+  font-family:'DM Mono',monospace;font-size:12px;
+  letter-spacing:.03em;text-align:center;
+}
+.banner.show{display:block}
+.banner-success{background:var(--success-bg);color:var(--success);border:1px solid #b2cfcd}
+.banner-error{background:var(--error-bg);color:var(--error);border:1px solid #e8b2b2}
+.banner-loading{background:#fffbf0;color:var(--gold);border:1px solid #e0cf94}
+
+/* ── NOTICE ── */
+.notice{
+  background:var(--cream);border:1px solid var(--border);
+  border-radius:var(--r);padding:10px 12px;
+  font-family:'DM Mono',monospace;font-size:11px;
+  color:var(--text3);line-height:1.6;margin-top:8px;
+}
+
+/* ── DIVIDER ── */
+hr{border:none;border-top:1px solid var(--border);margin:.75rem 0}
+
+@media(max-width:440px){
+  .grid2{grid-template-columns:1fr}
+  .comp-btn{aspect-ratio:auto;padding:14px 8px}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="header-badge">S12dev/trucoteca · Centro de archivos</div>
+    <h1>Programa</h1>
+    <p>FO-205P11000-14 · Generador automático de formato de evidencias</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="steps" id="stepper">
+    <div class="step active" id="step1"><span>①</span>ALUMNO</div>
+    <div class="step" id="step2"><span>②</span>MATERIA</div>
+    <div class="step" id="step3"><span>③</span>COMP.</div>
+    <div class="step" id="step4"><span>④</span>GENERAR</div>
+  </div>
+
+  <!-- ① DATOS DEL ALUMNO -->
+  <div class="card" id="sec_alumno">
+    <div class="card-title">① Datos del alumno</div>
+    <div class="grid2" style="margin-bottom:10px">
+      <div class="field">
+        <label>Nombre completo</label>
+        <input type="text" id="nombre" placeholder="Ej. Juan Pérez López">
+      </div>
+      <div class="field">
+        <label>No. de Control</label>
+        <input type="text" id="control" placeholder="Ej. 23060001" maxlength="20">
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>División / Carrera</label>
+        <input type="text" id="division" placeholder="Ej. Ing. en Sistemas">
+      </div>
+      <div class="field">
+        <label>Grupo</label>
+        <input type="text" id="grupo" placeholder="Ej. 2S-A">
+      </div>
+    </div>
+  </div>
+
+  <!-- FECHA -->
+  <div class="card">
+    <div class="card-title">Fecha de entrega</div>
+    <div class="grid2">
+      <div class="field">
+        <label>Fecha</label>
+        <input type="date" id="fecha">
+      </div>
+    </div>
+  </div>
+
+  <!-- ② ASIGNATURA -->
+  <div class="card" id="sec_asignatura">
+    <div class="card-title">② Asignatura</div>
+    <div class="field grid1" style="margin-bottom:12px">
+      <label>Materia</label>
+      <select id="asignatura_select">
+        <option value="">— Selecciona una materia —</option>
+        <option value="__vacio__">✏️  Formato vacío (ingresar todo manualmente)</option>
+        <option value="Programación Orientada a Objetos">Programación Orientada a Objetos</option>
+        <option value="Probabilidad y Estadística">Probabilidad y Estadística</option>
+        <option value="Física General">Física General</option>
+        <option value="Cálculo Integral">Cálculo Integral</option>
+        <option value="Contabilidad Financiera">Contabilidad Financiera</option>
+      </select>
+    </div>
+
+    <!-- Modo vacío -->
+    <div id="modo_vacio" style="display:none">
+      <div class="grid1" style="gap:10px">
+        <div class="field">
+          <label>Nombre de la asignatura</label>
+          <input type="text" id="materia_manual" placeholder="Nombre completo de la materia">
+        </div>
+        <div class="field">
+          <label>Docente</label>
+          <input type="text" id="docente_manual" placeholder="Nombre completo del docente">
+        </div>
+      </div>
+    </div>
+
+    <!-- Docente autocompletado -->
+    <div id="docente_auto_wrap" style="display:none">
+      <div class="field">
+        <label>Docente</label>
+        <input type="text" id="docente_auto" readonly style="color:var(--text2);background:var(--cream)">
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ COMPETENCIA -->
+  <div class="card" id="card_competencia" style="display:none">
+    <div class="card-title">③ Competencia No.</div>
+    <div class="comp-grid" id="comp_grid"></div>
+    <div class="desc-preview" id="desc_preview"></div>
+  </div>
+
+  <!-- Competencia manual -->
+  <div class="card" id="card_comp_manual" style="display:none">
+    <div class="card-title">③ Competencia (manual)</div>
+    <div class="grid2" style="margin-bottom:10px">
+      <div class="field">
+        <label>Número de competencia</label>
+        <input type="number" id="comp_manual_num" min="1" max="20" placeholder="Ej. 3">
+      </div>
+    </div>
+    <div class="field">
+      <label>Descripción de la competencia</label>
+      <textarea id="comp_manual_desc" placeholder="Describe la competencia a evaluar..."></textarea>
+    </div>
+  </div>
+
+  <!-- ④ INDICADORES -->
+  <div class="card">
+    <div class="card-title">④ Indicadores de desempeño alcanzados</div>
+    <div class="ind-grid" id="ind_grid">
+      <button class="ind-btn" data-ind="A">A</button>
+      <button class="ind-btn" data-ind="B">B</button>
+      <button class="ind-btn" data-ind="C">C</button>
+      <button class="ind-btn" data-ind="D">D</button>
+      <button class="ind-btn" data-ind="E">E</button>
+      <button class="ind-btn" data-ind="F">F</button>
+    </div>
+  </div>
+
+  <!-- EVIDENCIA -->
+  <div class="card">
+    <div class="card-title">Evidencia de aprendizaje</div>
+    <div class="field">
+      <label>Descripción de la evidencia</label>
+      <textarea id="evidencia" placeholder="Ej. Reporte escrito, práctica de laboratorio, proyecto integrador..."></textarea>
+    </div>
+  </div>
+
+</div><!-- /.wrap -->
+
+<div style="max-width:620px;margin:0 auto;padding:0 1rem">
+  <button class="generate-btn" id="generar_btn" onclick="generarDocumento()">
+    <span class="btn-icon">⬇</span>
+    Descargar Formato
+  </button>
+</div>
+
+<div class="banner banner-loading" id="loading_banner">Descargando plantilla y procesando documento...</div>
+<div class="banner banner-success" id="success_banner">✓ Documento generado y descargado correctamente</div>
+<div class="banner banner-error" id="error_banner"></div>
+
+<script>
+/* ════════════════════════════════════════
+   BASE DE DATOS DE ASIGNATURAS
+════════════════════════════════════════ */
+const asignaturasData = {
+  "Programación Orientada a Objetos": {
+    docente: "Terán Gómez David",
+    total_comp: 6,
+    competencias: [
+      "1. Conoce y comprende los conceptos básicos de base de datos y los fundamentos de la programación orientada a objetos.",
+      "2. Aplica los conceptos de clases y objetos en el diseño y desarrollo de software.",
+      "3. Identifica y aplica relaciones de herencia entre clases.",
+      "4. Aplica el concepto de polimorfismo en la resolución de problemas de software.",
+      "5. Comprende y aplica el manejo de excepciones en programas orientados a objetos.",
+      "6. Aplica el uso de archivos e interfaces gráficas de usuario."
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+  "Probabilidad y Estadística": {
+    docente: "M. en A. Lidia González González",
+    total_comp: 8,
+    competencias: [
+      "1. Comprende los conceptos básicos de la estadística descriptiva y su aplicación en ingeniería.",
+      "2. Utiliza los conceptos básicos de la teoría de la probabilidad.",
+      "3. Identifica el tipo de variable aleatoria y su distribución de probabilidad.",
+      "4. Identifica las propiedades y características de las distribuciones de probabilidad continua y discreta.",
+      "5. Aplica los conceptos del modelo de regresión lineal simple y múltiple.",
+      "6. Comprende los conceptos de muestreo y distribuciones muestrales.",
+      "7. Aplica los fundamentos de la teoría de estimación puntual y por intervalos.",
+      "8. Aplica los conceptos básicos de una prueba de hipótesis en problemas de ingeniería."
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase (creatividad).",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+  "Física General": {
+    docente: "Jessica Linnete Morales Hernández",
+    total_comp: 8,
+    competencias: [
+      "1. Comprende y aplica los conceptos de la Estática y equilibrio de cuerpos rígidos.",
+      "2. Comprende y aplica los conocimientos de la dinámica de la partícula y las leyes de Newton.",
+      "3. Soluciona problemas sencillos de reflexión, refracción y óptica física.",
+      "4. Conoce, identifica y distingue los principios de la termodinámica.",
+      "5. Conoce y aplica los conceptos de carga, campo y potencial eléctrico.",
+      "6. Determina la capacitancia de distribuciones elementales de carga.",
+      "7. Conoce los conceptos principales de la electrodinámica.",
+      "8. Conoce los conceptos principales del electromagnetismo e inductancia."
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase (creatividad).",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+  "Cálculo Integral": {
+    docente: "M. en T.I Brian Antonio Mejía Díaz",
+    total_comp: 5,
+    competencias: [
+      "1. Comprende los dos teoremas fundamentales del cálculo integral.",
+      "2. Aplica los teoremas y las propiedades de la integral definida e indefinida.",
+      "3. Identifica el método de integración más adecuado para resolver integrales.",
+      "4. Utiliza las definiciones de integral y las técnicas de integración en aplicaciones de ingeniería.",
+      "5. Aplica series para aproximar la solución de integrales especiales."
+    ],
+    indicadores: ["A","B","C","D","E","F"]
+  },
+  "Contabilidad Financiera": {
+    docente: "L.C Miriam Juárez Gutiérrez",
+    total_comp: 5,
+    competencias: [
+      "1. Conceptos Generales de la Contabilidad.",
+      "2. Estados Financieros e importancia del estado de situación financiera.",
+      "3. Teoría de la Partida Doble y asientos de diario.",
+      "4. Registro de operaciones de mercancías y valuación de inventarios.",
+      "5. Análisis e Interpretación de la Información Financiera."
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  }
+};
+
+/* ════════════════════════════════════════
+   ESTADO
+════════════════════════════════════════ */
+let selectedComp = null;
+let selectedIndicadores = [];
+
+const $ = id => document.getElementById(id);
+
+/* ════════════════════════════════════════
+   PERSISTENCIA localStorage
+════════════════════════════════════════ */
+function guardarLS() {
+  localStorage.setItem('fo205', JSON.stringify({
+    nombre: $('nombre').value,
+    control: $('control').value,
+    division: $('division').value,
+    grupo: $('grupo').value
+  }));
+}
+function cargarLS() {
+  try {
+    const d = JSON.parse(localStorage.getItem('fo205') || '{}');
+    ['nombre','control','division','grupo'].forEach(k => { if(d[k]) $(k).value = d[k]; });
+  } catch(e){}
+}
+['nombre','control','division','grupo'].forEach(id => $(id).addEventListener('input', guardarLS));
+
+/* ════════════════════════════════════════
+   STEPPER
+════════════════════════════════════════ */
+function updateStepper() {
+  const mat = $('asignatura_select').value;
+  const s1 = $('nombre').value.trim() && $('control').value.trim();
+  const s2 = mat !== '';
+  const s3 = selectedComp !== null || mat === '__vacio__';
+  ['step1','step2','step3','step4'].forEach(id => {
+    $(id).classList.remove('active','done');
+  });
+  if(s1 && s2 && s3){ $(  'step4').classList.add('active'); ['step1','step2','step3'].forEach(id => $(id).classList.add('done')); }
+  else if(s1 && s2){ $('step3').classList.add('active'); ['step1','step2'].forEach(id => $(id).classList.add('done')); }
+  else if(s1){ $('step2').classList.add('active'); $('step1').classList.add('done'); }
+  else { $('step1').classList.add('active'); }
+}
+['nombre','control','asignatura_select'].forEach(id => $(id).addEventListener('input', updateStepper));
+['nombre','control'].forEach(id => $(id).addEventListener('change', updateStepper));
+
+/* ════════════════════════════════════════
+   SELECTOR DE ASIGNATURA
+════════════════════════════════════════ */
+$('asignatura_select').addEventListener('change', function() {
+  const val = this.value;
+  $('modo_vacio').style.display = val === '__vacio__' ? 'block' : 'none';
+  $('docente_auto_wrap').style.display = (val && val !== '__vacio__') ? 'block' : 'none';
+  $('card_competencia').style.display = (val && val !== '__vacio__') ? 'block' : 'none';
+  $('card_comp_manual').style.display = val === '__vacio__' ? 'block' : 'none';
+
+  selectedComp = null;
+  selectedIndicadores = [];
+  $('desc_preview').className = 'desc-preview';
+
+  if(val && val !== '__vacio__' && asignaturasData[val]) {
+    const d = asignaturasData[val];
+    $('docente_auto').value = d.docente;
+    renderCompGrid(d.total_comp);
+    renderIndGrid(d.indicadores);
+  }
+  updateStepper();
+});
+
+function renderCompGrid(total) {
+  const g = $('comp_grid'); g.innerHTML = '';
+  for(let i=1; i<=total; i++) {
+    const b = document.createElement('button');
+    b.className = 'comp-btn'; b.textContent = i; b.dataset.num = i;
+    b.addEventListener('click', () => selectComp(i, b));
+    g.appendChild(b);
+  }
+}
+
+function renderIndGrid(indicadores) {
+  const g = $('ind_grid'); g.innerHTML = '';
+  selectedIndicadores = [];
+  indicadores.forEach((ind, idx) => {
+    const letra = typeof ind === 'string' && ind.length <= 2 ? ind : ind.charAt(0);
+    const b = document.createElement('button');
+    b.className = 'ind-btn'; b.textContent = letra;
+    b.dataset.letra = letra; b.dataset.full = ind;
+    b.addEventListener('click', () => toggleInd(letra, ind, b));
+    g.appendChild(b);
+  });
+}
+
+function selectComp(num, btn) {
+  document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedComp = num;
+  const mat = $('asignatura_select').value;
+  const data = asignaturasData[mat];
+  if(data && data.competencias[num-1]) {
+    const prev = $('desc_preview');
+    prev.textContent = data.competencias[num-1];
+    prev.className = 'desc-preview show';
+  }
+  updateStepper();
+}
+
+function toggleInd(letra, full, btn) {
+  btn.classList.toggle('active');
+  if(selectedIndicadores.find(i => i.letra === letra)) {
+    selectedIndicadores = selectedIndicadores.filter(i => i.letra !== letra);
+  } else {
+    selectedIndicadores.push({ letra, full });
+  }
+}
+
+/* ════════════════════════════════════════
+   URLS DE PLANTILLAS EN GITHUB
+   Cambia la base BASE_URL por la ruta de tu repositorio
+════════════════════════════════════════ */
+const BASE_URL = 'https://raw.githubusercontent.com/s12gamer/gxdasnz/main/';
+const githubUrls = {
+  'Programación Orientada a Objetos': BASE_URL + 'Programación Orientada a Objetos 2 form.docx',
+  'Probabilidad y Estadística':        BASE_URL + 'probabilidad form.docx',
+  'Física General':                    BASE_URL + 'fisica form.docx',
+  'Cálculo Integral':                  BASE_URL + 'Calculo integral form.docx',
+  'Contabilidad Financiera':           BASE_URL + 'Conta form.docx',
+};
+
+/* ════════════════════════════════════════
+   FORMATO FECHA
+════════════════════════════════════════ */
+function formatFecha(val) {
+  if(!val) return '';
+  const [y,m,d] = val.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+/* ════════════════════════════════════════
+   BANNERS
+════════════════════════════════════════ */
+function hideBanners() {
+  ['loading_banner','success_banner','error_banner'].forEach(id => $(id).className = $(id).className.replace(' show','').trim());
+}
+function showLoading(msg) { hideBanners(); $('loading_banner').textContent = msg; $('loading_banner').classList.add('show'); }
+function showSuccess(msg) { hideBanners(); $('success_banner').textContent = msg; $('success_banner').classList.add('show'); setTimeout(hideBanners,5000); }
+function showError(msg)   { hideBanners(); $('error_banner').textContent = msg; $('error_banner').classList.add('show'); setTimeout(hideBanners,7000); }
+
+/* ════════════════════════════════════════
+   VALIDACIÓN
+════════════════════════════════════════ */
+function validar() {
+  const nombre   = $('nombre').value.trim();
+  const control  = $('control').value.trim();
+  const materia  = $('asignatura_select').value;
+  if(!nombre)   { showError('Ingresa tu nombre completo.'); return false; }
+  if(!control)  { showError('Ingresa tu No. de Control.'); return false; }
+  if(!materia)  { showError('Selecciona una materia.'); return false; }
+  if(materia === '__vacio__') {
+    if(!$('materia_manual').value.trim()) { showError('Ingresa el nombre de la asignatura.'); return false; }
+    if(!$('docente_manual').value.trim()) { showError('Ingresa el nombre del docente.'); return false; }
+  } else {
+    if(selectedComp === null) { showError('Selecciona una competencia.'); return false; }
+  }
+  return true;
+}
+
+/* ════════════════════════════════════════
+   LÓGICA PRINCIPAL: EDICIÓN DEL DOCX
+════════════════════════════════════════ */
+async function generarDocumento() {
+  if(!validar()) return;
+  $('generar_btn').disabled = true;
+  showLoading('Descargando plantilla y procesando documento...');
+
+  const materia_sel = $('asignatura_select').value;
+  const nombre    = $('nombre').value.trim();
+  const control   = $('control').value.trim();
+  const division  = $('division').value.trim();
+  const grupo     = $('grupo').value.trim();
+  const fecha     = formatFecha($('fecha').value);
+  const evidencia = $('evidencia').value.trim();
+
+  let materia, docente, compNum, compDesc, indLetras, indFull;
+
+  if(materia_sel === '__vacio__') {
+    materia   = $('materia_manual').value.trim();
+    docente   = $('docente_manual').value.trim();
+    compNum   = $('comp_manual_num').value.trim();
+    compDesc  = $('comp_manual_desc').value.trim();
+    indLetras = selectedIndicadores.map(i => i.letra);
+    indFull   = selectedIndicadores.map(i => i.full);
+  } else {
+    const data = asignaturasData[materia_sel];
+    materia   = materia_sel;
+    docente   = data.docente;
+    compNum   = String(selectedComp);
+    compDesc  = data.competencias[selectedComp - 1];
+    indLetras = selectedIndicadores.map(i => i.letra);
+    indFull   = selectedIndicadores.map(i => i.full);
+  }
+
+  const githubUrl = githubUrls[materia_sel] || null;
+
+  try {
+    let blob;
+    if(githubUrl) {
+      blob = await procesarDesdeGithub({ githubUrl, nombre, control, division, grupo, fecha,
+        materia, docente, compNum, compDesc, indLetras, indFull, evidencia, materia_sel });
+    } else {
+      blob = generarDocxNuevo({ nombre, control, division, grupo, fecha,
+        materia, docente, compNum, compDesc, indLetras, indFull, evidencia });
+    }
+    const filename = `FO-205P11000-14_${nombre.replace(/\s+/g,'_')}_Comp${compNum}.docx`;
+    saveAs(blob, filename);
+    showSuccess('✓ Documento generado y descargado: ' + filename);
+  } catch(e) {
+    showError('Error al generar el documento: ' + e.message);
+    console.error(e);
+  } finally {
+    $('generar_btn').disabled = false;
+  }
+}
+
+/* ════════════════════════════════════════
+   PROCESAMIENTO DEL .DOCX DE GITHUB
+   Estrategia: edición directa del XML interno
+════════════════════════════════════════ */
+async function procesarDesdeGithub(opts) {
+  const resp = await fetch(opts.githubUrl);
+  if(!resp.ok) throw new Error(`No se pudo descargar el archivo (HTTP ${resp.status})`);
+  const ab   = await resp.arrayBuffer();
+  const zip  = new PizZip(ab);
+
+  /* Obtener el XML del documento */
+  let xmlStr = zip.file('word/document.xml').asText();
+
+  xmlStr = aplicarSustitucionesXML(xmlStr, opts);
+
+  zip.file('word/document.xml', xmlStr);
+
+  return zip.generate({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  });
+}
+
+/* ════════════════════════════════════════
+   SUSTITUCIONES EN EL XML
+   
+   ESTRATEGIA: El formato tiene filas con 4 celdas:
+     Col1=etiqueta | Col2=valor | Col3=etiqueta | Col4=valor
+   O filas con 2 celdas anchas:
+     Col1=etiqueta | Col2=valor (para descripción e indicadores)
+   
+   Trabajamos a nivel de <w:tr> (fila), identificamos la etiqueta
+   y escribimos el valor en la celda ADYACENTE A LA DERECHA.
+════════════════════════════════════════ */
+function aplicarSustitucionesXML(xml, opts) {
+  /* Paso 1 — reemplazar datos en celdas de valor adyacentes a la etiqueta */
+  xml = procesarFilasDeTabla(xml, opts);
+
+  /* Paso 2 — filtrar competencias (número y descripción) */
+  if(opts.materia_sel !== '__vacio__') {
+    xml = filtrarCompetencias(xml, opts);
+  }
+
+  /* Paso 3 — filtrar indicadores */
+  if(opts.indLetras.length > 0) {
+    xml = filtrarIndicadores(xml, opts);
+  }
+
+  return xml;
+}
+
+/* ──────────────────────────────────────
+   NIVEL FILA: iterar <w:tr> y reemplazar
+   la celda de valor que está justo a la
+   derecha de la celda de etiqueta.
+────────────────────────────────────── */
+function procesarFilasDeTabla(xml, opts) {
+  /* Separar el XML en filas preservando todo lo que hay entre ellas */
+  return xml.replace(/(<w:tr\b[\s\S]*?<\/w:tr>)/g, fila => {
+    /* Extraer todas las celdas de esta fila */
+    const celdas = [];
+    const reCell = /<w:tc\b[\s\S]*?<\/w:tc>/g;
+    let m;
+    while((m = reCell.exec(fila)) !== null) {
+      celdas.push({ match: m[0], index: m.index });
+    }
+    if(celdas.length < 2) return fila;
+
+    let filaModificada = fila;
+
+    /* Recorrer pares: celda etiqueta (par) → celda valor (impar) */
+    for(let i = 0; i < celdas.length - 1; i++) {
+      const txtEtiqueta = extraerTexto(celdas[i].match).toLowerCase().trim();
+
+      let nuevoValor = null;
+
+      /* ── Mapeo etiqueta → valor ── */
+      if(/nombre.*alumno|nombre.*estudiante|^nombre$/i.test(txtEtiqueta)) {
+        nuevoValor = opts.nombre + ' ' + opts.control;
+      } else if(/no\.?\s*control|n[uú]mero.*control|control/i.test(txtEtiqueta)) {
+        nuevoValor = opts.nombre + ' ' + opts.control;
+      } else if(/divisi[oó]n|carrera|programa/i.test(txtEtiqueta)) {
+        nuevoValor = opts.division;
+      } else if(/^grupo$|^gr\.?$/i.test(txtEtiqueta)) {
+        nuevoValor = opts.grupo;
+      } else if(/fecha/i.test(txtEtiqueta)) {
+        nuevoValor = opts.fecha;
+      } else if(/asignatura|materia/i.test(txtEtiqueta)) {
+        nuevoValor = opts.materia;
+      } else if(/docente|profesor|maestro/i.test(txtEtiqueta)) {
+        nuevoValor = opts.docente;
+      } else if(/competencia.*no|no.*competencia|competencia\s*#|n[uú]m.*competencia/i.test(txtEtiqueta)) {
+        nuevoValor = opts.compNum;
+      } else if(/evidencia/i.test(txtEtiqueta)) {
+        nuevoValor = opts.evidencia;
+      }
+
+      if(nuevoValor !== null) {
+        const celdaValorOriginal = celdas[i + 1].match;
+        const celdaValorNueva = escribirValorEnCelda(celdaValorOriginal, nuevoValor);
+        /* Reemplazar en la fila solo la primera ocurrencia exacta */
+        filaModificada = filaModificada.replace(celdaValorOriginal, celdaValorNueva);
+      }
+    }
+
+    return filaModificada;
+  });
+}
+
+/* Escribe un valor de texto en la celda, conservando el formato (rPr) del primer run */
+function escribirValorEnCelda(celda, valor) {
+  /* Encontrar el primer <w:r> con su <w:rPr> para conservar el formato */
+  const matchRpr = celda.match(/<w:rPr[\s\S]*?<\/w:rPr>/);
+  const rPr = matchRpr ? matchRpr[0] : '';
+
+  /* Encontrar el primer <w:p> para conservar propiedades de párrafo */
+  const matchPPr = celda.match(/<w:pPr[\s\S]*?<\/w:pPr>/);
+  const pPr = matchPPr ? matchPPr[0] : '';
+
+  /* Encontrar propiedades de celda <w:tcPr> */
+  const matchTcPr = celda.match(/<w:tcPr[\s\S]*?<\/w:tcPr>/);
+  const tcPr = matchTcPr ? matchTcPr[0] : '';
+
+  /* Reconstruir la celda con un único párrafo y un único run */
+  return `<w:tc>${tcPr}<w:p>${pPr}<w:r>${rPr}<w:t xml:space="preserve">${escXml(valor)}</w:t></w:r></w:p></w:tc>`;
+}
+
+function extraerTexto(xml) {
+  return (xml.match(/<w:t[^>]*>([^<]*)<\/w:t>/g) || [])
+    .map(m => m.replace(/<[^>]+>/g,''))
+    .join('');
+}
+
+/* ══════════════════════════════════════
+   FILTRADO DE COMPETENCIAS
+   
+   La tabla tiene:
+   - Una celda etiqueta "Competencia No." → celda valor con todos los números (col2)
+   - Una celda etiqueta "Descripción"     → celda valor con todos los textos  (col4)
+   
+   Buscamos esas celdas de VALOR (la que está a la derecha de la etiqueta)
+   y limpiamos los párrafos que no correspondan a la competencia elegida.
+══════════════════════════════════════ */
+function filtrarCompetencias(xml, opts) {
+  const data = asignaturasData[opts.materia_sel];
+  if(!data) return xml;
+
+  const compElegida = String(opts.compNum);
+  const todasComps  = data.competencias;
+
+  xml = xml.replace(/(<w:tr\b[\s\S]*?<\/w:tr>)/g, fila => {
+    const celdas = extraerCeldas(fila);
+    if(celdas.length < 2) return fila;
+
+    let filaModificada = fila;
+
+    for(let i = 0; i < celdas.length - 1; i++) {
+      const txtEtiq = extraerTexto(celdas[i]).toLowerCase().trim();
+      const celdaValor = celdas[i + 1];
+
+      /* ── Celda de número de competencia ── */
+      if(/competencia.*no|no.*competencia|competencia\s*#|n[uú]m.*competencia/i.test(txtEtiq)) {
+        const nueva = limpiarNumerosCompetencia(celdaValor, compElegida, data.total_comp);
+        filaModificada = filaModificada.replace(celdaValor, nueva);
+      }
+
+      /* ── Celda de descripción ── */
+      if(/descripci[oó]n/i.test(txtEtiq)) {
+        const nueva = limpiarDescripcionesCompetencia(celdaValor, compElegida, todasComps);
+        filaModificada = filaModificada.replace(celdaValor, nueva);
+      }
+    }
+
+    return filaModificada;
+  });
+
+  return xml;
+}
+
+function extraerCeldas(fila) {
+  const celdas = [];
+  const re = /<w:tc\b[\s\S]*?<\/w:tc>/g;
+  let m;
+  while((m = re.exec(fila)) !== null) celdas.push(m[0]);
+  return celdas;
+}
+
+/* Deja solo el párrafo cuyo texto es el número elegido */
+function limpiarNumerosCompetencia(celda, compElegida, total) {
+  const parrafos = extraerParrafos(celda);
+  const mantenidos = parrafos.filter(p => {
+    const txt = extraerTexto(p).trim();
+    if(!txt) return false; /* eliminar párrafos vacíos también */
+    /* ¿Este párrafo contiene solo el número elegido? */
+    return txt === compElegida || txt === compElegida + '.' || txt.startsWith(compElegida);
+  });
+
+  /* Si no encontramos nada con ese criterio estricto, buscar con más amplitud */
+  const resultado = mantenidos.length > 0 ? mantenidos : parrafos.filter(p => {
+    const txt = extraerTexto(p).trim();
+    return txt.includes(compElegida);
+  });
+
+  return reconstruirCelda(celda, resultado.length > 0 ? resultado : [crearParrafoTexto(celda, compElegida)]);
+}
+
+/* Deja solo el párrafo de la descripción de la competencia elegida */
+function limpiarDescripcionesCompetencia(celda, compElegida, todasComps) {
+  const descElegida = todasComps[parseInt(compElegida) - 1];
+  if(!descElegida) return celda;
+
+  const parrafos = extraerParrafos(celda);
+
+  /* Contar solo los párrafos con texto (uno por competencia) y quedarse
+     únicamente con el que está en la posición del número elegido */
+  const conTexto = parrafos.filter(p => extraerTexto(p).trim().length > 0);
+  const indice   = parseInt(compElegida) - 1;
+  const elegido  = conTexto[indice] ? [conTexto[indice]] : [crearParrafoTexto(celda, descElegida)];
+
+  return reconstruirCelda(celda, elegido);
+}
+
+function extraerParrafos(celda) {
+  return celda.match(/<w:p\b[\s\S]*?<\/w:p>/g) || [];
+}
+
+function reconstruirCelda(celdaOriginal, parrafosNuevos) {
+  const matchTcPr = celdaOriginal.match(/<w:tcPr[\s\S]*?<\/w:tcPr>/);
+  const tcPr = matchTcPr ? matchTcPr[0] : '';
+  return `<w:tc>${tcPr}${parrafosNuevos.join('')}</w:tc>`;
+}
+
+function crearParrafoTexto(celdaRef, texto) {
+  const matchRpr = celdaRef.match(/<w:rPr[\s\S]*?<\/w:rPr>/);
+  const rPr = matchRpr ? matchRpr[0] : '';
+  return `<w:p><w:r>${rPr}<w:t xml:space="preserve">${escXml(texto)}</w:t></w:r></w:p>`;
+}
+
+/* ══════════════════════════════════════
+   FILTRADO DE INDICADORES
+   
+   Busca la fila cuya etiqueta sea "Indicadores" (o similar)
+   y en la celda de valor adyacente elimina los párrafos
+   cuya letra inicial no esté en la selección del usuario.
+══════════════════════════════════════ */
+function filtrarIndicadores(xml, opts) {
+  const letraSet = new Set(opts.indLetras);
+
+  xml = xml.replace(/(<w:tr\b[\s\S]*?<\/w:tr>)/g, fila => {
+    const celdas = extraerCeldas(fila);
+    if(celdas.length < 2) return fila;
+
+    let filaModificada = fila;
+
+    for(let i = 0; i < celdas.length - 1; i++) {
+      const txtEtiq = extraerTexto(celdas[i]).toLowerCase().trim();
+
+      if(/indicador|desempe[nñ]o/i.test(txtEtiq)) {
+        const celdaValor = celdas[i + 1];
+        const parrafos = extraerParrafos(celdaValor);
+
+        const mantenidos = parrafos.filter(p => {
+          const txt = extraerTexto(p).trim();
+          if(!txt) return false;
+          /* ¿Empieza con letra de indicador? */
+          const m = txt.match(/^([A-F])[.):\s]/i);
+          if(!m) return true; /* No es indicador → conservar */
+          return letraSet.has(m[1].toUpperCase());
+        });
+
+        const nueva = reconstruirCelda(celdaValor,
+          mantenidos.length > 0 ? mantenidos : [crearParrafoTexto(celdaValor, opts.indFull.join(' / ') || '—')]
+        );
+        filaModificada = filaModificada.replace(celdaValor, nueva);
+      }
+    }
+
+    return filaModificada;
+  });
+
+  return xml;
+}
+
+function escXml(str) {
+  return String(str||'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+/* ════════════════════════════════════════
+   FALLBACK: GENERAR DOCX DESDE CERO
+   Se usa si no hay URL de GitHub
+════════════════════════════════════════ */
+function generarDocxNuevo(opts) {
+  const { nombre, control, division, grupo, fecha, materia, docente,
+          compNum, compDesc, indLetras, indFull, evidencia } = opts;
+
+  const indTexto = indFull.length > 0
+    ? indFull.map(i => `<w:p><w:r><w:rPr><w:sz w:val="19"/></w:rPr><w:t xml:space="preserve">${escXml(i)}</w:t></w:r></w:p>`).join('')
+    : `<w:p><w:r><w:t>—</w:t></w:r></w:p>`;
+
+  const fila = (k, v, shade) => `
+    <w:tr>
+      <w:tc>
+        <w:tcPr><w:tcW w:w="3200" w:type="dxa"/>${shade?`<w:shd w:val="clear" w:color="auto" w:fill="F0EDE5"/>`:''}
+        </w:tcPr>
+        <w:p><w:r><w:rPr><w:b/><w:sz w:val="19"/><w:color w:val="3D2B1A"/></w:rPr>
+          <w:t>${escXml(k)}</w:t></w:r></w:p>
+      </w:tc>
+      <w:tc>
+        <w:tcPr><w:tcW w:w="6300" w:type="dxa"/></w:tcPr>
+        <w:p><w:r><w:rPr><w:sz w:val="19"/></w:rPr>
+          <w:t xml:space="preserve">${escXml(v||'')}</w:t></w:r></w:p>
+      </w:tc>
+    </w:tr>`;
+
+  const filaInd = () => `
+    <w:tr>
+      <w:tc>
+        <w:tcPr><w:tcW w:w="3200" w:type="dxa"/><w:shd w:val="clear" w:color="auto" w:fill="E8F0EF"/>
+        </w:tcPr>
+        <w:p><w:r><w:rPr><w:b/><w:sz w:val="19"/><w:color w:val="1D4E4A"/></w:rPr>
+          <w:t>Indicadores alcanzados</w:t></w:r></w:p>
+      </w:tc>
+      <w:tc>
+        <w:tcPr><w:tcW w:w="6300" w:type="dxa"/></w:tcPr>
+        ${indTexto}
+      </w:tc>
+    </w:tr>`;
+
+  const docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:body>
+  <w:p>
+    <w:pPr><w:jc w:val="center"/></w:pPr>
+    <w:r><w:rPr><w:b/><w:sz w:val="30"/></w:rPr><w:t>FO-205P11000-14</w:t></w:r>
+  </w:p>
+  <w:p>
+    <w:pPr><w:jc w:val="center"/></w:pPr>
+    <w:r><w:rPr><w:sz w:val="22"/><w:i/></w:rPr><w:t>Avance Programático · Registro de Competencias</w:t></w:r>
+  </w:p>
+  <w:p><w:r><w:t xml:space="preserve"> </w:t></w:r></w:p>
+  <w:tbl>
+    <w:tblPr>
+      <w:tblW w:w="9500" w:type="dxa"/>
+      <w:tblBorders>
+        <w:top w:val="single" w:sz="4" w:color="C8C0A8"/>
+        <w:left w:val="single" w:sz="4" w:color="C8C0A8"/>
+        <w:bottom w:val="single" w:sz="4" w:color="C8C0A8"/>
+        <w:right w:val="single" w:sz="4" w:color="C8C0A8"/>
+        <w:insideH w:val="single" w:sz="4" w:color="C8C0A8"/>
+        <w:insideV w:val="single" w:sz="4" w:color="C8C0A8"/>
+      </w:tblBorders>
+    </w:tblPr>
+    <w:tblGrid>
+      <w:gridCol w:w="3200"/>
+      <w:gridCol w:w="6300"/>
+    </w:tblGrid>
+    ${fila('Nombre del alumno', nombre, true)}
+    ${fila('No. de Control', control, false)}
+    ${fila('División / Carrera', division, true)}
+    ${fila('Grupo', grupo, false)}
+    ${fila('Fecha', fecha, true)}
+    ${fila('Materia / Asignatura', materia, false)}
+    ${fila('Docente', docente, true)}
+    ${fila('Competencia No.', compNum, false)}
+    ${fila('Descripción', compDesc, true)}
+    ${filaInd()}
+    ${fila('Evidencia de aprendizaje', evidencia, true)}
+  </w:tbl>
+  <w:sectPr>
+    <w:pgSz w:w="12240" w:h="15840"/>
+    <w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720"/>
+  </w:sectPr>
+</w:body>
+</w:document>`;
+
+  const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`;
+
+  const relsRoot = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+
+  const ct = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+</Types>`;
+
+  const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:docDefaults>
+    <w:rPrDefault><w:rPr>
+      <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>
+      <w:sz w:val="20"/>
+    </w:rPr></w:rPrDefault>
+  </w:docDefaults>
+</w:styles>`;
+
+  const zip = new PizZip();
+  zip.file('[Content_Types].xml', ct);
+  zip.file('_rels/.rels', relsRoot);
+  zip.file('word/document.xml', docXml);
+  zip.file('word/_rels/document.xml.rels', rels);
+  zip.file('word/styles.xml', styles);
+  return zip.generate({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  });
+}
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  cargarLS();
+  $('fecha').value = new Date().toISOString().slice(0,10);
+});
+</script>
+</body>
+</html>
