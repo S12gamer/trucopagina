@@ -21,6 +21,7 @@ const formatos = [
   { id:7, name:"Formato Membrete",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1AKJGf0J50JLBezSxDx3ToCDeIHivWK2a" },
   { id:8, name:"Portafolio Calculo Int",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1Tfet0QQcinRFSIKr5VCT-GIDr_eU5env" },
   { id:9, name:"Portada Institucional",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1tXl9qaRw54kI1k7oKZcvU-yfnsNHzxrF" },
+{ id:10, name:"Portafolio Conta",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1-G1aWJ7nLLRizXx3J4JKRpHmvhxbaDa8" },
 ];
 
 const instrumentaciones = [
