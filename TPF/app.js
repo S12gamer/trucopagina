@@ -20,7 +20,7 @@ const formatos = [
   { id:6, name:"Formato en Blanco",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1nnNn-clnrsO2IaELLLb6eLd0Jo4ZnNcY" },
   { id:7, name:"Formato Membrete",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1AKJGf0J50JLBezSxDx3ToCDeIHivWK2a" },
   { id:8, name:"Portafolio Calculo Int",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1Tfet0QQcinRFSIKr5VCT-GIDr_eU5env" },
-  { id:9, name:"Portada Institucional",      desc:"By: CS",         url:"https://drive.google.com/uc?export=download&id=1tXl9qaRw54kI1k7oKZcvU-yfnsNHzxrF" },
+  { id:9, name:"Portada Institucional",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1tXl9qaRw54kI1k7oKZcvU-yfnsNHzxrF" },
 ];
 
 const instrumentaciones = [
@@ -31,6 +31,11 @@ const instrumentaciones = [
   { id:5, name:"Instrumentación Contabilidad",       desc:"Planeación semestral — Ing. en Sistemas", url:"https://drive.google.com/uc?export=download&id=1fbFq6p6c7_IixfQmfKTwZKCfplO4jmUi" },
   { id:6, name:"Instrumentación Nivel 3 y 4 Ingles",       desc:"Planeación semestral — Ing. en Sistemas/ Coordinacion de Lenguas Extranjeras", url:"https://drive.google.com/uc?export=download&id=1k4tEpzfDz2WFzENnyknNk9uLUOUUhB1h" },
   { id:7, name:"Instrumentación Programacion Ori a Objs",       desc:"Planeación semestral — Ing. en Sistemas", url:"https://drive.google.com/uc?export=download&id=1r0BRhQvbeAI703Muet0h_WhNbEej9Ox1" },
+];
+
+const programas = [
+  { id:1, name:"Anaconda Spyder 6",  desc:"Brian Antonio Mejía Díaz/Calculo Integral",  url:"https://repo.anaconda.com/archive/Anaconda3-2025.12-2-Windows-x86_64.exe" },
+  { id:1, name:"Visual Studio Community",  desc:"David Teran Gomez/Programacion Ori a Objs",  url:"https://visualstudio.microsoft.com/es/thank-you-downloading-visual-studio/?sku=Community&channel=Stable&version=VS18&source=VSLandingPage&passive=false&cid=2500" },
 ];
 
 /* ══════════════════════════════════════════
@@ -165,8 +170,8 @@ const materias = [
    LÓGICA INTERNA DE LA PLATAFORMA
    (No necesitas modificar nada de aquí para abajo)
 ══════════════════════════════════════ */
-const badgeLabel = { teal:'PNG / JPG', rust:'DOCX Sem 2', green:'DOCX/PDF Sem 2' };
-const thumbIcon  = { teal:'🖼️', rust:'📝', green:'📋' };
+const badgeLabel = { teal:'PNG / JPG', rust:'DOCX Sem 2', green:'DOCX/PDF Sem 2', orange:'Software / App' };
+const thumbIcon  = { teal:'🖼️', rust:'📝', green:'📋', orange:'💾' };
 
 function renderGrid(gridId, items, color, query='') {
   const grid = document.getElementById(gridId);
@@ -282,5 +287,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderGrid('gridMem',  membretes,         'teal');
   renderGrid('gridFmt',  formatos,          'rust');
   renderGrid('gridInst', instrumentaciones, 'green');
+  renderGrid('gridProg', programas,         'orange');
   renderMaterias();
 });

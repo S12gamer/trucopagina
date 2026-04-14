@@ -71,6 +71,8 @@
     .dot-green  { background:var(--green);  }
     .dot-purple { background:var(--purple); }
 
+    .dot-orange { background:#c97c2a; }
+
     /* ── Content ── */
     .content { flex:1; overflow:hidden; }
     .page { display:none; }
@@ -278,6 +280,12 @@
     .alc-medio  { background:#fff3cd; color:#856404; }
     .alc-basico { background:#f8d7da; color:#721c24; }
 
+    .ph-orange::before { background:#c97c2a; }
+    .card-orange:hover  { border-color:#c97c2a; }
+    .thumb-orange { background:linear-gradient(135deg,#fef3e2,#fde3b8); }
+    .badge-orange { background:#c97c2a; color:#fff; }
+    .btn-orange   { background:#c97c2a; }
+
     /* ── Responsive ── */
     @media(max-width:800px){
       nav { width:200px; }
@@ -316,6 +324,9 @@
       </button>
       <button class="nav-link" onclick="showPage('instrumentaciones',this)">
         <span class="dot dot-green"></span> Instrumentaciones
+      </button>
+      <button class="nav-link" onclick="showPage('programas',this)">
+        <span class="dot dot-orange"></span> Programas Usados
       </button>
       <div class="nav-section-title" style="margin-top:.8rem;">Consulta</div>
       <button class="nav-link" onclick="showPage('atributos',this)">
@@ -368,6 +379,20 @@
         </div>
       </div>
       <div class="card-area"><div class="card-grid" id="gridInst"></div></div>
+    </div>
+
+    <div class="page" id="page-programas">
+      <div class="page-header ph-orange">
+        <h2>💾 Programas Usados</h2>
+        <p>Software y herramientas utilizadas en las materias. Accede a los instaladores y recursos.</p>
+      </div>
+      <div class="search-row">
+        <div class="search-box">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar programa…" oninput="filterGrid('gridProg',programas,'orange',this.value)"/>
+        </div>
+      </div>
+      <div class="card-area"><div class="card-grid" id="gridProg"></div></div>
     </div>
 
     <div class="page" id="page-atributos">
