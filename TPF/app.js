@@ -19,7 +19,8 @@ const formatos = [
   { id:5, name:"Formato Calculo Int",      desc:"Brian Antonio Mejía Díaz",         url:"https://drive.google.com/uc?export=download&id=1LByc9bIXhi24O3rP4TVfu1QXUxu1jUJ8" },
   { id:6, name:"Formato en Blanco",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1nnNn-clnrsO2IaELLLb6eLd0Jo4ZnNcY" },
   { id:7, name:"Formato Membrete",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1AKJGf0J50JLBezSxDx3ToCDeIHivWK2a" },
-  { id:7, name:"Portafolio Calculo Int",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1Tfet0QQcinRFSIKr5VCT-GIDr_eU5env" },
+  { id:8, name:"Portafolio Calculo Int",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1Tfet0QQcinRFSIKr5VCT-GIDr_eU5env" },
+  { id:9, name:"Portada Institucional",      desc:"By: CS",         url:"https://drive.google.com/uc?export=download&id=1tXl9qaRw54kI1k7oKZcvU-yfnsNHzxrF" },
 ];
 
 const instrumentaciones = [
@@ -29,6 +30,7 @@ const instrumentaciones = [
   { id:4, name:"Instrumentación Probabilidad",     desc:"Planeación semestral — Ing. en Sistemas",       url:"https://drive.google.com/uc?export=download&id=1WKMWFkHZDJcKCAsGD2GpVe1SgtWNgTyy" },
   { id:5, name:"Instrumentación Contabilidad",       desc:"Planeación semestral — Ing. en Sistemas", url:"https://drive.google.com/uc?export=download&id=1fbFq6p6c7_IixfQmfKTwZKCfplO4jmUi" },
   { id:6, name:"Instrumentación Nivel 3 y 4 Ingles",       desc:"Planeación semestral — Ing. en Sistemas/ Coordinacion de Lenguas Extranjeras", url:"https://drive.google.com/uc?export=download&id=1k4tEpzfDz2WFzENnyknNk9uLUOUUhB1h" },
+  { id:7, name:"Instrumentación Programacion Ori a Objs",       desc:"Planeación semestral — Ing. en Sistemas", url:"https://drive.google.com/uc?export=download&id=1r0BRhQvbeAI703Muet0h_WhNbEej9Ox1" },
 ];
 
 /* ══════════════════════════════════════════
