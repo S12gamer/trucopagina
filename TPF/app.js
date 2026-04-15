@@ -23,6 +23,7 @@ const formatos = [
   { id:9, name:"Portada Institucional",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1tXl9qaRw54kI1k7oKZcvU-yfnsNHzxrF" },
   { id:10, name:"Portafolio Conta",      desc:"By: CS",         url:"https://drive.google.com/uc?export=download&id=1-G1aWJ7nLLRizXx3J4JKRpHmvhxbaDa8" },
   { id:11, name:"Portafolio Fisica",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1C26atG7hMxCDd0GT9-z-p69XZdPcK7gX" },
+{ id:12, name:"Portafolio Algebra Lin",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1IH7Q4wjhWU-7zEUQa2a1yE2qXJz0ENI1" },
 ];
 
 const instrumentaciones = [
