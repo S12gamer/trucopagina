@@ -38,7 +38,8 @@ const instrumentaciones = [
 
 const programas = [
   { id:1, name:"Anaconda Spyder 6",  desc:"Brian Antonio Mejía Díaz/Calculo Integral",  url:"https://repo.anaconda.com/archive/Anaconda3-2025.12-2-Windows-x86_64.exe" },
-  { id:1, name:"Visual Studio Community",  desc:"David Teran Gomez/Programacion Ori a Objs",  url:"https://visualstudio.microsoft.com/es/thank-you-downloading-visual-studio/?sku=Community&channel=Stable&version=VS18&source=VSLandingPage&passive=false&cid=2500" },
+  { id:2, name:"Visual Studio Community",  desc:"David Teran Gomez/Programacion Ori a Objs",  url:"https://visualstudio.microsoft.com/es/thank-you-downloading-visual-studio/?sku=Community&channel=Stable&version=VS18&source=VSLandingPage&passive=false&cid=2500" },
+  { id:2, name:"Siigo Aspel COI",  desc:"Miriam Juárez Gutiérrez/Contabilidad Financiera",  url:"https://www.siigo.com/mx/prueba-gratis-coi-aspel/?source=Medios%20Virtuales&medio_virtual=Adwords&nombre_de_campana=PruebasGratisCOI_MV_AS_AT_MX&utm_source=google&utm_medium=cpc&utm_campaign=PruebasGratisCOI_MV_AS_AT_MX&utm_term=siigo%20aspel%20coi&utm_campaign=Leads+%7C+S+%7C+Category+%7C++SPruebaGratisLeads_AO_MV_AS_AT_MX&utm_source=adwords&utm_medium=ppc&hsa_acc=6698788381&hsa_cam=20867081924&hsa_grp=160674777270&hsa_ad=684733323020&hsa_src=g&hsa_tgt=kwd-2672189889312&hsa_kw=siigo%20aspel%20coi&hsa_mt=e&hsa_net=adwords&hsa_ver=3&gad_source=1&gad_campaignid=20867081924&gclid=EAIaIQobChMIp9yS6reElAMVQFJ_AB08LgEKEAAYASAAEgIquvD_BwE" },
 ];
 
 /* ══════════════════════════════════════════
