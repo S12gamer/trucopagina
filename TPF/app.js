@@ -24,7 +24,6 @@ const formatos = [
   { id:10, name:"Portafolio Conta",      desc:"By: CS",         url:"https://drive.google.com/uc?export=download&id=1-G1aWJ7nLLRizXx3J4JKRpHmvhxbaDa8" },
   { id:11, name:"Portafolio Fisica",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1C26atG7hMxCDd0GT9-z-p69XZdPcK7gX" },
 { id:12, name:"Portafolio Algebra Lin",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1IH7Q4wjhWU-7zEUQa2a1yE2qXJz0ENI1" },
-];
 { id:13, name:"Formato Programación Orientada a Objetos",      desc:"By: David Teran Gomez",         url:"https://drive.google.com/uc?export=download&id=1qYJX9Xuqyg6kswRroMZYdaQO5dd9qBfv" },
 ];
 
