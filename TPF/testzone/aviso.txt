@@ -1,7 +1,8 @@
-MODO=TIEMPO
-DURACION=6000
+MODO=MANUAL
+TITULO=⚠️ Servidor en Mantenimiento Técnico
 ---
-¡Atención alumnos de Sistemas!
+Estimada comunidad, 
 
-Este aviso desaparecerá automáticamente en 6 segundos.
-Ideal para alertas rápidas o recordatorios informales.
+El día de hoy realizaremos tareas de optimización en la base de datos de instrumentaciones didácticas entre las 15:00 y las 16:00 horas.
+
+Agradecemos su comprensión.

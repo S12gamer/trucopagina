@@ -313,7 +313,9 @@ function checkAcademicNotice() {
       // Valores por defecto en caso de que no se especifiquen en el txt
       let config = {
         modo: 'MANUAL',
-        duracion: 5000
+        duracion: 5000,
+        version: '1.0',
+        titulo: ''
       };
       let mensaje = text;
 
@@ -347,9 +349,32 @@ function checkAcademicNotice() {
         }
       }
 
+      // Control del modo UPDATE: si la versión coincide con la leída localmente, no interrumpir al usuario
+      if (modoActivo === 'UPDATE') {
+        const versionGuardada = localStorage.getItem('academic_app_version');
+        if (versionGuardada === config.version) {
+          return;
+        }
+      }
+
+      // Almacenar configuración de forma global temporal para resolver el evento de cierre
+      window.currentNoticeConfig = config;
+
       // Inyectar el cuerpo del texto en el contenedor HTML
       document.getElementById('notice-body').textContent = mensaje;
       
+      // Personalizar dinámicamente el título según configuración o modo
+      const titleEl = document.querySelector('#notice-popup h3');
+      if (titleEl) {
+        if (config.titulo) {
+          titleEl.textContent = config.titulo;
+        } else if (modoActivo === 'UPDATE') {
+          titleEl.innerHTML = '✨ ¡Nueva Actualización Disponible! (v' + config.version + ')';
+        } else {
+          titleEl.innerHTML = '📢 Aviso Importante';
+        }
+      }
+
       // Lanzar el pop-up de forma fluida a un segundo de la carga
       setTimeout(() => {
         document.getElementById('notice-popup').classList.add('active');
@@ -373,6 +398,11 @@ function checkAcademicNotice() {
 
 function closeNotice() {
   document.getElementById('notice-popup').classList.remove('active');
+  
+  // Al cerrar un aviso tipo UPDATE, guardamos de forma persistente que el usuario ya vio esta versión
+  if (window.currentNoticeConfig && window.currentNoticeConfig.modo.toUpperCase() === 'UPDATE') {
+    localStorage.setItem('academic_app_version', window.currentNoticeConfig.version);
+  }
 }
 
 function closeNoticeOnBackdrop(event) {
