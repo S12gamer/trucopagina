@@ -1,5 +1,7 @@
-MODO=MANUAL
+MODO=TIEMPO
+DURACION=6000
 ---
-¡Aviso del Centro de Recursos!
+¡Atención alumnos de Sistemas!
 
-Este mensaje se quedará visible en la pantalla de forma permanente cada vez que entres hasta que decidas presionar la "X".
+Este aviso desaparecerá automáticamente en 6 segundos.
+Ideal para alertas rápidas o recordatorios informales.
