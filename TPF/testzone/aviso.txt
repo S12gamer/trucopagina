@@ -1,0 +1,5 @@
+MODO=MANUAL
+---
+¡Aviso del Centro de Recursos!
+
+Este mensaje se quedará visible en la pantalla de forma permanente cada vez que entres hasta que decidas presionar la "X".
