@@ -17,14 +17,14 @@ const formatos = [
   { id:3, name:"Formato Algebra Lin",    desc:"José Juan santana Ortiz",        url:"https://drive.google.com/uc?export=download&id=1fGJapgubiQTlxdwj9BNgqejENbc9Mt6Z" },
   { id:4, name:"Formato Contabilidad",      desc:"Miriam Juárez Gutiérrez",         url:"https://drive.google.com/uc?export=download&id=1WgRi46MP3lINGlevafaJyZRFHBf1YyD0" },
   { id:5, name:"Formato Calculo Int",      desc:"Brian Antonio Mejía Díaz",         url:"https://drive.google.com/uc?export=download&id=1LByc9bIXhi24O3rP4TVfu1QXUxu1jUJ8" },
-  { id:6, name:"Formato en Blanco",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1nnNn-clnrsO2IaELLLb6eLd0Jo4ZnNcY" },
-  { id:7, name:"Formato Membrete",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1AKJGf0J50JLBezSxDx3ToCDeIHivWK2a" },
-  { id:8, name:"Portafolio Calculo Int",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1Tfet0QQcinRFSIKr5VCT-GIDr_eU5env" },
-  { id:9, name:"Portada Institucional",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1tXl9qaRw54kI1k7oKZcvU-yfnsNHzxrF" },
-  { id:10, name:"Portafolio Conta",      desc:"By: CS",         url:"https://drive.google.com/uc?export=download&id=1-G1aWJ7nLLRizXx3J4JKRpHmvhxbaDa8" },
-  { id:11, name:"Portafolio Fisica",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1C26atG7hMxCDd0GT9-z-p69XZdPcK7gX" },
-  { id:12, name:"Portafolio Algebra Lin",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1IH7Q4wjhWU-7zEUQa2a1yE2qXJz0ENI1" },
-  { id:13, name:"Formato Programación Orientada a Objetos",      desc:"By: David Teran Gomez",         url:"https://drive.google.com/uc?export=download&id=1qYJX9Xuqyg6kswRroMZYdaQO5dd9qBfv" },
+  { id:6, name:"Formato Programación Orientada a Objetos",      desc:"David Teran Gomez",         url:"https://drive.google.com/uc?export=download&id=1qYJX9Xuqyg6kswRroMZYdaQO5dd9qBfv" },
+  { id:7, name:"Formato en Blanco",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1nnNn-clnrsO2IaELLLb6eLd0Jo4ZnNcY" },
+  { id:8, name:"Formato Membrete",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1AKJGf0J50JLBezSxDx3ToCDeIHivWK2a" },
+  { id:9, name:"Portafolio Calculo Int",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1Tfet0QQcinRFSIKr5VCT-GIDr_eU5env" },
+  { id:10, name:"Portada Institucional",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1tXl9qaRw54kI1k7oKZcvU-yfnsNHzxrF" },
+  { id:11, name:"Portafolio Conta",      desc:"By: CS",         url:"https://drive.google.com/uc?export=download&id=1-G1aWJ7nLLRizXx3J4JKRpHmvhxbaDa8" },
+  { id:12, name:"Portafolio Fisica",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1C26atG7hMxCDd0GT9-z-p69XZdPcK7gX" },
+  { id:13, name:"Portafolio Algebra Lin",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1IH7Q4wjhWU-7zEUQa2a1yE2qXJz0ENI1" },
 ];
 
 const instrumentaciones = [
