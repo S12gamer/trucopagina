@@ -281,15 +281,6 @@ function showPage(pageId, btn) {
   document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
   document.getElementById('page-'+pageId).classList.add('active');
   btn.classList.add('active');
-
-  // 📊 Google Analytics: Registro de cambio de sección (SPA)
-  if (typeof gtag === 'function') {
-    gtag('event', 'page_view', {
-      page_title: 'Sección: ' + pageId,
-      page_location: window.location.origin + window.location.pathname + '#' + pageId,
-      page_path: window.location.pathname + '#' + pageId
-    });
-  }
 }
 
 function escHtml(s) {
@@ -305,58 +296,92 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMaterias();
 });
 
-// 📊 Google Analytics: Rastreador automático de interacciones y descargas
-document.addEventListener('DOMContentLoaded', () => {
-  
-  // 1. Monitoreo de Descargas (Membretes, Programas y Formatos)
-  document.addEventListener('click', function(e) {
-    const anchor = e.target.closest('a');
-    
-    if (anchor && typeof gtag === 'function') {
-      const urlDescarga = anchor.getAttribute('href') || '';
-      
-      // Detecta si es un enlace de descarga directa o un enlace de Google Drive
-      if (urlDescarga.includes('drive.google.com') || urlDescarga.match(/\.(pdf|docx|xlsx|pptx|zip|rar|exe)$/i)) {
-        
-        // Intenta obtener el título real de la tarjeta del recurso para que el reporte sea legible
-        const card = anchor.closest('.card') || anchor.closest('.ind-row');
-        let nombreRecurso = '';
-        
-        if (card) {
-          const titleEl = card.querySelector('.card-title') || card.querySelector('.ind-text');
-          nombreRecurso = titleEl ? titleEl.textContent.trim() : anchor.innerText.trim();
-        } else {
-          nombreRecurso = anchor.innerText.trim() || 'Recurso Descargable';
-        }
+// ── SISTEMA DE AVISOS CONFIGURABLES DESDE TXT ──
 
-        // Envía el evento de descarga a Google Analytics
-        gtag('event', 'file_download', {
-          file_name: nombreRecurso,
-          url: urlDescarga
+/**
+ * Lee aviso.txt, procesa su configuración inicial y despliega el pop-up según el modo indicado.
+ */
+function checkAcademicNotice() {
+  fetch('aviso.txt')
+    .then(response => {
+      if (!response.ok) throw new Error('No se encontró el archivo aviso.txt');
+      return response.text();
+    })
+    .then(text => {
+      if (!text.trim()) return;
+
+      // Valores por defecto en caso de que no se especifiquen en el txt
+      let config = {
+        modo: 'MANUAL',
+        duracion: 5000
+      };
+      let mensaje = text;
+
+      // Detectar si existe la línea divisoria de configuración
+      if (text.includes('---')) {
+        const partes = text.split('---');
+        const lineasConfig = partes[0];
+        // Volvemos a unir el resto por si el mensaje contiene caracteres "---"
+        mensaje = partes.slice(1).join('---').trim(); 
+
+        // Leer y mapear cada línea de configuración (CLAVE=VALOR)
+        lineasConfig.split('\n').forEach(linea => {
+          const coincidencia = linea.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.+?)\s*$/);
+          if (coincidencia) {
+            const clave = coincidencia[1].toLowerCase();
+            const valor = coincidencia[2].trim();
+            config[clave] = valor;
+          }
         });
       }
-    }
-  });
 
-  // 2. Monitoreo de Búsquedas en la App (con temporizador para evitar saturación)
-  let searchTimeout = null;
-  document.addEventListener('input', function(e) {
-    const isSearchInput = e.target.closest('.search-box input');
-    
-    if (isSearchInput && typeof gtag === 'function') {
-      clearTimeout(searchTimeout);
-      
-      searchTimeout = setTimeout(() => {
-        const terminoBuscado = e.target.value.trim();
-        
-        // Registra la búsqueda únicamente si el usuario escribió 3 o más letras
-        if (terminoBuscado.length >= 3) {
-          gtag('event', 'search', {
-            search_term: terminoBuscado
-          });
+      // Si después del procesamiento el mensaje quedó vacío, no mostramos nada
+      if (mensaje.length === 0) return;
+
+      const modoActivo = config.modo.toUpperCase();
+
+      // Control del modo SESION: si ya se mostró en esta pestaña, romper ejecución
+      if (modoActivo === 'SESION') {
+        if (sessionStorage.getItem('academic_notice_displayed') === 'true') {
+          return;
         }
-      }, 1500); // Espera 1.5 segundos después de que el usuario deja de escribir
-    }
-  });
+      }
 
+      // Inyectar el cuerpo del texto en el contenedor HTML
+      document.getElementById('notice-body').textContent = mensaje;
+      
+      // Lanzar el pop-up de forma fluida a un segundo de la carga
+      setTimeout(() => {
+        document.getElementById('notice-popup').classList.add('active');
+        
+        // Ejecutar auto-cierre si el modo es por TIEMPO
+        if (modoActivo === 'TIEMPO') {
+          const milisegundos = parseInt(config.duracion) || 5000;
+          setTimeout(closeNotice, milisegundos);
+        }
+
+        // Registrar que ya se mostró si el modo es SESION
+        if (modoActivo === 'SESION') {
+          sessionStorage.setItem('academic_notice_displayed', 'true');
+        }
+      }, 1000);
+    })
+    .catch(error => {
+      console.log('Sistema de Avisos:', error.message);
+    });
+}
+
+function closeNotice() {
+  document.getElementById('notice-popup').classList.remove('active');
+}
+
+function closeNoticeOnBackdrop(event) {
+  if (event.target.id === 'notice-popup') {
+    closeNotice();
+  }
+}
+
+// Registrar el inicio automático del sistema de avisos al cargar el DOM
+document.addEventListener('DOMContentLoaded', () => {
+  checkAcademicNotice();
 });
