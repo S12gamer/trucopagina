@@ -8,5 +8,6 @@ Este es un pequeño test de Notificaciones dentro de la web app
 
 Cambios principales:
 - mejor difucion de la informacion
-- mancionar mejoras
-- mostar mensajes hasta de mantenimiento 
+- mencionar mejoras
+- mostar mensajes hasta de mantenimiento
+como lo ves?
