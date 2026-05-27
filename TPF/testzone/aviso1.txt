@@ -1,0 +1,12 @@
+MODO=UPDATE
+VERSION=1.0
+TITULO=🚀 ¡Centro de Recursos!
+---
+Hey!!
+Clorio al habla 👋👋
+Este es un pequeño test de Notificaciones dentro de la web app
+
+Cambios principales:
+- mejor difucion de la informacion
+- mancionar mejoras
+- mostar mensajes hasta de mantenimiento 

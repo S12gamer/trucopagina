@@ -18,13 +18,14 @@ const formatos = [
   { id:4, name:"Formato Contabilidad",      desc:"Miriam Juárez Gutiérrez",         url:"https://drive.google.com/uc?export=download&id=1WgRi46MP3lINGlevafaJyZRFHBf1YyD0" },
   { id:5, name:"Formato Calculo Int",      desc:"Brian Antonio Mejía Díaz",         url:"https://drive.google.com/uc?export=download&id=1LByc9bIXhi24O3rP4TVfu1QXUxu1jUJ8" },
   { id:6, name:"Formato Programación Orientada a Objetos",      desc:"David Teran Gomez",         url:"https://drive.google.com/uc?export=download&id=1qYJX9Xuqyg6kswRroMZYdaQO5dd9qBfv" },
-  { id:7, name:"Formato en Blanco",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1nnNn-clnrsO2IaELLLb6eLd0Jo4ZnNcY" },
-  { id:8, name:"Formato Membrete",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1AKJGf0J50JLBezSxDx3ToCDeIHivWK2a" },
-  { id:9, name:"Portafolio Calculo Int",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1Tfet0QQcinRFSIKr5VCT-GIDr_eU5env" },
-  { id:10, name:"Portada Institucional",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1tXl9qaRw54kI1k7oKZcvU-yfnsNHzxrF" },
-  { id:11, name:"Portafolio Conta",      desc:"By: CS",         url:"https://drive.google.com/uc?export=download&id=1-G1aWJ7nLLRizXx3J4JKRpHmvhxbaDa8" },
-  { id:12, name:"Portafolio Fisica",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1C26atG7hMxCDd0GT9-z-p69XZdPcK7gX" },
-  { id:13, name:"Portafolio Algebra Lin",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1IH7Q4wjhWU-7zEUQa2a1yE2qXJz0ENI1" },
+  { id:7, name:"Formato Reportes POO",      desc:"David Teran Gomez",         url:"https://drive.google.com/uc?export=download&id=1hREa4VMdEWgN6OZKGssuW4QGLQDujICT" },
+  { id:8, name:"Formato en Blanco",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1nnNn-clnrsO2IaELLLb6eLd0Jo4ZnNcY" },
+  { id:9, name:"Formato Membrete",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1AKJGf0J50JLBezSxDx3ToCDeIHivWK2a" },
+  { id:10, name:"Portafolio Calculo Int",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1Tfet0QQcinRFSIKr5VCT-GIDr_eU5env" },
+  { id:11, name:"Portada Institucional",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1tXl9qaRw54kI1k7oKZcvU-yfnsNHzxrF" },
+  { id:12, name:"Portafolio Conta",      desc:"By: CS",         url:"https://drive.google.com/uc?export=download&id=1-G1aWJ7nLLRizXx3J4JKRpHmvhxbaDa8" },
+  { id:13, name:"Portafolio Fisica",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1C26atG7hMxCDd0GT9-z-p69XZdPcK7gX" },
+  { id:14, name:"Portafolio Algebra Lin",      desc:"By: CS",         url:"https://drive.google.com/uc?export=download&id=1IH7Q4wjhWU-7zEUQa2a1yE2qXJz0ENI1" },
 ];
 
 const instrumentaciones = [
@@ -294,4 +295,124 @@ document.addEventListener("DOMContentLoaded", () => {
   renderGrid('gridInst', instrumentaciones, 'green');
   renderGrid('gridProg', programas,         'orange');
   renderMaterias();
+});
+
+// ── SISTEMA DE AVISOS CONFIGURABLES DESDE TXT ──
+
+/**
+ * Lee aviso.txt, procesa su configuración inicial y despliega el pop-up según el modo indicado.
+ */
+function checkAcademicNotice() {
+  fetch('aviso.txt')
+    .then(response => {
+      if (!response.ok) throw new Error('No se encontró el archivo aviso.txt');
+      return response.text();
+    })
+    .then(text => {
+      if (!text.trim()) return;
+
+      // Valores por defecto en caso de que no se especifiquen en el txt
+      let config = {
+        modo: 'MANUAL',
+        duracion: 5000,
+        version: '1.0',
+        titulo: ''
+      };
+      let mensaje = text;
+
+      // Detectar si existe la línea divisoria de configuración
+      if (text.includes('---')) {
+        const partes = text.split('---');
+        const lineasConfig = partes[0];
+        // Volvemos a unir el resto por si el mensaje contiene caracteres "---"
+        mensaje = partes.slice(1).join('---').trim(); 
+
+        // Leer y mapear cada línea de configuración (CLAVE=VALOR)
+        lineasConfig.split('\n').forEach(linea => {
+          const coincidencia = linea.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.+?)\s*$/);
+          if (coincidencia) {
+            const clave = coincidencia[1].toLowerCase();
+            const valor = coincidencia[2].trim();
+            config[clave] = valor;
+          }
+        });
+      }
+
+      // Si después del procesamiento el mensaje quedó vacío, no mostramos nada
+      if (mensaje.length === 0) return;
+
+      const modoActivo = config.modo.toUpperCase();
+
+      // Control del modo SESION: si ya se mostró en esta pestaña, romper ejecución
+      if (modoActivo === 'SESION') {
+        if (sessionStorage.getItem('academic_notice_displayed') === 'true') {
+          return;
+        }
+      }
+
+      // Control del modo UPDATE: si la versión coincide con la leída localmente, no interrumpir al usuario
+      if (modoActivo === 'UPDATE') {
+        const versionGuardada = localStorage.getItem('academic_app_version');
+        if (versionGuardada === config.version) {
+          return;
+        }
+      }
+
+      // Almacenar configuración de forma global temporal para resolver el evento de cierre
+      window.currentNoticeConfig = config;
+
+      // Inyectar el cuerpo del texto en el contenedor HTML
+      document.getElementById('notice-body').textContent = mensaje;
+      
+      // Personalizar dinámicamente el título según configuración o modo
+      const titleEl = document.querySelector('#notice-popup h3');
+      if (titleEl) {
+        if (config.titulo) {
+          titleEl.textContent = config.titulo;
+        } else if (modoActivo === 'UPDATE') {
+          titleEl.innerHTML = '✨ ¡Nueva Actualización Disponible! (v' + config.version + ')';
+        } else {
+          titleEl.innerHTML = '📢 Aviso Importante';
+        }
+      }
+
+      // Lanzar el pop-up de forma fluida a un segundo de la carga
+      setTimeout(() => {
+        document.getElementById('notice-popup').classList.add('active');
+        
+        // Ejecutar auto-cierre si el modo es por TIEMPO
+        if (modoActivo === 'TIEMPO') {
+          const milisegundos = parseInt(config.duracion) || 5000;
+          setTimeout(closeNotice, milisegundos);
+        }
+
+        // Registrar que ya se mostró si el modo es SESION
+        if (modoActivo === 'SESION') {
+          sessionStorage.setItem('academic_notice_displayed', 'true');
+        }
+      }, 1000);
+    })
+    .catch(error => {
+      console.log('Sistema de Avisos:', error.message);
+    });
+}
+
+function closeNotice() {
+  document.getElementById('notice-popup').classList.remove('active');
+  
+  // Al cerrar un aviso tipo UPDATE, guardamos de forma persistente que el usuario ya vio esta versión
+  if (window.currentNoticeConfig && window.currentNoticeConfig.modo.toUpperCase() === 'UPDATE') {
+    localStorage.setItem('academic_app_version', window.currentNoticeConfig.version);
+  }
+}
+
+function closeNoticeOnBackdrop(event) {
+  if (event.target.id === 'notice-popup') {
+    closeNotice();
+  }
+}
+
+// Registrar el inicio automático del sistema de avisos al cargar el DOM
+document.addEventListener('DOMContentLoaded', () => {
+  checkAcademicNotice();
 });

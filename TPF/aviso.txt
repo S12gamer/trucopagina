@@ -1,0 +1,14 @@
+MODO=UPDATE
+VERSION=1.0
+TITULO=¡Noticias Importantes!
+---
+Hey!!
+Clorio al habla 👋👋
+Bienvenidos a nuestro centro de archivos!!
+ahora de aqui en adelante cambios que se hagan o cosas que se añadan les aparecera algo como esto una notificacion dentro de la propia pagina mencionando los cambios principales o si se encuentra en mantenimiento o cerrada la pagina
+
+continuando aqui les dejo los cambios mas recientes a la pagina
+Cambios principales:
+- añadidos de formatos de la materia de POO,
+- actualizacion de varios formatos y portafolios
+- correcciones de ids de descarga
