@@ -1,8 +1,10 @@
-MODO=MANUAL
-TITULO=⚠️ Servidor en Mantenimiento Técnico
+MODO=UPDATE
+VERSION=1.0
+TITULO=🚀 ¡Centro de Recursos!
 ---
-Estimada comunidad, 
+Hemos actualizado por completo la interfaz visual y el sistema de navegación.
 
-El día de hoy realizaremos tareas de optimización en la base de datos de instrumentaciones didácticas entre las 15:00 y las 16:00 horas.
-
-Agradecemos su comprensión.
+Cambios principales:
+- Pestañas de filtrado rápido más veloces.
+- Nuevo motor de avisos emergentes dinámicos.
+- Descargas directas optimizadas.
