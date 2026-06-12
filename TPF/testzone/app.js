@@ -285,7 +285,7 @@ function generarFondoTrionda() {
   
   // Colores principales de la paleta Trionda
   const colors = ['#e20047', '#0044ff', '#00cc44'];
-  const numShapes = 200; 
+  const numShapes = 300; 
   
   // Figuras SVG relacionadas al mundial
   const pentagono = `<svg viewBox="0 0 100 100"><polygon points="50,10 90,40 75,90 25,90 10,40" fill="none" stroke="COLOR" stroke-width="5"/><circle cx="50" cy="53" r="10" fill="COLOR"/></svg>`;
