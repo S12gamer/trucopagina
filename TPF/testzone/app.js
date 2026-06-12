@@ -302,8 +302,43 @@ function generarFondoTrionda() {
   const medalla = `<svg viewBox="0 0 100 100"><path d="M32 15 L50 48 L68 15" fill="none" stroke="COLOR" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="50" cy="65" r="20" fill="none" stroke="COLOR" stroke-width="4"/><circle cx="50" cy="65" r="8" fill="COLOR"/></svg>`;
   const estadio = `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="45" ry="32" fill="none" stroke="COLOR" stroke-width="4"/><ellipse cx="50" cy="50" rx="32" ry="20" fill="none" stroke="COLOR" stroke-width="3"/><rect x="36" y="42" width="28" height="16" rx="2" fill="none" stroke="COLOR" stroke-width="3"/><line x1="50" y1="18" x2="50" y2="30" stroke="COLOR" stroke-width="3"/><line x1="50" y1="70" x2="50" y2="82" stroke="COLOR" stroke-width="3"/><line x1="5" y1="50" x2="18" y2="50" stroke="COLOR" stroke-width="3"/><line x1="82" y1="50" x2="95" y2="50" stroke="COLOR" stroke-width="3"/></svg>`;
   const copa = `<svg viewBox="0 0 100 100"><path d="M35 85 L65 85 L62 70 L38 70 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><line x1="36.5" y1="77" x2="63.5" y2="77" stroke="COLOR" stroke-width="3"/><path d="M42 70 C42 55, 30 48, 38 36 C43 30, 48 34, 50 38 C52 34, 57 30, 62 36 C70 48, 58 55, 58 70" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><circle cx="50" cy="24" r="13" fill="none" stroke="COLOR" stroke-width="4"/><path d="M40 20 Q50 26 60 20" fill="none" stroke="COLOR" stroke-width="3"/></svg>`;
+  const viajeMundial = `<svg viewBox="0 0 100 100"><path d="M50 12 L55 35 L88 55 L56 55 L50 85 L44 55 L12 55 L45 35 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M20 25 A40 40 0 0 1 80 25" fill="none" stroke="COLOR" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round"/></svg>`;
+  const porteria = `<svg viewBox="0 0 100 100"><path d="M10 80 L10 25 L90 25 L90 80" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="10" y1="43" x2="90" y2="43" stroke="COLOR" stroke-width="2"/><line x1="10" y1="61" x2="90" y2="61" stroke="COLOR" stroke-width="2"/><line x1="36" y1="25" x2="36" y2="80" stroke="COLOR" stroke-width="2"/><line x1="64" y1="25" x2="64" y2="80" stroke="COLOR" stroke-width="2"/><circle cx="36" cy="43" r="7" fill="COLOR"/></svg>`;
+  const logoOficial26 = `<svg viewBox="0 0 100 100">
+  <!-- El número 26 vertical de fondo (grueso) -->
+  <path d="M40 10 C25 10, 20 25, 30 35 L50 55 C60 65, 55 80, 40 80 L60 80" fill="none" stroke="COLOR" stroke-width="8" stroke-linecap="round"/>
+  <path d="M80 20 C65 20, 60 35, 60 50 C60 65, 80 65, 80 50 C80 35, 60 35, 60 50" fill="none" stroke="COLOR" stroke-width="8" stroke-linecap="round"/>
+  <!-- La Copa FIFA en el centro (más fina para contrastar y superpuesta) -->
+  <path d="M42 85 L58 85 L56 75 L44 75 Z" fill="COLOR"/>
+  <path d="M50 75 C50 65, 42 60, 44 52 C46 48, 50 50, 50 52 C50 50, 54 48, 56 52 C58 60, 50 65, 50 75" fill="none" stroke="COLOR" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="50" cy="46" r="7" fill="none" stroke="COLOR" stroke-width="3"/>
+</svg>`;
+  const banderasHost = `<svg viewBox="0 0 100 100">
+  <!-- CANADÁ (Izquierda: Hoja de maple estilizada) -->
+  <rect x="5" y="25" width="25" height="50" rx="2" fill="none" stroke="COLOR" stroke-width="3"/>
+  <path d="M17.5 35 L19 41 L25 40 L21 45 L23 51 L17.5 48 L12 51 L14 45 L10 40 L16 41 Z" fill="COLOR"/>
+  
+  <!-- USA (Centro: Barras y zona de estrellas) -->
+  <rect x="37.5" y="25" width="25" height="50" rx="2" fill="none" stroke="COLOR" stroke-width="3"/>
+  <rect x="37.5" y="25" width="12" height="15" fill="COLOR"/>
+  <line x1="50" y1="31" x2="62.5" y2="31" stroke="COLOR" stroke-width="2"/>
+  <line x1="37.5" y1="37" x2="62.5" y2="37" stroke="COLOR" stroke-width="2"/>
+  <line x1="37.5" y1="43" x2="62.5" y2="43" stroke="COLOR" stroke-width="2"/>
+  
+  <!-- MÉXICO (Derecha: Tricolor y escudo central) -->
+  <rect x="70" y="25" width="25" height="50" rx="2" fill="none" stroke="COLOR" stroke-width="3"/>
+  <line x1="78.3" y1="25" x2="78.3" y2="75" stroke="COLOR" stroke-width="2"/>
+  <line x1="86.6" y1="25" x2="86.6" y2="75" stroke="COLOR" stroke-width="2"/>
+  <circle cx="82.5" cy="50" r="4" fill="COLOR"/>
+</svg>`;
+  const fanCelebrando = `<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="25" r="10" fill="none" stroke="COLOR" stroke-width="4"/>
+  <path d="M20 40 Q50 30, 80 40 L75 55 Q50 45, 25 55 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M35 52 L35 90 M65 52 L65 90" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/>
+  <path d="M20 40 L10 15 M80 40 L90 15" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/>
+</svg>`;
 
-  const shapes = [pentagono, cancha, trofeo, silbato, zapato, tarjetas, pelota, camiseta, mundial26, banderin, cronometro, medalla, estadio, copa];
+  const shapes = [pentagono, cancha, trofeo, silbato, zapato, tarjetas, pelota, camiseta, mundial26, banderin, cronometro, medalla, estadio, copa, viajeMundial, porteria, logoOficial26, banderasHost, fanCelebrando];
   const animations = ['floatRandom1', 'floatRandom2', 'floatRandom3'];
 
   for (let i = 0; i < numShapes; i++) {
