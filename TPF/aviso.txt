@@ -1,14 +1,12 @@
 MODO=UPDATE
-VERSION=1.0
-TITULO=¡Noticias Importantes!
+VERSION=1.1
+TITULO=¡El Centro de Archivos ya siente la vibra del Mundial 2026! ⚽🏆
 ---
 Hey!!
-Clorio al habla 👋👋
-Bienvenidos a nuestro centro de archivos!!
-ahora de aqui en adelante cambios que se hagan o cosas que se añadan les aparecera algo como esto una notificacion dentro de la propia pagina mencionando los cambios principales o si se encuentra en mantenimiento o cerrada la pagina
+Clorio y Santi al habla 👋👋
+¡La máxima fiesta del fútbol llegó a nuestro recinto de archivos! Nos contagiamos de la emoción del Mundial 2026 y cambiamos de piel por un tiempo: actualizamos temporalmente nuestra interfaz con un diseño especial para vivir el torneo en cada clic.
 
-continuando aqui les dejo los cambios mas recientes a la pagina
-Cambios principales:
-- añadidos de formatos de la materia de POO,
-- actualizacion de varios formatos y portafolios
-- correcciones de ids de descarga
+No te preocupes, todos los archivos no se van a la prórroga; todas las funciones y tus documentos siguen exactamente en el mismo lugar.
+
+¡Disfruten de este nuevo look mundialista!
+¡Esperamos que les guste!

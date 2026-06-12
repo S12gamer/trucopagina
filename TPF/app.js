@@ -1,53 +1,48 @@
 /* ══════════════════════════════════════════
    DATOS DE DESCARGA
-   Aquí puedes agregar, editar o borrar descargas
 ══════════════════════════════════════════ */
 const membretes = [
-  { id:1, name:"Membrete Oficial PS",        desc:"Uso vertical Superior",               url:"https://drive.google.com/uc?export=download&id=10HmkDc5HWUCwZXx8DwoEngPrnPEt40YZ" },
-  { id:2, name:"Membrete Oficial PI",       desc:"Uso vertical Inferior",                 url:"https://drive.google.com/uc?export=download&id=1vBb9mY5NX6r1JB0FaEDcO0RnKJxQ-aUX" },
-  { id:3, name:"Membrete Oficial PS Horizontal",  desc:"Uso horizontal Superior",               url:"https://drive.google.com/uc?export=download&id=1-xAeQV0TdWiM4RcIw2wpfrvPxo_cWRlG" },
-  { id:4, name:"Membrete Oficial PI Horizontal",          desc:"Uso horizontal Inferior",              url:"https://drive.google.com/uc?export=download&id=1QJwbhkDU_KDQLzc_9bnj68uRqag9ZnTi" },
-  { id:5, name:"Membrete Oficial Pajaro PS",          desc:"Uso vertical Superior (solo en docs oficiales)",              url:"https://drive.google.com/uc?export=download&id=1zoOcVsd0rAsii8j_b4mb9PvNqCfONSNH" },
-  { id:6, name:"Membrete Oficial Pajaro PI",          desc:"Uso vertical Inferior(solo en docs oficiales)",              url:"https://drive.google.com/uc?export=download&id=1JaqsRhII0VOA9rg5zLcZC2R1rnCUPysu" },
+  { id:1, name:"Membrete Oficial PS", desc:"Uso vertical Superior", url:"https://drive.google.com/uc?export=download&id=10HmkDc5HWUCwZXx8DwoEngPrnPEt40YZ" },
+  { id:2, name:"Membrete Oficial PI", desc:"Uso vertical Inferior", url:"https://drive.google.com/uc?export=download&id=1vBb9mY5NX6r1JB0FaEDcO0RnKJxQ-aUX" },
+  { id:3, name:"Membrete Oficial PS Horizontal", desc:"Uso horizontal Superior", url:"https://drive.google.com/uc?export=download&id=1-xAeQV0TdWiM4RcIw2wpfrvPxo_cWRlG" },
+  { id:4, name:"Membrete Oficial PI Horizontal", desc:"Uso horizontal Inferior", url:"https://drive.google.com/uc?export=download&id=1QJwbhkDU_KDQLzc_9bnj68uRqag9ZnTi" },
+  { id:5, name:"Membrete Oficial Pajaro PS", desc:"Uso vertical Superior (solo en docs oficiales)", url:"https://drive.google.com/uc?export=download&id=1zoOcVsd0rAsii8j_b4mb9PvNqCfONSNH" },
+  { id:6, name:"Membrete Oficial Pajaro PI", desc:"Uso vertical Inferior(solo en docs oficiales)", url:"https://drive.google.com/uc?export=download&id=1JaqsRhII0VOA9rg5zLcZC2R1rnCUPysu" },
 ];
 
 const formatos = [
-  { id:1, name:"Formato Probabilidad",  desc:"Lidia González González",                            url:"https://drive.google.com/uc?export=download&id=1KWvFgXadQB92KiBse6GagPoR4bB6xX8C" },
-  { id:2, name:"Formato Fisica Gen",  desc:"Jessica Linnete Morales Hernández",                     url:"https://drive.google.com/uc?export=download&id=1WSqHHTgocPbgg-Y_9vTcN_4ujdyBJ6WI" },
-  { id:3, name:"Formato Algebra Lin",    desc:"José Juan santana Ortiz",        url:"https://drive.google.com/uc?export=download&id=1fGJapgubiQTlxdwj9BNgqejENbc9Mt6Z" },
-  { id:4, name:"Formato Contabilidad",      desc:"Miriam Juárez Gutiérrez",         url:"https://drive.google.com/uc?export=download&id=1WgRi46MP3lINGlevafaJyZRFHBf1YyD0" },
-  { id:5, name:"Formato Calculo Int",      desc:"Brian Antonio Mejía Díaz",         url:"https://drive.google.com/uc?export=download&id=1LByc9bIXhi24O3rP4TVfu1QXUxu1jUJ8" },
-  { id:6, name:"Formato Programación Orientada a Objetos",      desc:"David Teran Gomez",         url:"https://drive.google.com/uc?export=download&id=1qYJX9Xuqyg6kswRroMZYdaQO5dd9qBfv" },
-  { id:7, name:"Formato Reportes POO",      desc:"David Teran Gomez",         url:"https://drive.google.com/uc?export=download&id=1hREa4VMdEWgN6OZKGssuW4QGLQDujICT" },
-  { id:8, name:"Formato en Blanco",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1nnNn-clnrsO2IaELLLb6eLd0Jo4ZnNcY" },
-  { id:9, name:"Formato Membrete",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1AKJGf0J50JLBezSxDx3ToCDeIHivWK2a" },
-  { id:10, name:"Portafolio Calculo Int",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1Tfet0QQcinRFSIKr5VCT-GIDr_eU5env" },
-  { id:11, name:"Portada Institucional",      desc:"By: S12/Trucoteca & CS",         url:"https://drive.google.com/uc?export=download&id=1tXl9qaRw54kI1k7oKZcvU-yfnsNHzxrF" },
-  { id:12, name:"Portafolio Conta",      desc:"By: CS",         url:"https://drive.google.com/uc?export=download&id=1-G1aWJ7nLLRizXx3J4JKRpHmvhxbaDa8" },
-  { id:13, name:"Portafolio Fisica",      desc:"By: S12/Trucoteca",         url:"https://drive.google.com/uc?export=download&id=1C26atG7hMxCDd0GT9-z-p69XZdPcK7gX" },
-  { id:14, name:"Portafolio Algebra Lin",      desc:"By: CS",         url:"https://drive.google.com/uc?export=download&id=1IH7Q4wjhWU-7zEUQa2a1yE2qXJz0ENI1" },
+  { id:1, name:"Formato Probabilidad", desc:"Lidia González González", url:"https://drive.google.com/uc?export=download&id=1KWvFgXadQB92KiBse6GagPoR4bB6xX8C" },
+  { id:2, name:"Formato Fisica Gen", desc:"Jessica Linnete Morales Hernández", url:"https://drive.google.com/uc?export=download&id=1WSqHHTgocPbgg-Y_9vTcN_4ujdyBJ6WI" },
+  { id:3, name:"Formato Algebra Lin", desc:"José Juan santana Ortiz", url:"https://drive.google.com/uc?export=download&id=1fGJapgubiQTlxdwj9BNgqejENbc9Mt6Z" },
+  { id:4, name:"Formato Contabilidad", desc:"Miriam Juárez Gutiérrez", url:"https://drive.google.com/uc?export=download&id=1WgRi46MP3lINGlevafaJyZRFHBf1YyD0" },
+  { id:5, name:"Formato Calculo Int", desc:"Brian Antonio Mejía Díaz", url:"https://drive.google.com/uc?export=download&id=1LByc9bIXhi24O3rP4TVfu1QXUxu1jUJ8" },
+  { id:6, name:"Formato Programación Orientada a Objetos", desc:"David Teran Gomez", url:"https://drive.google.com/uc?export=download&id=1qYJX9Xuqyg6kswRroMZYdaQO5dd9qBfv" },
+  { id:7, name:"Formato Reportes POO", desc:"David Teran Gomez", url:"https://drive.google.com/uc?export=download&id=1hREa4VMdEWgN6OZKGssuW4QGLQDujICT" },
+  { id:8, name:"Formato en Blanco", desc:"By: S12/Trucoteca", url:"https://drive.google.com/uc?export=download&id=1nnNn-clnrsO2IaELLLb6eLd0Jo4ZnNcY" },
+  { id:9, name:"Formato Membrete", desc:"By: S12/Trucoteca", url:"https://drive.google.com/uc?export=download&id=1AKJGf0J50JLBezSxDx3ToCDeIHivWK2a" },
+  { id:10, name:"Portafolio Calculo Int", desc:"By: S12/Trucoteca & CS", url:"https://drive.google.com/uc?export=download&id=1Tfet0QQcinRFSIKr5VCT-GIDr_eU5env" },
+  { id:11, name:"Portada Institucional", desc:"By: S12/Trucoteca & CS", url:"https://drive.google.com/uc?export=download&id=1tXl9qaRw54kI1k7oKZcvU-yfnsNHzxrF" },
+  { id:12, name:"Portafolio Conta", desc:"By: CS", url:"https://drive.google.com/uc?export=download&id=1-G1aWJ7nLLRizXx3J4JKRpHmvhxbaDa8" },
+  { id:13, name:"Portafolio Fisica", desc:"By: S12/Trucoteca", url:"https://drive.google.com/uc?export=download&id=1C26atG7hMxCDd0GT9-z-p69XZdPcK7gX" },
+  { id:14, name:"Portafolio Algebra Lin", desc:"By: CS", url:"https://drive.google.com/uc?export=download&id=1IH7Q4wjhWU-7zEUQa2a1yE2qXJz0ENI1" },
 ];
 
 const instrumentaciones = [
-  { id:1, name:"Instrumentación Cálculo Int",        desc:"Planeación semestral — Ing. en Sistemas",           url:"https://drive.google.com/uc?export=download&id=1n_PpXeGg2JuK6nJbkADMl2yO-S-ZA0cd" },
-  { id:2, name:"Instrumentación Física Gen",         desc:"Planeación semestral — Ing. en Sistemas",      url:"https://drive.google.com/uc?export=download&id=1Y7S_qjhCObFferQf_2rA18ZORquL1ds1" },
-  { id:3, name:"Instrumentación Algebra Lin",      desc:"Planeación semestral — Ing. en Sistemas",      url:"https://drive.google.com/uc?export=download&id=19vlAwJTEoCbp7EcuyKQVJmK7FmE8t4jR" },
-  { id:4, name:"Instrumentación Probabilidad",     desc:"Planeación semestral — Ing. en Sistemas",       url:"https://drive.google.com/uc?export=download&id=1WKMWFkHZDJcKCAsGD2GpVe1SgtWNgTyy" },
-  { id:5, name:"Instrumentación Contabilidad",       desc:"Planeación semestral — Ing. en Sistemas", url:"https://drive.google.com/uc?export=download&id=1fbFq6p6c7_IixfQmfKTwZKCfplO4jmUi" },
-  { id:6, name:"Instrumentación Nivel 3 y 4 Ingles",       desc:"Planeación semestral — Ing. en Sistemas/ Coordinacion de Lenguas Extranjeras", url:"https://drive.google.com/uc?export=download&id=1k4tEpzfDz2WFzENnyknNk9uLUOUUhB1h" },
-  { id:7, name:"Instrumentación Programacion Ori a Objs",       desc:"Planeación semestral — Ing. en Sistemas", url:"https://drive.google.com/uc?export=download&id=1r0BRhQvbeAI703Muet0h_WhNbEej9Ox1" },
+  { id:1, name:"Instrumentación Cálculo Int", desc:"Planeación semestral", url:"https://drive.google.com/uc?export=download&id=1n_PpXeGg2JuK6nJbkADMl2yO-S-ZA0cd" },
+  { id:2, name:"Instrumentación Física Gen", desc:"Planeación semestral", url:"https://drive.google.com/uc?export=download&id=1Y7S_qjhCObFferQf_2rA18ZORquL1ds1" },
+  { id:3, name:"Instrumentación Algebra Lin", desc:"Planeación semestral", url:"https://drive.google.com/uc?export=download&id=19vlAwJTEoCbp7EcuyKQVJmK7FmE8t4jR" },
+  { id:4, name:"Instrumentación Probabilidad", desc:"Planeación semestral", url:"https://drive.google.com/uc?export=download&id=1WKMWFkHZDJcKCAsGD2GpVe1SgtWNgTyy" },
+  { id:5, name:"Instrumentación Contabilidad", desc:"Planeación semestral", url:"https://drive.google.com/uc?export=download&id=1fbFq6p6c7_IixfQmfKTwZKCfplO4jmUi" },
+  { id:6, name:"Instrumentación Nivel 3 y 4 Ingles", desc:"Planeación semestral", url:"https://drive.google.com/uc?export=download&id=1k4tEpzfDz2WFzENnyknNk9uLUOUUhB1h" },
+  { id:7, name:"Instrumentación Programacion Ori a Objs", desc:"Planeación semestral", url:"https://drive.google.com/uc?export=download&id=1r0BRhQvbeAI703Muet0h_WhNbEej9Ox1" },
 ];
 
 const programas = [
-  { id:1, name:"Anaconda Spyder 6",  desc:"Brian Antonio Mejía Díaz/Calculo Integral",  url:"https://repo.anaconda.com/archive/Anaconda3-2025.12-2-Windows-x86_64.exe" },
-  { id:2, name:"Visual Studio Community",  desc:"David Teran Gomez/Programacion Ori a Objs",  url:"https://visualstudio.microsoft.com/es/thank-you-downloading-visual-studio/?sku=Community&channel=Stable&version=VS18&source=VSLandingPage&passive=false&cid=2500" },
-  { id:2, name:"Siigo Aspel COI",  desc:"Miriam Juárez Gutiérrez/Contabilidad Financiera",  url:"https://www.siigo.com/mx/prueba-gratis-coi-aspel/?source=Medios%20Virtuales&medio_virtual=Adwords&nombre_de_campana=PruebasGratisCOI_MV_AS_AT_MX&utm_source=google&utm_medium=cpc&utm_campaign=PruebasGratisCOI_MV_AS_AT_MX&utm_term=siigo%20aspel%20coi&utm_campaign=Leads+%7C+S+%7C+Category+%7C++SPruebaGratisLeads_AO_MV_AS_AT_MX&utm_source=adwords&utm_medium=ppc&hsa_acc=6698788381&hsa_cam=20867081924&hsa_grp=160674777270&hsa_ad=684733323020&hsa_src=g&hsa_tgt=kwd-2672189889312&hsa_kw=siigo%20aspel%20coi&hsa_mt=e&hsa_net=adwords&hsa_ver=3&gad_source=1&gad_campaignid=20867081924&gclid=EAIaIQobChMIp9yS6reElAMVQFJ_AB08LgEKEAAYASAAEgIquvD_BwE" },
+  { id:1, name:"Anaconda Spyder 6", desc:"Brian Antonio Mejía Díaz/Calculo Integral", url:"https://repo.anaconda.com/archive/Anaconda3-2025.12-2-Windows-x86_64.exe" },
+  { id:2, name:"Visual Studio Community", desc:"David Teran Gomez/Programacion Ori a Objs", url:"https://visualstudio.microsoft.com/es/thank-you-downloading-visual-studio/" },
+  { id:3, name:"Siigo Aspel COI", desc:"Miriam Juárez Gutiérrez/Contabilidad Financiera", url:"https://www.siigo.com/mx/prueba-gratis-coi-aspel/" },
 ];
 
-/* ══════════════════════════════════════════
-   DATOS — ATRIBUTOS DE EGRESO POR MATERIA
-   Aquí agregas o modificas las materias y semestres
-══════════════════════════════════════════ */
 const materias = [
   {
     id: 1,
@@ -173,42 +168,30 @@ const materias = [
 
 
 /* ══════════════════════════════════════
-   LÓGICA INTERNA DE LA PLATAFORMA
-   (No necesitas modificar nada de aquí para abajo)
+   LÓGICA DE INTERFAZ Y NAVEGACIÓN
 ══════════════════════════════════════ */
-const badgeLabel = { teal:'PNG / JPG', rust:'DOCX Sem 2', green:'DOCX/PDF Sem 2', orange:'Software / App' };
-const thumbIcon  = { teal:'🖼️', rust:'📝', green:'📋', orange:'💾' };
+const badgeLabel = { blue:'PNG / JPG', red:'DOCX Sem 2', green:'DOCX/PDF Sem 2'};
+const thumbIcon  = { blue:'🖼️', red:'📝', green:'📋'};
 
 function renderGrid(gridId, items, color, query='') {
   const grid = document.getElementById(gridId);
   const q = query.toLowerCase();
   const filtered = items.filter(f => f.name.toLowerCase().includes(q));
-  if (!filtered.length) {
-    grid.innerHTML = `<div class="empty-msg">⚠️ Sin resultados para "${escHtml(query)}".</div>`;
-    return;
-  }
+  if (!filtered.length) { grid.innerHTML = `<div class="empty-msg">⚠️ Sin resultados.</div>`; return; }
   grid.innerHTML = filtered.map((f,i) => `
     <div class="card card-${color}" style="animation-delay:${i*0.05}s">
       <div class="card-thumb thumb-${color}">
-        <div class="thumb-icon">${thumbIcon[color]}</div>
-        <span class="badge badge-${color}">${badgeLabel[color]}</span>
+        <div class="thumb-icon">${thumbIcon[color] || '💾'}</div>
+        <span class="badge badge-${color}">${badgeLabel[color] || 'Software / App'}</span>
       </div>
       <div class="card-body">
         <div class="card-title">${escHtml(f.name)}</div>
         <div class="card-meta">${escHtml(f.desc||'—')}</div>
-        <a class="btn-dl btn-${color}" href="${escHtml(f.url)}" target="_blank" rel="noopener">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          Descargar
-        </a>
+        <a class="btn-dl btn-${color}" href="${escHtml(f.url)}" target="_blank" rel="noopener">Descargar</a>
       </div>
     </div>`).join('');
 }
 function filterGrid(gridId, items, color, value) { renderGrid(gridId, items, color, value); }
-
 function renderMaterias(query='') {
   const container = document.getElementById('aeContainer');
   const q = query.toLowerCase();
@@ -283,20 +266,66 @@ function showPage(pageId, btn) {
   document.getElementById('page-'+pageId).classList.add('active');
   btn.classList.add('active');
 }
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function escHtml(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-/* ── Init ── */
 document.addEventListener("DOMContentLoaded", () => {
-  renderGrid('gridMem',  membretes,         'teal');
-  renderGrid('gridFmt',  formatos,          'rust');
+  renderGrid('gridMem',  membretes,         'blue');
+  renderGrid('gridFmt',  formatos,          'red');
   renderGrid('gridInst', instrumentaciones, 'green');
-  renderGrid('gridProg', programas,         'orange');
+  renderGrid('gridProg', programas,         'blue');
   renderMaterias();
 });
 
+/* ══════════════════════════════════════════
+   GENERADOR DE FONDO ANIMADO MUNDIALISTA
+══════════════════════════════════════════ */
+function generarFondoTrionda() {
+  const bgContainer = document.getElementById('worldcup-bg');
+  if (!bgContainer) return;
+  
+  // Colores principales de la paleta Trionda
+  const colors = ['#e20047', '#0044ff', '#00cc44'];
+  const numShapes = 35; 
+  
+  // Figuras SVG relacionadas al mundial
+  const pentagono = `<svg viewBox="0 0 100 100"><polygon points="50,10 90,40 75,90 25,90 10,40" fill="none" stroke="COLOR" stroke-width="5"/><circle cx="50" cy="53" r="10" fill="COLOR"/></svg>`;
+  const cancha = `<svg viewBox="0 0 100 100"><rect x="10" y="15" width="80" height="70" rx="5" fill="none" stroke="COLOR" stroke-width="4"/><line x1="50" y1="15" x2="50" y2="85" stroke="COLOR" stroke-width="4"/><circle cx="50" cy="50" r="12" fill="none" stroke="COLOR" stroke-width="4"/></svg>`;
+  const trofeo = `<svg viewBox="0 0 100 100"><path d="M30 20 C30 10, 70 10, 70 20 C70 45, 55 55, 55 70 L45 70 C45 55, 30 45, 30 20 Z" fill="none" stroke="COLOR" stroke-width="4"/><rect x="35" y="70" width="30" height="15" fill="none" stroke="COLOR" stroke-width="4"/><line x1="15" y1="20" x2="30" y2="20" stroke="COLOR" stroke-width="4"/><line x1="70" y1="20" x2="85" y2="20" stroke="COLOR" stroke-width="4"/></svg>`;
+  const silbato = `<svg viewBox="0 0 100 100"><circle cx="65" cy="50" r="20" fill="none" stroke="COLOR" stroke-width="5"/><path d="M15 45 L45 45 L45 55 L15 55 Z" fill="COLOR"/><circle cx="65" cy="50" r="6" fill="COLOR"/></svg>`;
+  const zapato = `<svg viewBox="0 0 100 100"><path d="M15 70 L85 70 C90 70, 95 60, 90 50 C80 35, 55 35, 45 25 L20 25 L15 70 Z" fill="none" stroke="COLOR" stroke-width="4"/><circle cx="25" cy="75" r="4" fill="COLOR"/><circle cx="50" cy="75" r="4" fill="COLOR"/><circle cx="75" cy="75" r="4" fill="COLOR"/></svg>`;
+  const tarjetas = `<svg viewBox="0 0 100 100"><rect x="20" y="15" width="35" height="50" rx="3" fill="none" stroke="COLOR" stroke-width="4" transform="rotate(-15 37 40)"/><rect x="45" y="25" width="35" height="50" rx="3" fill="none" stroke="COLOR" stroke-width="4" transform="rotate(10 62 50)"/></svg>`;
+  
+  const shapes = [pentagono, cancha, trofeo, silbato, zapato, tarjetas];
+  const animations = ['floatRandom1', 'floatRandom2', 'floatRandom3'];
+
+  for (let i = 0; i < numShapes; i++) {
+    const div = document.createElement('div');
+    const size = Math.random() * 70 + 35; 
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const svgCode = shapes[Math.floor(Math.random() * shapes.length)].replace(/COLOR/g, color);
+    
+    div.innerHTML = svgCode;
+    div.className = 'bg-shape';
+    
+    div.style.left = (Math.random() * 120 - 10) + 'vw';
+    div.style.top = (Math.random() * 120 - 10) + 'vh';
+    div.style.width = size + 'px';
+    div.style.height = size + 'px';
+    
+    // Aumenté la opacidad (entre 6% y 15%) para que sí se vean
+    div.style.opacity = Math.random() * 0.09 + 0.06; 
+    
+    const anim = animations[Math.floor(Math.random() * animations.length)];
+    const duration = Math.random() * 40 + 30; 
+    const delay = Math.random() * -50; 
+    
+    div.style.animation = `${anim} ${duration}s infinite ease-in-out ${delay}s`;
+    
+    bgContainer.appendChild(div);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', generarFondoTrionda);
 // ── SISTEMA DE AVISOS CONFIGURABLES DESDE TXT ──
 
 /**
