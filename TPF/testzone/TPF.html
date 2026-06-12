@@ -203,17 +203,50 @@
       .page-header,.search-row,.card-area,.ae-wrap,.ae-search-row { padding-left:1.4rem; padding-right:1.4rem; }
     }
     @media(max-width:640px){
-      html,body{height:auto!important;;overflow-y:auto!important;}
-      .layout { flex-direction:column;height:auto;min-height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch; }
-      nav { width:100%; height:auto; position:relative; overflow-y:visible; border-right:none; border-bottom: 2px solid var(--trionda-green);}
-      .nav-links { display:flex; flex-wrap:wrap; padding:.8rem; gap:.3rem; }
-      .nav-link { width:auto; flex:1 1 auto; justify-content:center; font-size:.78rem; padding:.5rem .7rem; margin:0;}
-      .nav-section-title { display:none; }
-      .content{overflow:visible !important;height:auto !important;max-height:none !important;min-height:0;}
+      /* 1. Devolvemos el scroll natural al body y quitamos el bloqueo de overscroll */
+      html, body {
+        height: auto !important;
+        overflow-y: auto !important;
+        overscroll-behavior: auto; 
+      }
+      
+      /* 2. LA CLAVE: overflow: visible para que NO secuestre el scroll en Android */
+      .layout { 
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible; /* Antes estaba en overflow-y: auto */
+      }
+      
+      /* 3. El nav también debe ser visible y no intentar hacer scroll interno */
+      nav { 
+        width: 100%; 
+        height: auto; 
+        position: relative; 
+        overflow: visible; /* Quitamos el scroll del nav en móvil */
+        border-right: none; 
+        border-bottom: 2px solid var(--trionda-green);
+      }
+      .nav-links { display: flex; flex-wrap: wrap; padding: .8rem; gap: .3rem; }
+      .nav-link { width: auto; flex: 1 1 auto; justify-content: center; font-size: .78rem; padding: .5rem .7rem; margin: 0;}
+      .nav-section-title { display: none; }
+      
+      /* 4. El contenido también fluye de forma natural */
+      .content {
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        min-height: 0;
+      }
+      
       .page-header {
-      padding:2.2rem 3rem 1.8rem;
-      border-bottom:1px solid rgba(0,0,0,0.05);
-      backdrop-filter: blur(12px); position:relative; top: auto; z-index: 10;backdrop-filter:none;}
+        padding: 2.2rem 1.4rem 1.8rem; /* Ajustado el padding lateral para móvil */
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        backdrop-filter: none; 
+        position: relative; 
+        top: auto; 
+        z-index: 10;
+      }
     }
     @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 
