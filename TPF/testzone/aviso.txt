@@ -1,0 +1,12 @@
+MODO=UPDATE
+VERSION=1.1
+TITULO=¡El Centro de Archivos ya siente la vibra del Mundial 2026! ⚽🏆
+---
+Hey!!
+Clorio y Santi al habla 👋👋
+¡La máxima fiesta del fútbol llegó a nuestro recinto de archivos! Nos contagiamos de la emoción del Mundial 2026 y cambiamos de piel por un tiempo: actualizamos temporalmente nuestra interfaz con un diseño especial para vivir el torneo en cada clic.
+
+No te preocupes, todos los archivos no se van a la prórroga; todas las funciones y tus documentos siguen exactamente en el mismo lugar.
+
+¡Disfruten de este nuevo look mundialista!
+¡Esperamos que les guste!
