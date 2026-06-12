@@ -337,8 +337,52 @@ function generarFondoTrionda() {
   <path d="M35 52 L35 90 M65 52 L65 90" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/>
   <path d="M20 40 L10 15 M80 40 L90 15" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/>
 </svg>`;
+  // 17. Guante de portero (Atajada clave)
+  const guantePortero = `<svg viewBox="0 0 100 100"><rect x="35" y="72" width="30" height="15" rx="2" fill="none" stroke="COLOR" stroke-width="4"/><path d="M30 72 L30 40 C30 32, 40 32, 40 40 L40 30 C40 22, 50 22, 50 30 L50 28 C50 20, 60 20, 60 28 L60 35 C60 27, 70 27, 70 35 L70 72 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M30 60 Q18 55, 22 45 Q30 45, 34 55" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/></svg>`;
 
-  const shapes = [pentagono, cancha, trofeo, silbato, zapato, tarjetas, pelota, camiseta, mundial26, banderin, cronometro, medalla, estadio, copa, viajeMundial, porteria, logoOficial26, banderasHost, fanCelebrando];
+// 18. Brazalete de Capitán (Liderazgo en la cancha)
+  const brazaleteCapitan = `<svg viewBox="0 0 100 100"><rect x="15" y="30" width="70" height="40" rx="5" fill="none" stroke="COLOR" stroke-width="4"/><path d="M60 42 C44 42, 40 46, 40 50 C40 54, 44 58, 60 58" fill="none" stroke="COLOR" stroke-width="6" stroke-linecap="round"/><line x1="15" y1="50" x2="25" y2="50" stroke="COLOR" stroke-width="3"/><line x1="75" y1="50" x2="85" y2="50" stroke="COLOR" stroke-width="3"/></svg>`;
+
+// 19. Banderín de Juez de Línea (Fueras de juego)
+  const banderaLinier = `<svg viewBox="0 0 100 100"><line x1="20" y1="15" x2="20" y2="85" stroke="COLOR" stroke-width="5" stroke-linecap="round"/><rect x="20" y="20" width="60" height="42" fill="none" stroke="COLOR" stroke-width="4"/><line x1="20" y1="20" x2="80" y2="62" stroke="COLOR" stroke-width="4"/><line x1="20" y1="62" x2="80" y2="20" stroke="COLOR" stroke-width="2" stroke-dasharray="3,3"/></svg>`;
+
+// 20. Entrada / Ticket del Partido (Acceso al estadio)
+  const ticketMundial = `<svg viewBox="0 0 100 100"><rect x="15" y="25" width="70" height="50" rx="4" fill="none" stroke="COLOR" stroke-width="4"/><line x1="65" y1="25" x2="65" y2="75" stroke="COLOR" stroke-width="4" stroke-dasharray="4,4"/><circle cx="65" cy="25" r="6" fill="COLOR"/><circle cx="65" cy="75" r="6" fill="COLOR"/><line x1="25" y1="40" x2="55" y2="40" stroke="COLOR" stroke-width="4"/><line x1="25" y1="52" x2="45" y2="52" stroke="COLOR" stroke-width="3"/><line x1="25" y1="62" x2="35" y2="62" stroke="COLOR" stroke-width="2"/></svg>`;
+
+// 21. Cámara de TV / Transmisión (Cobertura global del evento)
+  const camaraTransmision = `<svg viewBox="0 0 100 100"><rect x="15" y="25" width="45" height="30" rx="3" fill="none" stroke="COLOR" stroke-width="4"/><polygon points="60,32 82,20 82,58 60,48" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><circle cx="30" cy="40" r="6" fill="COLOR"/><line x1="37" y1="55" x2="20" y2="85" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="37" y1="55" x2="55" y2="85" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="37" y1="55" x2="37" y2="85" stroke="COLOR" stroke-width="3"/></svg>`;
+
+// 22. Spray Evanescente del Árbitro (Falta y barrera)
+  const sprayEspuma = `<svg viewBox="0 0 100 100"><rect x="35" y="45" width="30" height="40" rx="3" fill="none" stroke="COLOR" stroke-width="4"/><rect x="43" y="37" width="14" height="8" fill="none" stroke="COLOR" stroke-width="3"/><path d="M50 37 L50 30 L42 33" fill="none" stroke="COLOR" stroke-width="3" stroke-linecap="round"/><circle cx="35" cy="20" r="6" fill="COLOR"/><circle cx="50" cy="15" r="8" fill="COLOR"/><circle cx="65" cy="22" r="5" fill="COLOR"/></svg>`;
+
+// 23. Autobús del Equipo (Logística y traslados de las selecciones)
+  const autobusEquipo = `<svg viewBox="0 0 100 100"><path d="M10 35 L80 35 C88 35, 90 42, 90 50 L90 70 L10 70 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><circle cx="30" cy="72" r="8" fill="none" stroke="COLOR" stroke-width="4"/><circle cx="70" cy="72" r="8" fill="none" stroke="COLOR" stroke-width="4"/><line x1="10" y1="48" x2="85" y2="48" stroke="COLOR" stroke-width="3"/><line x1="35" y1="35" x2="35" y2="48" stroke="COLOR" stroke-width="2"/><line x1="60" y1="35" x2="60" y2="48" stroke="COLOR" stroke-width="2"/></svg>`;
+
+// 24. Fuegos Artificiales / Fiesta (Ceremonia de inauguración y final)
+  const fiestaEstadio = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="5" fill="COLOR"/><line x1="50" y1="35" x2="50" y2="15" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="50" y1="65" x2="50" y2="85" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="35" y1="50" x2="15" y2="50" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="65" y1="50" x2="85" y2="50" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="39" y1="39" x2="25" y2="25" stroke="COLOR" stroke-width="3" stroke-linecap="round"/><line x1="61" y1="61" x2="75" y2="75" stroke="COLOR" stroke-width="3" stroke-linecap="round"/><line x1="61" y1="39" x2="75" y2="25" stroke="COLOR" stroke-width="3" stroke-linecap="round"/><line x1="39" y1="61" x2="25" y2="75" stroke="COLOR" stroke-width="3" stroke-linecap="round"/></svg>`;
+
+// 25. Estrella de Campeón (La gloria máxima)
+  const estrellaVictoria = `<svg viewBox="0 0 100 100"><polygon points="50,12 63,38 92,38 68,55 77,85 50,68 23,85 32,55 8,38 37,38" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><circle cx="50" cy="50" r="7" fill="COLOR"/></svg>`;
+
+// 26. Pasaportes de Viaje (Cruzar fronteras entre CAN, USA y MEX)
+  const pasaporteViajero = `<svg viewBox="0 0 100 100"><rect x="20" y="15" width="45" height="65" rx="4" fill="none" stroke="COLOR" stroke-width="4" transform="rotate(-10 42 50)"/><rect x="35" y="20" width="45" height="65" rx="4" fill="none" stroke="COLOR" stroke-width="4" transform="rotate(5 57 52)"/><circle cx="58" cy="50" r="10" fill="none" stroke="COLOR" stroke-width="3"/><path d="M52 50 L64 50 M58 44 L58 56" stroke="COLOR" stroke-width="2"/></svg>`;
+  // 27. Hoja de Maple Clásica (Símbolo nacional absoluto, geometría simétrica de 11 puntas)
+  const hojaMaple = `<svg viewBox="0 0 100 100"><path d="M50 85 L50 70 L32 75 L38 58 L15 52 L35 45 L25 25 L46 32 L50 10 L54 32 L75 25 L65 45 L85 52 L62 58 L68 75 L50 70" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/></svg>`;
+
+// 28. Bosque y Montañas Rocosas (La imponente naturaleza canadiense con un pino alpino en primer plano)
+  const naturalezaCanada = `<svg viewBox="0 0 100 100"><path d="M10 75 L45 30 L75 65 L90 50 L95 75 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><polygon points="25,75 25,62 18,62 28,48 38,62 31,62 31,75" fill="COLOR"/></svg>`;
+  // 29. Estatua de la Libertad (Silueta icónica de la corona de rayos y la antorcha encendida)
+  const estatuaLibertad = `<svg viewBox="0 0 100 100"><path d="M35 75 L38 52 C38 42, 62 42, 62 52 L65 75" fill="none" stroke="COLOR" stroke-width="4"/><path d="M34 48 L18 42 M39 44 L25 25 M45 42 L45 12 M55 42 L55 12 M61 44 L75 25 M66 48 L82 42" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><path d="M72 75 L72 50 L68 50 L66 42 L78 42 L76 50 L72 50" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M72 42 C68 32, 72 25, 72 25 C72 25, 76 32, 72 42" fill="COLOR"/></svg>`;
+
+// 30. Águila Calva (Perfil estilizado del ave nacional americana con el pico sólido)
+  const aguilaUSA = `<svg viewBox="0 0 100 100"><path d="M20 70 C20 40, 40 25, 65 25 C72 25, 76 30, 72 40 L85 46 L68 58 C60 75, 35 75, 20 70 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M68 40 L85 46 L68 58 C64 52, 64 45, 68 40 Z" fill="COLOR"/><circle cx="55" cy="40" r="3" fill="COLOR"/></svg>`;
+  // 31. Pirámide de Chichén Itzá / El Castillo (Legado prehispánico con escalinata central y niveles simétricos)
+  const piramideMexico = `<svg viewBox="0 0 100 100"><path d="M10 80 L20 62 L30 44 L40 30 L60 30 L70 44 L80 62 L90 80 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><line x1="20" y1="62" x2="80" y2="62" stroke="COLOR" stroke-width="3"/><line x1="30" y1="44" x2="70" y2="44" stroke="COLOR" stroke-width="3"/><rect x="42" y="16" width="16" height="14" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><polygon points="44,80 46,30 54,30 56,80" fill="none" stroke="COLOR" stroke-width="3"/></svg>`;
+
+// 32. Sombrero de Charro (El rey de la fiesta en las tribunas del mundial, adornado con un mini balón abajo)
+  const sombreroMexico = `<svg viewBox="0 0 100 100"><path d="M30 60 C30 25, 42 15, 50 15 C58 15, 70 25, 70 60" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M8 60 Q50 82 92 60 Q50 48 8 60" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M31 52 Q50 58 69 52" stroke="COLOR" stroke-width="3" stroke-dasharray="4,2"/><circle cx="50" cy="70" r="5" fill="COLOR"/></svg>`;
+
+  const shapes = [pentagono, cancha, trofeo, silbato, zapato, tarjetas, pelota, camiseta, mundial26, banderin, cronometro, medalla, estadio, copa, viajeMundial, porteria, logoOficial26, banderasHost, fanCelebrando, guantePortero, brazaleteCapitan, ticketMundial,camaraTransmision, sprayEspuma, autobusEquipo, fiestaEstadio, estrellaVictoria, pasaporteViajero, hojaMaple, naturalezaCanada, estatuaLibertad,aguilaUSA, piramideMexico, sombreroMexico];
   const animations = ['floatRandom1', 'floatRandom2', 'floatRandom3'];
 
   for (let i = 0; i < numShapes; i++) {
