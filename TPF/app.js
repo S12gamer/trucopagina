@@ -528,6 +528,53 @@ function closeNoticeOnBackdrop(event) {
   }
 }
 
+/* ══════════════════════════════════════════
+   CONTROL DE LA INTRO DE VIDEO (MODO PERSISTENTE)
+══════════════════════════════════════════ */
+document.addEventListener("DOMContentLoaded", () => {
+  const introContainer = document.getElementById("video-intro");
+  const introVideo = document.getElementById("intro-video");
+
+  if (!introContainer || !introVideo) return;
+
+  // 🔍 COMPROBACIÓN ESTILO "UPDATE":
+  // Si en el navegador ya está guardado que el usuario vio el video, 
+  // lo eliminamos instantáneamente del HTML sin reproducir nada.
+  if (localStorage.getItem("intro_video_visto") === "true") {
+    introContainer.remove();
+    return; // Detiene el script aquí para que la web cargue normal
+  }
+
+  // Función encargada de realizar el fundido
+  const finalizarIntro = () => {
+    if (introContainer.classList.contains("fade-out")) return;
+    
+    introContainer.classList.add("fade-out");
+    
+    // 💾 GUARDAR EL REGISTRO:
+    // Guardamos la marca de forma permanente en el navegador del usuario
+    localStorage.setItem("intro_video_visto", "true");
+    
+    setTimeout(() => {
+      introContainer.remove();
+    }, 800); // 0.8s de la transición CSS
+  };
+
+  // Detección anticipada (0.5 segundos antes de que termine)
+  introVideo.addEventListener("timeupdate", () => {
+    const segundosAnticipados = 0.5; 
+    if (introVideo.duration) {
+      const tiempoRestante = introVideo.duration - introVideo.currentTime;
+      if (tiempoRestante <= segundosAnticipados) {
+        finalizarIntro();
+      }
+    }
+  });
+
+  // Mecanismo de seguridad por si falla el video
+  setTimeout(finalizarIntro, 6000); 
+});
+
 // Registrar el inicio automático del sistema de avisos al cargar el DOM
 document.addEventListener('DOMContentLoaded', () => {
   checkAcademicNotice();
