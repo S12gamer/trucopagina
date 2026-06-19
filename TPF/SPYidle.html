@@ -108,14 +108,61 @@ button{
     padding:8px;
     background:#0e639c;
     color:white;
-    border:none;
+    border: 1px solid #0e639c;
     cursor:pointer;
+    transition: background 0.2s, color 0.2s;
 }
 
-button:hover{ background:#1177bb; }
+button:hover{ background:#1e1e1e; }
 
 img{ max-width:100%; }
 
+/* DISEÑO ADAPTADO PARA EL LINK GENERAL */
+.nav-link-btn {
+    display: block;
+    width: 100%;
+    margin: 4px 0;
+    padding: 8px;
+    background: #0e639c; /* #0e639c Fondo oscuro integrado para diferenciarlo de una acción directa */
+    color: #ffffff; /* Texto con el azul corporativo de tu app */
+    border: 1px solid #0e639c; /* Borde sutil */
+    text-align: center;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.nav-link-btn:hover {
+    background: #1e1e1e;
+    color: white;
+}
+
+/* El punto indicador (Dot Green) con animación de pulso */
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.dot-green {
+    background-color: #2ecc71;
+    box-shadow: 0 0 8px #2ecc71;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+}
 
 /* =====================================
    LOADER
@@ -313,7 +360,9 @@ function hideLoader(){
 <button id="save">PNG</button>
 <button id="copy">Copiar</button>
 <button onclick="savePy()">Descargar .py</button>
-<button href="https://s12gamer.github.io/trucopagina/TPF/TPF.html">Regresar al Centro</button>
+<a href="https://s12gamer.github.io/trucopagina/TPF/TPF.html" target="_blank" class="nav-link-btn">
+    <span class="dot dot-green"></span> Centro de Archivos
+</a>
 <h3>Gráficas</h3>
 <div id="graph"></div>
 
@@ -331,6 +380,7 @@ packages = ["numpy","matplotlib","sympy"]
 
 <script type="py">
 
+import re
 import sys, io, traceback
 import numpy as np
 import sympy as sp
@@ -341,7 +391,73 @@ from js import document, navigator, Blob, URL, window
 from pyodide.ffi import create_proxy
 
 ENV = {"np":np,"sp":sp,"__name__":"__main__"}
+LIBRERIAS_DISPONIBLES = {
+    "numpy",
+    "matplotlib",
+    "mpl_toolkits",
+    "sympy",
+    "math",
+    "mpmath",
+    #--- Ciencia de Datos y Machine Learning ---
+    "scikit-learn",  #Nombre oficial del paquete (el import suele ser sklearn)
+    "statsmodels",
+    "xgboost",
+    "lightgbm",
+    "xarray",
 
+    # --- Visualización de Datos ---
+    "seaborn",
+    "bokeh",
+    "altair",
+    "folium",
+
+    # --- Manejo de Imágenes y Visión ---
+    "pillow",        # Procesamiento de imágenes general
+    "scikit-image",
+    "opencv-python", # cv2
+    "imageio",
+
+    # --- Datos Geoespaciales y Astronomía ---
+    "geopandas",
+    "shapely",
+    "cartopy",
+    "astropy",
+
+    # --- Utilidades Web, Parsing y Texto ---
+    "beautifulsoup4", # Web scraping / parsing HTML
+    "requests",       # Manejo de peticiones HTTP
+    "urllib3",
+    "jinja2",
+    "pyyaml",
+    "regex",
+    "lxml",
+
+    # --- Criptografía, Archivos y Bases de Datos ---
+    "cryptography",
+    "sqlalchemy",
+    "sqlite3",        # Incluida nativamente
+    "h5py",
+    "pyarrow",
+    "duckdb",
+
+    # --- Arquitectura y Validaciones ---
+    "pydantic",
+    "pytest",
+    "anyio",
+    "cffi"
+
+}
+
+LIBRERIAS_PROHIBIDAS = {
+    "tkinter",
+    "customtkinter",
+    "PyQt6",
+    "PySide6",
+    "cv2",
+    "opencv",
+    "streamlit",
+    "manim"
+}
 current_img = None
 
 
@@ -368,6 +484,18 @@ def ejecutar(event):
     sys.stdout = buffer
     print(f"Ejecutando script: {filename}\n" + "-"*40)
     try:
+        bloqueado, reporte = verificar_dependencias(code)
+
+        if reporte:
+
+            console.innerText = (
+                "=== Dependencias detectadas ===\n\n"
+                + reporte +
+                "\n\n==============================\n\n"
+            )
+
+        if bloqueado:
+            return
         plt.close("all")
 
         def show_web(*args, **kwargs):
@@ -398,6 +526,59 @@ def ejecutar(event):
     finally:
         sys.stdout = stdout
 
+
+def detectar_imports(codigo):
+
+    imports = set()
+
+    patrones = re.findall(
+        r'^\s*(?:from\s+([a-zA-Z0-9_\.]+)\s+import|import\s+([a-zA-Z0-9_\.]+))',
+        codigo,
+        re.MULTILINE
+    )
+
+    for item in patrones:
+
+        lib = item[0] or item[1]
+
+        if lib:
+            imports.add(lib.split(".")[0])
+
+    return imports
+
+def verificar_dependencias(codigo):
+
+    imports = detectar_imports(codigo)
+
+    reporte = []
+
+    bloqueado = False
+
+    for lib in sorted(imports):
+
+        if lib in LIBRERIAS_PROHIBIDAS:
+
+            reporte.append(
+                f"❌ {lib} no puede ejecutarse dentro del navegador"
+            )
+
+            bloqueado = True
+
+        elif lib in LIBRERIAS_DISPONIBLES:
+
+            reporte.append(
+                f"✅ {lib}"
+            )
+
+        else:
+
+            reporte.append(
+                f"⚠ {lib} no está disponible en este entorno"
+            )
+
+            bloqueado = True
+
+    return bloqueado, "\n".join(reporte)
 
 # =========================
 # BOTONES PYTHON
