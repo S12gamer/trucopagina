@@ -268,14 +268,7 @@ function hideLoader(){
 
 </script>
 <body>
-    <div id="video-intro">
-        <script>if(localStorage.getItem("intro_video_visto2") === "true"){ document.getElementById("video-intro").style.display = "none"; }</script>
-        <video id="intro-video" autoplay muted playsinline>
-        <source src="introvidm.mp4" type="video/mp4">
-        Tu navegador no soporta videos.
-        </video>
-  </div>
-  <div id="app-loader">
+    <div id="app-loader">
     <div class="loader-content">
 
         <div class="loader-spinner"></div>
@@ -287,6 +280,14 @@ function hideLoader(){
         </p>
 
     </div>
+    <div id="video-intro">
+        <script>if(localStorage.getItem("intro_video_visto2") === "true"){ document.getElementById("video-intro").style.display = "none"; }</script>
+        <video id="intro-video" autoplay muted playsinline>
+        <source src="introvidm.mp4" type="video/mp4">
+        Tu navegador no soporta videos.
+        </video>
+  </div>
+  
 </div> 
 <div class="grid">
 
@@ -431,7 +432,32 @@ document.getElementById("copy").addEventListener("click", create_proxy(copy_img)
 window.pythonReady = True
 
 </script>
+<script>
 
+updateLoader("Cargando Pyodide...");
+
+const waitForReady = setInterval(() => {
+
+    if(
+        window.monacoReady &&
+        window.pythonReady
+    ){
+
+        updateLoader("Completado");
+
+        clearInterval(waitForReady);
+
+        setTimeout(() => {
+
+            hideLoader();
+
+        },500);
+
+    }
+
+},200);
+
+</script>
 <script>
 
 /* =========================
@@ -614,31 +640,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(finalizarIntro, 6000); 
 });
 </script>
-<script>
 
-updateLoader("Cargando Pyodide...");
-
-const waitForReady = setInterval(() => {
-
-    if(
-        window.monacoReady &&
-        window.pythonReady
-    ){
-
-        updateLoader("Completado");
-
-        clearInterval(waitForReady);
-
-        setTimeout(() => {
-
-            hideLoader();
-
-        },500);
-
-    }
-
-},200);
-
-</script>
 </body>
 </html>
