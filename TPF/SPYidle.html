@@ -307,21 +307,22 @@ function hideLoader(){
 <!-- PLOTS -->
 <div id="plots">
 
-<h3>Gráficas</h3>
+<h3>Acciones</h3>
 
 <button id="run">Ejecutar</button>
 <button id="save">PNG</button>
 <button id="copy">Copiar</button>
 <button onclick="savePy()">Descargar .py</button>
-
+<button href="https://s12gamer.github.io/trucopagina/TPF/TPF.html">Regresar al Centro</button>
+<h3>Gráficas</h3>
 <div id="graph"></div>
+
+</div>
 <footer>
     <p>&copy; 2026 Centro de Archivos MEX - USA - CAN ´26</p>
     <p>&copy; Spider Web Idle</p>
     <p>Made by: S12 & CS</p>
 </footer>
-</div>
-
 </div>
 
 <py-config>
@@ -359,11 +360,13 @@ def ejecutar(event):
     graph.innerHTML = ""
 
     code = window.current_code or ""
+    # 1. Obtenemos el nombre del archivo real desde JS
+    filename = window.currentFileName or "archivo_desconocido.py"
 
     stdout = sys.stdout
     buffer = io.StringIO()
     sys.stdout = buffer
-
+    print(f"Ejecutando script: {filename}\n" + "-"*40)
     try:
         plt.close("all")
 
@@ -430,6 +433,9 @@ document.getElementById("run").addEventListener("click", create_proxy(run))
 document.getElementById("save").addEventListener("click", create_proxy(save_img))
 document.getElementById("copy").addEventListener("click", create_proxy(copy_img))
 window.pythonReady = True
+if window.pythonReady == True:
+    console = document.getElementById("console")
+    console.innerText = "CDE_User>> trucopagina/TPF/SPYidle/_init_.py loaded correctly"
 
 </script>
 <script>
@@ -481,6 +487,7 @@ print("Centro de Archivos MEX - USA - CAN ´26")`
 let currentFile = "main.py";
 
 function renderFiles(){
+    window.currentFileName = currentFile;
     const list = document.getElementById("fileList");
     list.innerHTML = "";
 
@@ -558,6 +565,8 @@ require.config({
 
 require(["vs/editor/editor.main"], function () {
 
+    window.current_code = files["main.py"];
+    window.currentFileName = currentFile;
     updateLoader("Editor cargado...");
     window.editor = monaco.editor.create(
         document.getElementById("editor"),
