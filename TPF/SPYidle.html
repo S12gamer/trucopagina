@@ -483,6 +483,7 @@ def ejecutar(event):
     buffer = io.StringIO()
     sys.stdout = buffer
     print(f"Ejecutando script: {filename}\n" + "-"*40)
+    estado_grafica = {"detectada": False}
     try:
         bloqueado, reporte = verificar_dependencias(code)
 
@@ -499,7 +500,7 @@ def ejecutar(event):
         plt.close("all")
 
         def show_web(*args, **kwargs):
-
+            estado_grafica["detectada"] = True
             global current_img
 
             for i in plt.get_fignums():
@@ -517,8 +518,16 @@ def ejecutar(event):
         plt.show = show_web
 
         exec(code, ENV)
-
+        if estado_grafica["detectada"]:
+            print(
+                "\n--------------Importante----------------\n"
+                "Por defecto, las figuras se muestran en el panel de Gráficas. "
+                "Para que también aparezcan en línea en la consola, necesitas "
+                "desmarcar 'Silenciar gráficos en línea' en el menú de opciones de Gráficos."
+            )
         console.innerText = buffer.getvalue() or "OK"
+        
+            
 
     except Exception:
         console.innerText = traceback.format_exc()
@@ -559,7 +568,7 @@ def verificar_dependencias(codigo):
         if lib in LIBRERIAS_PROHIBIDAS:
 
             reporte.append(
-                f"❌ {lib} no puede ejecutarse dentro del navegador"
+                f" {lib} no puede ejecutarse dentro del navegador"
             )
 
             bloqueado = True
@@ -567,7 +576,7 @@ def verificar_dependencias(codigo):
         elif lib in LIBRERIAS_DISPONIBLES:
 
             reporte.append(
-                f"✅ {lib}"
+                f" {lib}"
             )
 
         else:
@@ -654,10 +663,8 @@ const waitForReady = setInterval(() => {
 let files = {
     "main.py": `import numpy as np
 import matplotlib.pyplot as plt
-
 x = np.linspace(0,10,100)
 y = np.sin(x)
-
 plt.plot(x,y)
 plt.title("Funcion seno")
 plt.show()
