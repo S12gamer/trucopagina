@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Spyder Web v1.0 Beta</title>
+
+<script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+<link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css"/>
+
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI;
+    background:#1e1e1e;
+    color:white;
+}
+/* ── INTRO DE VIDEO EN PANTALLA COMPLETA ── */
+    #video-intro {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000000; /* Fondo negro absoluto mientras carga o se reproduce */
+      z-index: 999999; /* Se sitúa por encima de barras de navegación, fondos y pop-ups */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease-out, visibility 0.8s ease-out; /* Transición suave de fundido */
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #intro-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* El video llena la pantalla de forma fluida sin estirarse */
+      pointer-events: none; /* Bloquea clics, doble clics y clic derecho (así no se puede pausar) */
+    }
+
+    /* Clase que activará el JavaScript para hacer el fundido hacia la web */
+    #video-intro.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+.grid{
+    display:grid;
+    grid-template-columns: 250px 2fr 1fr;
+    grid-template-rows: 60vh 40vh;
+    height:100vh;
+}
+
+/* FILES */
+#files{
+    grid-column:1;
+    grid-row:1 / span 2;
+    background:#111;
+    padding:10px;
+    overflow:auto;
+}
+
+.file{
+    padding:5px;
+    cursor:pointer;
+    background:#222;
+    margin:5px 0;
+}
+
+.file:hover{
+    background:#333;
+}
+
+.file.active{
+    background:#0e639c;
+}
+
+/* EDITOR */
+#editor{
+    grid-column:2;
+    grid-row:1;
+}
+
+/* CONSOLE */
+#console{
+    grid-column:2;
+    grid-row:2;
+    background:#0d0d0d;
+    padding:10px;
+    overflow:auto;
+    font-family:Consolas;
+}
+
+/* PLOTS */
+#plots{
+    grid-column:3;
+    grid-row:1 / span 2;
+    background:#2d2d30;
+    padding:10px;
+    overflow:auto;
+}
+
+button{
+    margin:5px;
+    padding:8px;
+    background:#0e639c;
+    color:white;
+    border: 1px solid #0e639c;
+    cursor:pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+button:hover{ background:#1e1e1e; }
+
+img{ max-width:100%; }
+
+/* DISEÑO ADAPTADO PARA EL LINK GENERAL */
+.nav-link-btn {
+    display: block;
+    width: 100%;
+    margin: 4px 0;
+    padding: 8px;
+    background: #0e639c; /* #0e639c Fondo oscuro integrado para diferenciarlo de una acción directa */
+    color: #ffffff; /* Texto con el azul corporativo de tu app */
+    border: 1px solid #0e639c; /* Borde sutil */
+    text-align: center;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.nav-link-btn:hover {
+    background: #1e1e1e;
+    color: white;
+}
+
+/* El punto indicador (Dot Green) con animación de pulso */
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.dot-green {
+    background-color: #2ecc71;
+    box-shadow: 0 0 8px #2ecc71;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+}
+
+/* =====================================
+   LOADER
+===================================== */
+
+#app-loader{
+    position:fixed;
+    inset:0;
+    background:#111;
+    z-index:999999999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:opacity .5s ease;
+}
+
+#app-loader.hidden{
+    opacity:0;
+    pointer-events:none;
+}
+
+.loader-content{
+    text-align:center;
+}
+
+.loader-spinner{
+    width:80px;
+    height:80px;
+    border:8px solid rgba(255,255,255,.15);
+    border-top-color:#0e639c;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin:auto;
+}
+
+.loader-content h2{
+    margin-top:20px;
+}
+
+.loader-content p{
+    color:#ccc;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+*{box-sizing:border-box;}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow-x:hidden;
+}
+
+button{max-width:100%;}
+
+#plots button,
+#files button{
+    width:100%;
+    margin:4px 0;
+}
+
+#graph img{
+    width:100%;
+    height:auto;
+    display:block;
+}
+
+@media (max-width:1024px){
+    .grid{
+        grid-template-columns:220px 1fr;
+        grid-template-rows:55vh 25vh auto;
+    }
+
+    #files{grid-column:1;grid-row:1 / span 3;}
+    #editor{grid-column:2;grid-row:1;}
+    #console{grid-column:2;grid-row:2;}
+    #plots{grid-column:2;grid-row:3;min-height:250px;}
+}
+
+@media (max-width:768px){
+    .grid{
+        display:flex;
+        flex-direction:column;
+        height:auto;
+        min-height:100vh;
+    }
+
+    #files{width:100%;height:220px;min-height:220px;}
+    #editor{width:100%;height:55vh;min-height:350px;}
+    #console{width:100%;height:180px;}
+    #plots{width:100%;min-height:300px;}
+
+    .file{
+        padding:10px;
+        font-size:14px;
+    }
+
+    button{
+        font-size:14px;
+        padding:10px;
+    }
+
+    h3{margin-top:0;}
+}
+
+@media (max-width:480px){
+    #files{height:180px;min-height:180px;}
+    #editor{height:50vh;min-height:280px;}
+    #console{height:150px;}
+    button{width:100%;}
+}
+
+</style>
+</head>
+<script>
+
+window.spyderReady = false;
+
+function updateLoader(text){
+
+    const lbl = document.getElementById("loader-status");
+
+    if(lbl){
+        lbl.innerText = text;
+    }
+
+}
+
+function hideLoader(){
+
+    const loader = document.getElementById("app-loader");
+
+    if(!loader) return;
+
+    loader.classList.add("hidden");
+
+    setTimeout(()=>{
+        loader.remove();
+    },500);
+
+}
+
+</script>
+<body>
+    <div id="app-loader">
+    <div class="loader-content">
+
+        <div class="loader-spinner"></div>
+
+        <h2>Spyder Web Idle</h2>
+
+        <p id="loader-status">
+            Inicializando Python...
+        </p>
+
+    </div>
+    <div id="video-intro">
+        <script>if(localStorage.getItem("intro_video_visto2") === "true"){ document.getElementById("video-intro").style.display = "none"; }</script>
+        <video id="intro-video" autoplay muted playsinline>
+        <source src="introvidm.mp4" type="video/mp4">
+        Tu navegador no soporta videos.
+        </video>
+  </div>
+  
+</div> 
+<div class="grid">
+
+<!-- FILES -->
+<div id="files">
+    <button onclick="createFile()">+ Nuevo archivo</button>
+    <button onclick="openFile()">Abrir .py</button>
+    <div id="fileList"></div>
+</div>
+
+<!-- EDITOR -->
+<div id="editor"></div>
+
+<!-- CONSOLE -->
+<div id="console"></div>
+
+<!-- PLOTS -->
+<div id="plots">
+
+<h3>Acciones</h3>
+
+<button id="run">Ejecutar</button>
+<button id="save">PNG</button>
+<button id="copy">Copiar</button>
+<button onclick="savePy()">Descargar .py</button>
+<a href="https://s12gamer.github.io/trucopagina/TPF/TPF.html" target="_blank" class="nav-link-btn">
+    <span class="dot dot-green"></span> Centro de Archivos
+</a>
+<h3>Gráficas</h3>
+<div id="graph"></div>
+
+</div>
+<footer>
+    <p>&copy; 2026 Centro de Archivos MEX - USA - CAN ´26</p>
+    <p>&copy; Spider Web Idle</p>
+    <p>Made by: S12 & CS</p>
+</footer>
+</div>
+
+<py-config>
+packages = ["numpy","matplotlib","sympy"]
+</py-config>
+
+<script type="py">
+
+import re
+import sys, io, traceback
+import numpy as np
+import sympy as sp
+import matplotlib.pyplot as plt
+import base64
+
+from js import document, navigator, Blob, URL, window
+from pyodide.ffi import create_proxy
+
+ENV = {"np":np,"sp":sp,"__name__":"__main__"}
+LIBRERIAS_DISPONIBLES = {
+    "numpy",
+    "matplotlib",
+    "mpl_toolkits",
+    "sympy",
+    "math",
+    "mpmath",
+    #--- Ciencia de Datos y Machine Learning ---
+    "scikit-learn",  #Nombre oficial del paquete (el import suele ser sklearn)
+    "statsmodels",
+    "xgboost",
+    "lightgbm",
+    "xarray",
+
+    # --- Visualización de Datos ---
+    "seaborn",
+    "bokeh",
+    "altair",
+    "folium",
+
+    # --- Manejo de Imágenes y Visión ---
+    "pillow",        # Procesamiento de imágenes general
+    "scikit-image",
+    "opencv-python", # cv2
+    "imageio",
+
+    # --- Datos Geoespaciales y Astronomía ---
+    "geopandas",
+    "shapely",
+    "cartopy",
+    "astropy",
+
+    # --- Utilidades Web, Parsing y Texto ---
+    "beautifulsoup4", # Web scraping / parsing HTML
+    "requests",       # Manejo de peticiones HTTP
+    "urllib3",
+    "jinja2",
+    "pyyaml",
+    "regex",
+    "lxml",
+
+    # --- Criptografía, Archivos y Bases de Datos ---
+    "cryptography",
+    "sqlalchemy",
+    "sqlite3",        # Incluida nativamente
+    "h5py",
+    "pyarrow",
+    "duckdb",
+
+    # --- Arquitectura y Validaciones ---
+    "pydantic",
+    "pytest",
+    "anyio",
+    "cffi"
+
+}
+
+LIBRERIAS_PROHIBIDAS = {
+    "tkinter",
+    "customtkinter",
+    "PyQt6",
+    "PySide6",
+    "cv2",
+    "opencv",
+    "streamlit",
+    "manim"
+}
+current_img = None
+
+
+# =========================
+# EJECUTOR
+# =========================
+
+def ejecutar(event):
+
+    global current_img
+
+    console = document.getElementById("console")
+    graph = document.getElementById("graph")
+
+    console.innerHTML = ""
+    graph.innerHTML = ""
+
+    code = window.current_code or ""
+    # 1. Obtenemos el nombre del archivo real desde JS
+    filename = window.currentFileName or "archivo_desconocido.py"
+
+    stdout = sys.stdout
+    buffer = io.StringIO()
+    sys.stdout = buffer
+    print(f"Ejecutando script: {filename}\n" + "-"*40)
+    estado_grafica = {"detectada": False}
+    try:
+        bloqueado, reporte = verificar_dependencias(code)
+
+        if reporte:
+
+            console.innerText = (
+                "=== Dependencias detectadas ===\n\n"
+                + reporte +
+                "\n\n==============================\n\n"
+            )
+
+        if bloqueado:
+            return
+        plt.close("all")
+
+        def show_web(*args, **kwargs):
+            estado_grafica["detectada"] = True
+            global current_img
+
+            for i in plt.get_fignums():
+                fig = plt.figure(i)
+
+                buf = io.BytesIO()
+                fig.savefig(buf, format="png")
+                buf.seek(0)
+
+                img = base64.b64encode(buf.read()).decode()
+
+                current_img = img
+                graph.innerHTML += f'<img src="data:image/png;base64,{img}"/>'
+
+        plt.show = show_web
+
+        exec(code, ENV)
+        if estado_grafica["detectada"]:
+            print(
+                "\n--------------Importante----------------\n"
+                "Por defecto, las figuras se muestran en el panel de Gráficas. "
+                "Para que también aparezcan en línea en la consola, necesitas "
+                "desmarcar 'Silenciar gráficos en línea' en el menú de opciones de Gráficos."
+            )
+        console.innerText = buffer.getvalue() or "OK"
+        
+            
+
+    except Exception:
+        console.innerText = traceback.format_exc()
+
+    finally:
+        sys.stdout = stdout
+
+
+def detectar_imports(codigo):
+
+    imports = set()
+
+    patrones = re.findall(
+        r'^\s*(?:from\s+([a-zA-Z0-9_\.]+)\s+import|import\s+([a-zA-Z0-9_\.]+))',
+        codigo,
+        re.MULTILINE
+    )
+
+    for item in patrones:
+
+        lib = item[0] or item[1]
+
+        if lib:
+            imports.add(lib.split(".")[0])
+
+    return imports
+
+def verificar_dependencias(codigo):
+
+    imports = detectar_imports(codigo)
+
+    reporte = []
+
+    bloqueado = False
+
+    for lib in sorted(imports):
+
+        if lib in LIBRERIAS_PROHIBIDAS:
+
+            reporte.append(
+                f" {lib} no puede ejecutarse dentro del navegador"
+            )
+
+            bloqueado = True
+
+        elif lib in LIBRERIAS_DISPONIBLES:
+
+            reporte.append(
+                f" {lib}"
+            )
+
+        else:
+
+            reporte.append(
+                f"⚠ {lib} no está disponible en este entorno"
+            )
+
+            bloqueado = True
+
+    return bloqueado, "\n".join(reporte)
+
+# =========================
+# BOTONES PYTHON
+# =========================
+
+def run(event):
+    ejecutar(event)
+
+
+def save_img(event):
+
+    if not current_img:
+        return
+
+    a = document.createElement("a")
+    a.href = "data:image/png;base64," + current_img
+    a.download = "grafica.png"
+    a.click()
+
+
+async def copy_img(event):
+
+    blob = Blob.new(
+        [base64.b64decode(current_img)],
+        {"type":"image/png"}
+    )
+
+    item = navigator.ClipboardItem.new({"image/png": blob})
+    await navigator.clipboard.write([item])
+
+
+document.getElementById("run").addEventListener("click", create_proxy(run))
+document.getElementById("save").addEventListener("click", create_proxy(save_img))
+document.getElementById("copy").addEventListener("click", create_proxy(copy_img))
+window.pythonReady = True
+if window.pythonReady == True:
+    console = document.getElementById("console")
+    console.innerText = "CDE_User>> trucopagina/TPF/SPYidle/_init_.py loaded correctly"
+
+</script>
+<script>
+
+updateLoader("Cargando Pyodide...");
+
+const waitForReady = setInterval(() => {
+
+    if(
+        window.monacoReady &&
+        window.pythonReady
+    ){
+
+        updateLoader("Completado");
+
+        clearInterval(waitForReady);
+
+        setTimeout(() => {
+
+            hideLoader();
+
+        },500);
+
+    }
+
+},200);
+
+</script>
+<script>
+
+/* =========================
+   MULTI-ARCHIVO SYSTEM
+========================= */
+
+let files = {
+    "main.py": `import numpy as np
+import matplotlib.pyplot as plt
+x = np.linspace(0,10,100)
+y = np.sin(x)
+plt.plot(x,y)
+plt.title("Funcion seno")
+plt.show()
+print("Bienvenido al Idle Web")
+print("Centro de Archivos MEX - USA - CAN ´26")`
+};
+
+let currentFile = "main.py";
+
+function renderFiles(){
+    window.currentFileName = currentFile;
+    const list = document.getElementById("fileList");
+    list.innerHTML = "";
+
+    for(let name in files){
+        let div = document.createElement("div");
+        div.className = "file" + (name === currentFile ? " active" : "");
+        div.innerText = name;
+
+        div.onclick = () => {
+            currentFile = name;
+            window.editor.setValue(files[name]);
+            renderFiles();
+        };
+
+        list.appendChild(div);
+    }
+}
+
+function createFile(){
+    let name = prompt("Nombre del archivo:");
+    if(!name) return;
+
+    if(!name.endsWith(".py")) name += ".py";
+
+    files[name] = "# nuevo archivo\n";
+    currentFile = name;
+
+    window.editor.setValue(files[name]);
+    renderFiles();
+}
+
+function savePy(){
+
+    files[currentFile] = window.editor.getValue();
+
+    let blob = new Blob([files[currentFile]], {type:"text/plain"});
+    let url = URL.createObjectURL(blob);
+
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = currentFile;
+    a.click();
+}
+
+function openFile(){
+
+    let input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".py";
+
+    input.onchange = e => {
+        let file = e.target.files[0];
+        let reader = new FileReader();
+
+        reader.onload = ev => {
+            files[file.name] = ev.target.result;
+            currentFile = file.name;
+
+            window.editor.setValue(files[file.name]);
+            renderFiles();
+        };
+
+        reader.readAsText(file);
+    };
+
+    input.click();
+}
+
+/* MONACO */
+require.config({
+    paths: {
+        vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs"
+    }
+});
+
+require(["vs/editor/editor.main"], function () {
+
+    window.current_code = files["main.py"];
+    window.currentFileName = currentFile;
+    updateLoader("Editor cargado...");
+    window.editor = monaco.editor.create(
+        document.getElementById("editor"),
+        {
+            value: files["main.py"],
+            language: "python",
+            theme: "vs-dark",
+            automaticLayout: true,
+
+        minimap:{
+            enabled:window.innerWidth > 768
+        },
+
+        fontSize:window.innerWidth < 768 ? 14 : 16,
+
+        scrollBeyondLastLine:false
+        }
+    );
+
+    window.current_code = files["main.py"];
+
+    window.editor.onDidChangeModelContent(() => {
+        window.current_code = window.editor.getValue();
+        files[currentFile] = window.current_code;
+    });
+
+    renderFiles();
+    window.monacoReady = true;
+});
+
+/* EXPORT GLOBAL */
+window.createFile = createFile;
+window.openFile = openFile;
+window.savePy = savePy;
+
+/* ══════════════════════════════════════════
+   CONTROL DE LA INTRO DE VIDEO (MODO PERSISTENTE)
+══════════════════════════════════════════ */
+document.addEventListener("DOMContentLoaded", () => {
+  const introContainer = document.getElementById("video-intro");
+  const introVideo = document.getElementById("intro-video");
+
+  if (!introContainer || !introVideo) return;
+
+  // 🔍 COMPROBACIÓN ESTILO "UPDATE":
+  // Si en el navegador ya está guardado que el usuario vio el video, 
+  // lo eliminamos instantáneamente del HTML sin reproducir nada.
+  if (localStorage.getItem("intro_video_visto2") === "true") {
+    introContainer.remove();
+    return; // Detiene el script aquí para que la web cargue normal
+  }
+
+  // Función encargada de realizar el fundido
+  const finalizarIntro = () => {
+    if (introContainer.classList.contains("fade-out")) return;
+    
+    introContainer.classList.add("fade-out");
+    
+    // 💾 GUARDAR EL REGISTRO:
+    // Guardamos la marca de forma permanente en el navegador del usuario
+    localStorage.setItem("intro_video_visto2", "true");
+    
+    setTimeout(() => {
+      introContainer.remove();
+    }, 800); // 0.8s de la transición CSS
+  };
+
+  // Detección anticipada (0.5 segundos antes de que termine)
+  introVideo.addEventListener("timeupdate", () => {
+    const segundosAnticipados = 0.5; 
+    if (introVideo.duration) {
+      const tiempoRestante = introVideo.duration - introVideo.currentTime;
+      if (tiempoRestante <= segundosAnticipados) {
+        finalizarIntro();
+      }
+    }
+  });
+
+  // Mecanismo de seguridad por si falla el video
+  setTimeout(finalizarIntro, 6000); 
+});
+</script>
+
+</body>
+</html>
