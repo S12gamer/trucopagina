@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Spyder Web v1.0 Beta</title>
+<script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+<link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css"/>
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI;
+    background:#1e1e1e;
+    color:white;
+}
+/* ── INTRO DE VIDEO EN PANTALLA COMPLETA ── */
+    #video-intro {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000000; /* Fondo negro absoluto mientras carga o se reproduce */
+      z-index: 999999; /* Se sitúa por encima de barras de navegación, fondos y pop-ups */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease-out, visibility 0.8s ease-out; /* Transición suave de fundido */
+      opacity: 1;
+      visibility: visible;
+    }
+    #intro-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* El video llena la pantalla de forma fluida sin estirarse */
+      pointer-events: none; /* Bloquea clics, doble clics y clic derecho (así no se puede pausar) */
+    }
+    /* Clase que activará el JavaScript para hacer el fundido hacia la web */
+    #video-intro.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+.grid{
+    display:grid;
+    grid-template-columns: 250px 2fr 1fr;
+    grid-template-rows: 60vh 40vh;
+    height:100vh;
+}
+/* FILES */
+#files{
+    grid-column:1;
+    grid-row:1 / span 2;
+    background:#111;
+    padding:10px;
+    overflow:auto;
+}
+.file{
+    padding:5px;
+    cursor:pointer;
+    background:#222;
+    margin:5px 0;
+}
+.file:hover{
+    background:#333;
+}
+.file.active{
+    background:#0e639c;
+}
+/* EDITOR */
+#editor{
+    grid-column:2;
+    grid-row:1;
+}
+/* CONSOLE */
+#console{
+    grid-column:2;
+    grid-row:2;
+    background:#0d0d0d;
+    padding:10px;
+    overflow:auto;
+    font-family:Consolas;
+}
+/* PLOTS */
+#plots{
+    grid-column:3;
+    grid-row:1 / span 2;
+    background:#2d2d30;
+    padding:10px;
+    overflow:auto;
+}
+button{
+    margin:5px;
+    padding:8px;
+    background:#0e639c;
+    color:white;
+    border: 1px solid #0e639c;
+    cursor:pointer;
+    transition: background 0.2s, color 0.2s;
+}
+button:hover{ background:#1e1e1e; }
+img{ max-width:100%; }
+/* DISEÑO ADAPTADO PARA EL LINK GENERAL */
+.nav-link-btn {
+    display: block;
+    width: 100%;
+    margin: 4px 0;
+    padding: 8px;
+    background: #0e639c; /* #0e639c Fondo oscuro integrado para diferenciarlo de una acción directa */
+    color: #ffffff; /* Texto con el azul corporativo de tu app */
+    border: 1px solid #0e639c; /* Borde sutil */
+    text-align: center;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.nav-link-btn:hover {
+    background: #1e1e1e;
+    color: white;
+}
+/* El punto indicador (Dot Green) con animación de pulso */
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.dot-green {
+    background-color: #2ecc71;
+    box-shadow: 0 0 8px #2ecc71;
+    animation: pulse-green 2s infinite;
+}
+@keyframes pulse-green {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+}
+/* =====================================
+   LOADER
+===================================== */
+#app-loader{
+    position:fixed;
+    inset:0;
+    background:#111;
+    z-index:999999999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:opacity .5s ease;
+}
+#app-loader.hidden{
+    opacity:0;
+    pointer-events:none;
+}
+.loader-content{
+    text-align:center;
+}
+.loader-spinner{
+    width:80px;
+    height:80px;
+    border:8px solid rgba(255,255,255,.15);
+    border-top-color:#0e639c;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin:auto;
+}
+.loader-content h2{
+    margin-top:20px;
+}
+.loader-content p{
+    color:#ccc;
+}
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+/* ==========================================
+   RESPONSIVE
+========================================== */
+*{box-sizing:border-box;}
+html,body{
+    width:100%;
+    height:100%;
+    overflow-x:hidden;
+}
+button{max-width:100%;}
+#plots button,
+#files button{
+    width:100%;
+    margin:4px 0;
+}
+#graph img{
+    width:100%;
+    height:auto;
+    display:block;
+}
+@media (max-width:1024px){
+    .grid{
+        grid-template-columns:220px 1fr;
+        grid-template-rows:55vh 25vh auto;
+    }
+    #files{grid-column:1;grid-row:1 / span 3;}
+    #editor{grid-column:2;grid-row:1;}
+    #console{grid-column:2;grid-row:2;}
+    #plots{grid-column:2;grid-row:3;min-height:250px;}
+}
+@media (max-width:768px){
+    .grid{
+        display:flex;
+        flex-direction:column;
+        height:auto;
+        min-height:100vh;
+    }
+    #files{width:100%;height:220px;min-height:220px;}
+    #editor{width:100%;height:55vh;min-height:350px;}
+    #console{width:100%;height:180px;}
+    #plots{width:100%;min-height:300px;}
+    .file{
+        padding:10px;
+        font-size:14px;
+    }
+    button{
+        font-size:14px;
+        padding:10px;
+    }
+    h3{margin-top:0;}
+}
+@media (max-width:480px){
+    #files{height:180px;min-height:180px;}
+    #editor{height:50vh;min-height:280px;}
+    #console{height:150px;}
+    button{width:100%;}
+}
+/* ══════════════════════════════════════════
+   MODOS DE APRENDIZAJE — INTEGRADOS EN EDITOR Y CONSOLA
+   ══════════════════════════════════════════ */
+#editor { position: relative; }
+
+/* Barra flotante de modo sobre el editor */
+#mode-bar {
+    display: none;
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.95);
+    border-bottom: 2px solid #0e639c;
+    padding: 6px 12px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+#mode-bar.visible { display: flex; }
+#mode-bar.teach  { border-bottom-color: #2ecc71; }
+#mode-bar.memo   { border-bottom-color: #9b59b6; }
+#mode-bar .mode-title { font-size: 13px; font-weight: bold; color: #4fc3f7; }
+#mode-bar.teach .mode-title { color: #2ecc71; }
+#mode-bar.memo  .mode-title { color: #ce93d8; }
+#mode-bar .mode-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+#mode-bar button { margin: 0 !important; padding: 5px 12px !important; font-size: 12px !important; }
+#mode-bar .exit-btn { background: #c0392b !important; border-color: #c0392b !important; }
+#mode-bar .exit-btn:hover { background: #e74c3c !important; }
+#mode-bar .step-lbl { color: #888; font-size: 12px; }
+
+/* Consola en modo enseñanza */
+#console.teach-mode {
+    background: #0d0d0d;
+    font-family: Segoe UI, sans-serif;
+    overflow-y: auto;
+}
+#teach-explain-wrap {
+    height: 100%;
+    overflow-y: auto;
+    padding: 14px 18px;
+    box-sizing: border-box;
+}
+#teach-explain-wrap .teach-prog-track {
+    background: #222;
+    border-radius: 4px;
+    height: 4px;
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+#teach-explain-wrap .teach-prog-fill {
+    height: 100%;
+    background: linear-gradient(90deg,#2ecc71,#4fc3f7);
+    border-radius: 4px;
+    transition: width .3s;
+}
+
+/* Consola en modo memorización */
+#console.memo-mode {
+    background: #0a0a0f;
+    font-family: Segoe UI, sans-serif;
+    overflow-y: auto;
+}
+#memo-live-wrap {
+    height: 100%;
+    overflow-y: auto;
+    padding: 14px 18px;
+    box-sizing: border-box;
+}
+.memo-live-row { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 12px; }
+.memo-live-stat { font-size: 13px; color: #aaa; }
+.memo-live-stat b { color: #fff; }
+.memo-final-result { padding: 10px 0; }
+.memo-final-result .score-big {
+    font-size: 52px; font-weight: bold; text-align: center;
+    margin: 8px 0;
+}
+.score-big.s-high  { color: #2ecc71; }
+.score-big.s-mid   { color: #f39c12; }
+.score-big.s-low   { color: #e74c3c; }
+.memo-breakdown { margin-top: 12px; font-size: 12px; font-family: Consolas, monospace; max-height: 160px; overflow-y: auto; }
+.memo-breakdown .bl { display: flex; gap: 8px; padding: 2px 0; }
+.memo-breakdown .bl .bi { color: #555; min-width: 22px; text-align: right; }
+.memo-breakdown .bl .bc { white-space: pre; flex: 1; }
+.memo-breakdown .bl.ok  .bc { color: #2ecc71; }
+.memo-breakdown .bl.near .bc { color: #f39c12; }
+.memo-breakdown .bl.bad  .bc { color: #e74c3c; }
+/* PROGRESS BAR (kept for legacy reference) */
+.learn-progress-track {
+    background: #333;
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+}
+.learn-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0e639c, #4fc3f7);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+.score-pill {
+    background: #0e639c;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 13px;
+    font-weight: bold;
+}
+.score-pill.red { background: #c0392b; }
+</style>
+</head>
+<script>
+window.spyderReady = false;
+function updateLoader(text){
+    const lbl = document.getElementById("loader-status");
+    if(lbl){
+        lbl.innerText = text;
+    }
+}
+function hideLoader(){
+    const loader = document.getElementById("app-loader");
+    if(!loader) return;
+    loader.classList.add("hidden");
+    setTimeout(()=>{
+        loader.remove();
+    },500);
+}
+</script>
+<body>
+    <div id="app-loader">
+    <div class="loader-content">
+        <div class="loader-spinner"></div>
+        <h1>Spyder Web Idle</h1>
+        <h2>Jocelyn Edition</h2>
+        <p id="loader-status">
+            Inicializando Python...
+        </p>
+    </div>
+    <div id="video-intro">
+        <script>if(localStorage.getItem("intro_video_visto2") === "true"){ document.getElementById("video-intro").style.display = "none"; }</script>
+        <video id="intro-video" autoplay muted playsinline>
+        <source src="introvidm.mp4" type="video/mp4">
+        Tu navegador no soporta videos.
+        </video>
+  </div>
+  
+</div> 
+<div class="grid">
+<!-- FILES -->
+<div id="files">
+    <button onclick="createFile()">+ Nuevo archivo</button>
+    <button onclick="openFile()">Abrir .py</button>
+    <div id="fileList"></div>
+    <hr style="border-color:#333;margin:10px 0;">
+    <p style="color:#888;font-size:11px;margin:4px 0 6px 0;text-transform:uppercase;letter-spacing:1px;">📚 Riemann — Aprendizaje</p>
+    <button onclick="enterTeachMode()" style="width:100%;background:#1a3a1a;border-color:#2ecc71;color:#2ecc71;">📖 Enseñanza línea a línea</button>
+    <button onclick="enterMemoMode()"  style="width:100%;background:#2a1a3a;border-color:#9b59b6;color:#ce93d8;">🧠 Modo memorización</button>
+</div>
+<!-- EDITOR -->
+<div id="editor">
+  <!-- Barra flotante de modo (enseñanza / memorización) -->
+  <div id="mode-bar">
+    <span class="mode-title" id="mode-bar-title">📖 Enseñanza · Riemann</span>
+    <div class="mode-controls" id="mode-bar-controls"></div>
+  </div>
+</div>
+<!-- CONSOLE -->
+<div id="console"></div>
+<!-- PLOTS -->
+<div id="plots">
+<h3>Acciones</h3>
+<button id="run">Ejecutar</button>
+<button id="save">PNG</button>
+<button id="copy">Copiar</button>
+<button onclick="savePy()">Descargar .py</button>
+<a href="https://s12gamer.github.io/trucopagina/TPF/TPF.html" target="_blank" class="nav-link-btn">
+    <span class="dot dot-green"></span> Centro de Archivos
+</a>
+<h3>Gráficas</h3>
+<div id="graph"></div>
+</div>
+<footer>
+    <p>&copy; 2026 Centro de Archivos MEX - USA - CAN ´26</p>
+    <p>&copy; Spider Web Idle Jocelyn Edition</p>
+    <p>Made by: S12 & CS</p>
+</footer>
+</div>
+<py-config>
+packages = ["numpy","matplotlib","sympy"]
+</py-config>
+<script type="py">
+import re
+import sys, io, traceback
+import numpy as np
+import sympy as sp
+import matplotlib.pyplot as plt
+import base64
+from js import document, navigator, Blob, URL, window
+from pyodide.ffi import create_proxy
+ENV = {"np":np,"sp":sp,"__name__":"__main__"}
+LIBRERIAS_DISPONIBLES = {
+    "numpy",
+    "matplotlib",
+    "mpl_toolkits",
+    "sympy",
+    "math",
+    "mpmath",
+    #--- Ciencia de Datos y Machine Learning ---
+    "scikit-learn",  #Nombre oficial del paquete (el import suele ser sklearn)
+    "statsmodels",
+    "xgboost",
+    "lightgbm",
+    "xarray",
+    # --- Visualización de Datos ---
+    "seaborn",
+    "bokeh",
+    "altair",
+    "folium",
+    # --- Manejo de Imágenes y Visión ---
+    "pillow",        # Procesamiento de imágenes general
+    "scikit-image",
+    "opencv-python", # cv2
+    "imageio",
+    # --- Datos Geoespaciales y Astronomía ---
+    "geopandas",
+    "shapely",
+    "cartopy",
+    "astropy",
+    # --- Utilidades Web, Parsing y Texto ---
+    "beautifulsoup4", # Web scraping / parsing HTML
+    "requests",       # Manejo de peticiones HTTP
+    "urllib3",
+    "jinja2",
+    "pyyaml",
+    "regex",
+    "lxml",
+    # --- Criptografía, Archivos y Bases de Datos ---
+    "cryptography",
+    "sqlalchemy",
+    "sqlite3",        # Incluida nativamente
+    "h5py",
+    "pyarrow",
+    "duckdb",
+    # --- Arquitectura y Validaciones ---
+    "pydantic",
+    "pytest",
+    "anyio",
+    "cffi"
+}
+LIBRERIAS_PROHIBIDAS = {
+    "tkinter",
+    "customtkinter",
+    "PyQt6",
+    "PySide6",
+    "cv2",
+    "opencv",
+    "streamlit",
+    "manim"
+}
+current_img = None
+# =========================
+# EJECUTOR
+# =========================
+def ejecutar(event):
+    global current_img
+    console = document.getElementById("console")
+    graph = document.getElementById("graph")
+    console.innerHTML = ""
+    graph.innerHTML = ""
+    code = window.current_code or ""
+    # 1. Obtenemos el nombre del archivo real desde JS
+    filename = window.currentFileName or "archivo_desconocido.py"
+    stdout = sys.stdout
+    buffer = io.StringIO()
+    sys.stdout = buffer
+    print(f"Ejecutando script: {filename}\n" + "-"*40)
+    estado_grafica = {"detectada": False}
+    try:
+        bloqueado, reporte = verificar_dependencias(code)
+        if reporte:
+            console.innerText = (
+                "=== Dependencias detectadas ===\n\n"
+                + reporte +
+                "\n\n==============================\n\n"
+            )
+        if bloqueado:
+            return
+        plt.close("all")
+        def show_web(*args, **kwargs):
+            estado_grafica["detectada"] = True
+            global current_img
+            for i in plt.get_fignums():
+                fig = plt.figure(i)
+                buf = io.BytesIO()
+                fig.savefig(buf, format="png")
+                buf.seek(0)
+                img = base64.b64encode(buf.read()).decode()
+                current_img = img
+                graph.innerHTML += f'<img src="data:image/png;base64,{img}"/>'
+        plt.show = show_web
+        exec(code, ENV)
+        if estado_grafica["detectada"]:
+            print(
+                "\n--------------Importante----------------\n"
+                "Por defecto, las figuras se muestran en el panel de Gráficas. "
+                "Para que también aparezcan en línea en la consola, necesitas "
+                "desmarcar 'Silenciar gráficos en línea' en el menú de opciones de Gráficos."
+            )
+        console.innerText = buffer.getvalue() or "OK"
+        
+            
+    except Exception:
+        console.innerText = traceback.format_exc()
+    finally:
+        sys.stdout = stdout
+def detectar_imports(codigo):
+    imports = set()
+    patrones = re.findall(
+        r'^\s*(?:from\s+([a-zA-Z0-9_\.]+)\s+import|import\s+([a-zA-Z0-9_\.]+))',
+        codigo,
+        re.MULTILINE
+    )
+    for item in patrones:
+        lib = item[0] or item[1]
+        if lib:
+            imports.add(lib.split(".")[0])
+    return imports
+def verificar_dependencias(codigo):
+    imports = detectar_imports(codigo)
+    reporte = []
+    bloqueado = False
+    for lib in sorted(imports):
+        if lib in LIBRERIAS_PROHIBIDAS:
+            reporte.append(
+                f" {lib} no puede ejecutarse dentro del navegador"
+            )
+            bloqueado = True
+        elif lib in LIBRERIAS_DISPONIBLES:
+            reporte.append(
+                f" {lib}"
+            )
+        else:
+            reporte.append(
+                f"⚠ {lib} no está disponible en este entorno"
+            )
+            bloqueado = True
+    return bloqueado, "\n".join(reporte)
+# =========================
+# BOTONES PYTHON
+# =========================
+def run(event):
+    ejecutar(event)
+def save_img(event):
+    if not current_img:
+        return
+    a = document.createElement("a")
+    a.href = "data:image/png;base64," + current_img
+    a.download = "grafica.png"
+    a.click()
+async def copy_img(event):
+    blob = Blob.new(
+        [base64.b64decode(current_img)],
+        {"type":"image/png"}
+    )
+    item = navigator.ClipboardItem.new({"image/png": blob})
+    await navigator.clipboard.write([item])
+document.getElementById("run").addEventListener("click", create_proxy(run))
+document.getElementById("save").addEventListener("click", create_proxy(save_img))
+document.getElementById("copy").addEventListener("click", create_proxy(copy_img))
+window.pythonReady = True
+if window.pythonReady == True:
+    console = document.getElementById("console")
+    console.innerText = "CDE_User>> trucopagina/TPF/SPYidle/_init_.py loaded correctly"
+</script>
+<script>
+updateLoader("Cargando Pyodide...");
+const waitForReady = setInterval(() => {
+    if(
+        window.monacoReady &&
+        window.pythonReady
+    ){
+        updateLoader("Completado");
+        clearInterval(waitForReady);
+        setTimeout(() => {
+            hideLoader();
+        },500);
+    }
+},200);
+</script>
+<script>
+/* =========================
+   MULTI-ARCHIVO SYSTEM
+========================= */
+let files = {
+    "Sumas de riemann.py": `import numpy as np
+import matplotlib.pyplot as plt
+
+#funciones de ejemplo
+def f1(x): return x
+def f2(x): return x**2 
+def f3(x): return np.sin(x)
+def f4(x): return np.exp(x)
+def f5(x): return 3*x
+
+#listas de ejercicios (funcion, intervalo, n, metodo)
+
+ejercicios = [
+    (f1, 0, 1, 4, "izquierda"),
+    (f2, 0, 2, 4, "derecha"),
+    (f3, 0, np.pi, 6, "izquierda"),
+    (f4, 0, 1, 5, "izquierda"),
+    (f5, 0, 3, 3, "derecha")
+    ]
+def suma_riemann(f, a, b, n, metodo="izquierda"):
+    dx = (b - a) / n
+    x = np.linspace(a, b, n+1)
+    
+    if metodo == "izquierda":
+        puntos = x[:-1]
+    elif metodo == "derecha":
+        puntos = x[1:]
+    elif metodo == "punto medio":
+        puntos = (x[:-1] + x[1:]) / 2 
+    else:
+        raise ValueError("Metodo no valido")
+        
+    suma = np.sum(f(puntos) * dx)
+    return suma, x, puntos, dx
+
+#Graficar cada ejercicio
+
+fig, axs = plt.subplots(1, 5, figsize=(20, 4))
+
+for i, (f, a, b, n, metodo) in enumerate(ejercicios):
+    suma, x, puntos, dx = suma_riemann(f, a, b, n, metodo)
+    X = np.linspace(a, b, 200)
+    Y = f(X)
+    
+    axs[i].plot(X, Y, 'b', label='f(x)')
+    for j in range(n):
+        if metodo == "izquierda":
+            altura = f(x[j])
+            axs[i].bar(x[j], altura, width=dx, align='edge', alpha=0.3, edgecolor='black')
+        elif metodo == "derecha":
+            altura = f(x[j+1])
+            axs[i].bar(x[j], altura, width=dx, align='edge', alpha=0.3, edgecolor='black')
+        elif metodo == "punto medio":
+            altura = f(puntos[j])
+            axs[i].bar(x[j], altura, width=dx, align='edge', alpha=0.3, edgecolor='black')
+            
+        axs[i].set_title(f"Ejercicio {i+1}\\nMetodo: {metodo}\\nSuma ≈ {suma:.3f}")
+        axs[i].set_xlabel("x")
+        axs[i].set_ylabel("f(x)")
+        axs[i].legend()
+            
+plt.tight_layout()        
+plt.show()`
+};
+let currentFile = "Sumas de riemann.py";
+function renderFiles(){
+    window.currentFileName = currentFile;
+    const list = document.getElementById("fileList");
+    list.innerHTML = "";
+    for(let name in files){
+        let div = document.createElement("div");
+        div.className = "file" + (name === currentFile ? " active" : "");
+        div.innerText = name;
+        div.onclick = () => {
+            currentFile = name;
+            window.editor.setValue(files[name]);
+            renderFiles();
+        };
+        list.appendChild(div);
+    }
+}
+function createFile(){
+    let name = prompt("Nombre del archivo:");
+    if(!name) return;
+    if(!name.endsWith(".py")) name += ".py";
+    files[name] = "# nuevo archivo\n";
+    currentFile = name;
+    window.editor.setValue(files[name]);
+    renderFiles();
+}
+function savePy(){
+    files[currentFile] = window.editor.getValue();
+    let blob = new Blob([files[currentFile]], {type:"text/plain"});
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = currentFile;
+    a.click();
+}
+function openFile(){
+    let input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".py";
+    input.onchange = e => {
+        let file = e.target.files[0];
+        let reader = new FileReader();
+        reader.onload = ev => {
+            files[file.name] = ev.target.result;
+            currentFile = file.name;
+            window.editor.setValue(files[file.name]);
+            renderFiles();
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+/* MONACO */
+require.config({
+    paths: {
+        vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs"
+    }
+});
+require(["vs/editor/editor.main"], function () {
+    window.current_code = files["Sumas de riemann.py"];
+    window.currentFileName = currentFile;
+    updateLoader("Editor cargado...");
+    window.editor = monaco.editor.create(
+        document.getElementById("editor"),
+        {
+            value: files["Sumas de riemann.py"],
+            language: "python",
+            theme: "vs-dark",
+            automaticLayout: true,
+        minimap:{
+            enabled:window.innerWidth > 768
+        },
+        fontSize:window.innerWidth < 768 ? 14 : 16,
+        scrollBeyondLastLine:false
+        }
+    );
+    window.current_code = files["Sumas de riemann.py"];
+    window.editor.onDidChangeModelContent(() => {
+        window.current_code = window.editor.getValue();
+        files[currentFile] = window.current_code;
+    });
+    renderFiles();
+    window.monacoReady = true;
+});
+/* EXPORT GLOBAL */
+window.createFile = createFile;
+window.openFile = openFile;
+window.savePy = savePy;
+/* ══════════════════════════════════════════
+   CONTROL DE LA INTRO DE VIDEO (MODO PERSISTENTE)
+══════════════════════════════════════════ */
+document.addEventListener("DOMContentLoaded", () => {
+  const introContainer = document.getElementById("video-intro");
+  const introVideo = document.getElementById("intro-video");
+  if (!introContainer || !introVideo) return;
+  // 🔍 COMPROBACIÓN ESTILO "UPDATE":
+  // Si en el navegador ya está guardado que el usuario vio el video, 
+  // lo eliminamos instantáneamente del HTML sin reproducir nada.
+  if (localStorage.getItem("intro_video_visto2") === "true") {
+    introContainer.remove();
+    return; // Detiene el script aquí para que la web cargue normal
+  }
+  // Función encargada de realizar el fundido
+  const finalizarIntro = () => {
+    if (introContainer.classList.contains("fade-out")) return;
+    
+    introContainer.classList.add("fade-out");
+    
+    // 💾 GUARDAR EL REGISTRO:
+    // Guardamos la marca de forma permanente en el navegador del usuario
+    localStorage.setItem("intro_video_visto2", "true");
+    
+    setTimeout(() => {
+      introContainer.remove();
+    }, 800); // 0.8s de la transición CSS
+  };
+  // Detección anticipada (0.5 segundos antes de que termine)
+  introVideo.addEventListener("timeupdate", () => {
+    const segundosAnticipados = 0.5; 
+    if (introVideo.duration) {
+      const tiempoRestante = introVideo.duration - introVideo.currentTime;
+      if (tiempoRestante <= segundosAnticipados) {
+        finalizarIntro();
+      }
+    }
+  });
+  // Mecanismo de seguridad por si falla el video
+  setTimeout(finalizarIntro, 6000); 
+});
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   DATOS — todas las líneas del programa Riemann con explicaciones
+   ══════════════════════════════════════════════════════════════════ */
+const RIEMANN_LINES = [
+  {
+    code: "import numpy as np",
+    section: "IMPORTACIONES",
+    title: "Importar NumPy",
+    body: `Esta línea le dice a Python: <b>"necesito usar NumPy"</b>. NumPy es una caja de herramientas matemáticas que nos da funciones como raíces cuadradas, senos, logaritmos y maneras rápidas de trabajar con listas de números.<br><br>El <b>as np</b> es un apodo: en lugar de escribir <b>numpy</b> cada vez, escribimos <b>np</b>.`,
+    analogy: `Es como pedir una calculadora científica prestada y ponerle la etiqueta "np" para saber cuál es la tuya.`
+  },
+  {
+    code: "import matplotlib.pyplot as plt",
+    section: "IMPORTACIONES",
+    title: "Importar Matplotlib",
+    body: `Importamos <b>matplotlib.pyplot</b>, que es la parte de matplotlib que dibuja gráficas. Le damos el apodo <b>plt</b>.<br><br>Con esta herramienta podremos crear ejes, dibujar curvas, agregar colores y mostrar la figura en pantalla.`,
+    analogy: `Es como tener un papel cuadriculado y lápices de colores listos para graficar, pero en la computadora.`
+  },
+  {
+    code: "#funciones de ejemplo",
+    section: "COMENTARIO",
+    title: "Comentario explicativo",
+    body: `Las líneas que empiezan con <b>#</b> son comentarios. Python las ignora por completo; están ahí solo para que <b>los humanos</b> entiendan el código.<br><br>Este comentario nos avisa que las siguientes líneas definen funciones matemáticas de ejemplo.`,
+    analogy: `Son como notas al margen en un cuaderno: el código no las "lee", pero a ti te ayudan a recordar qué hace cada parte.`
+  },
+  {
+    code: "def f1(x): return x",
+    section: "FUNCIONES",
+    title: "Definir f1 — función identidad",
+    body: `<b>def</b> significa "definir una función". Le decimos a Python: <b>"crea una función llamada f1 que recibe un número x y devuelve ese mismo número"</b>.<br><br>En matemáticas esto es <b>f₁(x) = x</b>, la función identidad. Su gráfica es una línea recta que pasa por el origen con pendiente 1.`,
+    analogy: `Imagina una máquina a la que le metes 5 y te devuelve 5. Eso es f1.`
+  },
+  {
+    code: "def f2(x): return x**2",
+    section: "FUNCIONES",
+    title: "Definir f2 — parábola",
+    body: `Esta función recibe <b>x</b> y devuelve <b>x al cuadrado</b>. En Python el operador <b>**</b> significa "elevar a la potencia".<br><br>En matemáticas es <b>f₂(x) = x²</b>. Su gráfica es una parábola que abre hacia arriba.`,
+    analogy: `Si metes 3, la máquina calcula 3×3 = 9 y te devuelve 9.`
+  },
+  {
+    code: "def f3(x): return np.sin(x)",
+    section: "FUNCIONES",
+    title: "Definir f3 — función seno",
+    body: `Aquí usamos <b>np.sin(x)</b>, la función seno que viene de NumPy. El resultado oscila entre −1 y 1 de forma periódica.<br><br>En matemáticas es <b>f₃(x) = sin(x)</b>. Su gráfica es la famosa ola sinusoidal.`,
+    analogy: `Piensa en las olas del mar: suben y bajan de forma regular. El seno hace exactamente eso.`
+  },
+  {
+    code: "def f4(x): return np.exp(x)",
+    section: "FUNCIONES",
+    title: "Definir f4 — función exponencial",
+    body: `<b>np.exp(x)</b> calcula <b>e elevado a x</b>, donde <b>e ≈ 2.718</b> es el número de Euler.<br><br>Esta función crece muy rápido: si x=0 vale 1, si x=1 vale ≈2.718, si x=2 vale ≈7.4, etc. Se usa mucho en crecimiento poblacional, interés compuesto y física.`,
+    analogy: `Es como una deuda con interés compuesto: al principio crece despacio, pero se dispara rápidamente.`
+  },
+  {
+    code: "def f5(x): return 3*x",
+    section: "FUNCIONES",
+    title: "Definir f5 — línea con pendiente 3",
+    body: `Esta función devuelve <b>3 multiplicado por x</b>. En matemáticas es <b>f₅(x) = 3x</b>.<br><br>Su gráfica es una línea recta que pasa por el origen con pendiente 3: por cada unidad que avanza x, f5 sube 3 unidades.`,
+    analogy: `Si x es el tiempo en horas y 3 es tu velocidad en km/h, f5 te dice cuántos kilómetros recorriste.`
+  },
+  {
+    code: "#listas de ejercicios (funcion, intervalo, n, metodo)",
+    section: "COMENTARIO",
+    title: "Comentario: descripción de la lista",
+    body: `Otro comentario. Nos dice que la siguiente variable va a guardar una lista de ejercicios, y que cada ejercicio tiene 5 partes: <b>función, inicio del intervalo, fin del intervalo, número de rectángulos y método</b>.`,
+    analogy: `Es el encabezado de una tabla de Excel: te avisa qué significa cada columna antes de ver los datos.`
+  },
+  {
+    code: "ejercicios = [",
+    section: "DATOS",
+    title: "Crear la lista de ejercicios",
+    body: `Creamos una variable llamada <b>ejercicios</b> y la igualamos a una lista (<b>[</b> abre la lista). En Python las listas guardan varios elementos en orden.<br><br>Esta lista va a contener 5 elementos, uno por cada ejercicio de suma de Riemann.`,
+    analogy: `Es como abrir una carpeta y decir: "aquí voy a guardar 5 hojas de trabajo".`
+  },
+  {
+    code: "    (f1, 0, 1, 4, \"izquierda\"),",
+    section: "DATOS",
+    title: "Ejercicio 1 — f1 en [0,1] con 4 rectángulos",
+    body: `Este es el primer elemento de la lista. Es una <b>tupla</b> (datos entre paréntesis) con 5 valores:<br><br>
+• <b>f1</b> → la función a integrar (f(x)=x)<br>
+• <b>0</b> → inicio del intervalo<br>
+• <b>1</b> → fin del intervalo<br>
+• <b>4</b> → número de rectángulos<br>
+• <b>"izquierda"</b> → método de Riemann a usar`,
+    analogy: `Es como una fila de una tabla: todos los datos de un problema en una sola línea.`
+  },
+  {
+    code: "    (f2, 0, 2, 4, \"derecha\"),",
+    section: "DATOS",
+    title: "Ejercicio 2 — f2 en [0,2] con 4 rectángulos",
+    body: `Segundo ejercicio. Usa la función <b>f2(x)=x²</b> (parábola), el intervalo va de <b>0 a 2</b>, se usarán <b>4 rectángulos</b> y el método es <b>"derecha"</b> (la altura de cada rectángulo se mide en su esquina derecha).`,
+    analogy: `Cambió la función y el método. Es como resolver el mismo tipo de problema pero con diferentes números.`
+  },
+  {
+    code: "    (f3, 0, np.pi, 6, \"izquierda\"),",
+    section: "DATOS",
+    title: "Ejercicio 3 — seno en [0, π] con 6 rectángulos",
+    body: `Tercer ejercicio. Usa la función <b>seno</b>, el intervalo va de 0 a <b>π (pi ≈ 3.14159…)</b>, con <b>6 rectángulos</b> y método <b>izquierda</b>.<br><br><b>np.pi</b> es la constante π incluida en NumPy.`,
+    analogy: `π es simplemente el número pi. En lugar de escribir 3.14159… lo escribimos como np.pi para no perder decimales.`
+  },
+  {
+    code: "    (f4, 0, 1, 5, \"izquierda\"),",
+    section: "DATOS",
+    title: "Ejercicio 4 — exponencial en [0,1] con 5 rectángulos",
+    body: `Cuarto ejercicio. La función <b>exponencial e^x</b>, intervalo de <b>0 a 1</b>, <b>5 rectángulos</b>, método <b>izquierda</b>.`,
+    analogy: `Vamos aumentando la complejidad: el seno era ondulado, la exponencial crece sin parar.`
+  },
+  {
+    code: "    (f5, 0, 3, 3, \"derecha\")",
+    section: "DATOS",
+    title: "Ejercicio 5 — 3x en [0,3] con 3 rectángulos",
+    body: `Quinto ejercicio. La función <b>3x</b>, intervalo de <b>0 a 3</b>, solo <b>3 rectángulos</b> (pocos), método <b>derecha</b>. Al ser pocos rectángulos, la aproximación será menos precisa.`,
+    analogy: `Con solo 3 rectángulos es como intentar cubrir el área bajo la curva con bloques grandes: fácil de ver pero no muy exacto.`
+  },
+  {
+    code: "    ]",
+    section: "DATOS",
+    title: "Cierre de la lista de ejercicios",
+    body: `El corchete <b>]</b> cierra la lista que abrimos antes con <b>[</b>. Todo lo que estaba entre los corchetes son los 5 ejercicios que Python va a recordar.`,
+    analogy: `Es como cerrar la carpeta de ejercicios: ya guardaste todo dentro.`
+  },
+  {
+    code: "def suma_riemann(f, a, b, n, metodo=\"izquierda\"):",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Definir la función suma_riemann",
+    body: `Esta es la función principal del programa. Recibe 5 parámetros:<br><br>
+• <b>f</b> → la función matemática a usar<br>
+• <b>a</b> → inicio del intervalo<br>
+• <b>b</b> → fin del intervalo<br>
+• <b>n</b> → número de rectángulos<br>
+• <b>metodo</b> → tipo de suma (por defecto "izquierda")<br><br>
+Los dos puntos <b>:</b> al final anuncian el inicio del cuerpo de la función.`,
+    analogy: `Es como una receta: le dices a Python "cuando te pida calcular una suma de Riemann, sigue estos pasos con estos ingredientes".`
+  },
+  {
+    code: "    dx = (b - a) / n",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Calcular el ancho de cada rectángulo",
+    body: `<b>dx</b> es el ancho de cada rectángulo. Se calcula dividiendo la longitud total del intervalo <b>(b − a)</b> entre el número de rectángulos <b>n</b>.<br><br>Por ejemplo, si el intervalo va de 0 a 2 con 4 rectángulos: dx = (2−0)/4 = 0.5`,
+    analogy: `Si tienes que cubrir un metro de mesa con 4 vasos iguales, cada vaso debe tener 25 cm de ancho. Eso es dx.`
+  },
+  {
+    code: "    x = np.linspace(a, b, n+1)",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Crear los puntos de división",
+    body: `<b>np.linspace(a, b, n+1)</b> crea una lista de <b>n+1 puntos igualmente espaciados</b> entre a y b. Estos puntos son los bordes de los rectángulos.<br><br>Por ejemplo, linspace(0, 2, 5) → [0, 0.5, 1.0, 1.5, 2.0]<br><br>Son n+1 porque para n rectángulos necesitas n+1 bordes (como las muescas en una regla).`,
+    analogy: `Si tienes 4 rectángulos, necesitas 5 líneas verticales para dividirlos. linspace dibuja esas líneas.`
+  },
+  {
+    code: "    if metodo == \"izquierda\":",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Condicional: método izquierda",
+    body: `<b>if</b> es una condición: "si esto es verdad, haz lo siguiente". Aquí preguntamos si el método elegido es <b>"izquierda"</b>.<br><br>El operador <b>==</b> compara dos valores (no confundir con <b>=</b> que asigna un valor).`,
+    analogy: `Es como una bifurcación en un camino: si el letrero dice "izquierda", tomas ese camino.`
+  },
+  {
+    code: "        puntos = x[:-1]",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Puntos del borde izquierdo",
+    body: `<b>x[:-1]</b> significa "todos los elementos de x excepto el último". Esos son los bordes <b>izquierdos</b> de cada rectángulo.<br><br>Por ejemplo, si x = [0, 0.5, 1.0, 1.5, 2.0], entonces x[:-1] = [0, 0.5, 1.0, 1.5]<br><br>Usamos el borde izquierdo para medir la altura de cada rectángulo.`,
+    analogy: `Si tienes 4 rectángulos, la altura de cada uno se mide en su esquina izquierda. Eso es lo que guardamos en "puntos".`
+  },
+  {
+    code: "    elif metodo == \"derecha\":",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Condicional: método derecha",
+    body: `<b>elif</b> significa "si la condición anterior fue falsa, prueba esta otra". Aquí comprobamos si el método es <b>"derecha"</b>.<br><br>Si fue "izquierda", ya lo manejamos. Si no, comprobamos si es "derecha".`,
+    analogy: `En la bifurcación del camino: si no era "izquierda", probamos con "derecha".`
+  },
+  {
+    code: "        puntos = x[1:]",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Puntos del borde derecho",
+    body: `<b>x[1:]</b> significa "todos los elementos de x excepto el primero". Esos son los bordes <b>derechos</b> de cada rectángulo.<br><br>Por ejemplo, x = [0, 0.5, 1.0, 1.5, 2.0] → x[1:] = [0.5, 1.0, 1.5, 2.0]`,
+    analogy: `Ahora medimos la altura de cada rectángulo en su esquina derecha en lugar de la izquierda.`
+  },
+  {
+    code: "    elif metodo == \"punto medio\":",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Condicional: método punto medio",
+    body: `Tercer caso posible: el método <b>"punto medio"</b>. En este caso la altura se mide en el centro de cada rectángulo, lo que generalmente da una mejor aproximación.`,
+    analogy: `Medir en el centro es como promediar la esquina izquierda y la derecha. Más justo para ambos lados.`
+  },
+  {
+    code: "        puntos = (x[:-1] + x[1:]) / 2",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Calcular los puntos medios",
+    body: `Sumamos los bordes izquierdos <b>x[:-1]</b> con los bordes derechos <b>x[1:]</b> y dividimos entre 2. Eso nos da el punto <b>exactamente en el centro</b> de cada rectángulo.<br><br>NumPy hace esto para <b>todos los rectángulos a la vez</b>, sin necesidad de un bucle.`,
+    analogy: `(0 + 0.5)/2 = 0.25 → ese es el centro del primer rectángulo. Hacemos lo mismo para todos.`
+  },
+  {
+    code: "    else:",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Caso por defecto: método inválido",
+    body: `Si el método no era ninguno de los tres anteriores, llegamos al bloque <b>else</b>. Esto captura cualquier valor desconocido que alguien haya escrito por error.`,
+    analogy: `Es la opción "ninguna de las anteriores" en un examen. Si llegamos aquí, algo está mal.`
+  },
+  {
+    code: "        raise ValueError(\"Metodo no valido\")",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Lanzar un error",
+    body: `<b>raise ValueError</b> detiene el programa y muestra un mensaje de error. Aquí le avisamos al usuario que el método que escribió no existe.<br><br>Esto se llama "lanzar una excepción": es la forma de Python de decir "no puedo continuar con estos datos".`,
+    analogy: `Como una señal de "camino cerrado": el programa se detiene y te explica por qué no puede seguir.`
+  },
+  {
+    code: "    suma = np.sum(f(puntos) * dx)",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Calcular la suma de Riemann",
+    body: `Esta es la línea más importante de todo el programa. Hace tres cosas en orden:<br><br>
+1. <b>f(puntos)</b> → evalúa la función en todos los puntos a la vez (da las alturas)<br>
+2. <b>* dx</b> → multiplica cada altura por el ancho (calcula el área de cada rectángulo)<br>
+3. <b>np.sum(...)</b> → suma todas las áreas para obtener la aproximación total`,
+    analogy: `Area = base × altura. Hacemos eso para cada rectángulo y luego sumamos todos. np.sum es como una calculadora que suma la lista completa de golpe.`
+  },
+  {
+    code: "    return suma, x, puntos, dx",
+    section: "FUNCIÓN PRINCIPAL",
+    title: "Devolver los resultados",
+    body: `<b>return</b> devuelve valores al código que llamó a la función. Aquí devolvemos 4 cosas:<br><br>
+• <b>suma</b> → la aproximación del área<br>
+• <b>x</b> → todos los bordes de los rectángulos<br>
+• <b>puntos</b> → los puntos donde se midió la altura<br>
+• <b>dx</b> → el ancho de los rectángulos<br><br>
+Devolvemos todo esto porque lo necesitaremos para graficar.`,
+    analogy: `Es como una función que calcula el precio de algo y devuelve no solo el total, sino también el desglose (impuestos, descuento, precio base).`
+  },
+  {
+    code: "#Graficar cada ejercicio",
+    section: "GRAFICADO",
+    title: "Comentario: inicio del graficado",
+    body: `Otro comentario. Nos indica que a partir de aquí el código se encarga de <b>dibujar</b> las gráficas de los 5 ejercicios.`,
+    analogy: `Es como un encabezado de sección: "Aquí empieza la parte visual".`
+  },
+  {
+    code: "fig, axs = plt.subplots(1, 5, figsize=(20, 4))",
+    section: "GRAFICADO",
+    title: "Crear la figura con 5 paneles",
+    body: `<b>plt.subplots(1, 5)</b> crea una figura con <b>1 fila y 5 columnas</b> de gráficas. <b>figsize=(20, 4)</b> define el tamaño: 20 unidades de ancho y 4 de alto.<br><br>
+• <b>fig</b> → la figura completa (el marco)<br>
+• <b>axs</b> → lista con los 5 paneles individuales`,
+    analogy: `Es como crear una hoja con 5 cuadros en fila para dibujar una gráfica diferente en cada uno.`
+  },
+  {
+    code: "for i, (f, a, b, n, metodo) in enumerate(ejercicios):",
+    section: "BUCLE PRINCIPAL",
+    title: "Bucle: recorrer cada ejercicio",
+    body: `Un <b>bucle for</b> repite las instrucciones siguientes para cada elemento de la lista <b>ejercicios</b>.<br><br>
+• <b>enumerate</b> nos da automáticamente el número de turno (<b>i</b>: 0, 1, 2, 3, 4)<br>
+• <b>(f, a, b, n, metodo)</b> desempaqueta cada tupla: asigna cada parte a su variable<br><br>
+Es decir, en la primera vuelta: i=0, f=f1, a=0, b=1, n=4, metodo="izquierda"`,
+    analogy: `Es como decir: "para cada hoja de ejercicios en mi carpeta, ábrela y trabaja con ella".`
+  },
+  {
+    code: "    suma, x, puntos, dx = suma_riemann(f, a, b, n, metodo)",
+    section: "BUCLE PRINCIPAL",
+    title: "Llamar a la función suma_riemann",
+    body: `Aquí <b>llamamos</b> a la función que definimos antes, pasándole los datos del ejercicio actual. La función devuelve 4 valores y los guardamos en 4 variables a la vez: <b>suma, x, puntos, dx</b>.`,
+    analogy: `Es como enviar la receta a la cocina con los ingredientes del ejercicio, y recibir de vuelta el platillo terminado (la suma) y la preparación (x, puntos, dx para graficar).`
+  },
+  {
+    code: "    X = np.linspace(a, b, 200)",
+    section: "BUCLE PRINCIPAL",
+    title: "Crear puntos suaves para la curva",
+    body: `Para dibujar la curva de la función de forma suave, necesitamos <b>muchos puntos</b>. Aquí creamos 200 puntos entre a y b.<br><br>Usamos 200 (en lugar de n+1) porque queremos que la curva se vea continua, no como una escalera.`,
+    analogy: `Es como pixeles: con pocos puntos la curva parece dentada; con 200 puntos parece perfectamente suave.`
+  },
+  {
+    code: "    Y = f(X)",
+    section: "BUCLE PRINCIPAL",
+    title: "Evaluar la función en los 200 puntos",
+    body: `Evaluamos la función <b>f</b> en los 200 puntos que creamos. NumPy hace esto automáticamente para todos los puntos a la vez, sin necesidad de un bucle.<br><br><b>Y</b> ahora contiene las alturas de la curva en cada uno de esos 200 puntos.`,
+    analogy: `Le mandamos los 200 valores de X a la máquina (f), y ella nos devuelve los 200 valores de Y. Un proceso muy rápido.`
+  },
+  {
+    code: "    axs[i].plot(X, Y, 'b', label='f(x)')",
+    section: "BUCLE PRINCIPAL",
+    title: "Dibujar la curva en azul",
+    body: `<b>axs[i]</b> selecciona el panel número i. <b>.plot(X, Y)</b> dibuja una curva conectando los 200 puntos.<br><br>
+• <b>'b'</b> → color azul (blue)<br>
+• <b>label='f(x)'</b> → el nombre que aparecerá en la leyenda`,
+    analogy: `Es como tomar un lápiz azul y dibujar la curva punto por punto en el cuadro correspondiente.`
+  },
+  {
+    code: "    for j in range(n):",
+    section: "BUCLE DE RECTÁNGULOS",
+    title: "Bucle: dibujar cada rectángulo",
+    body: `Un bucle dentro del bucle principal. <b>range(n)</b> genera los números 0, 1, 2, …, n−1. El bucle se repetirá <b>n veces</b>, una por cada rectángulo.<br><br><b>j</b> es el índice del rectángulo actual.`,
+    analogy: `"Para el rectángulo 0, luego el 1, luego el 2…" hasta llegar al último.`
+  },
+  {
+    code: "        if metodo == \"izquierda\":",
+    section: "BUCLE DE RECTÁNGULOS",
+    title: "¿Método izquierda? Calcular altura",
+    body: `Dentro del bucle de rectángulos, volvemos a preguntar qué método se está usando. Esto determina cómo calcular la <b>altura</b> de cada rectángulo en particular.`,
+    analogy: `Antes elegimos la regla general; ahora la aplicamos rectángulo por rectángulo.`
+  },
+  {
+    code: "            altura = f(x[j])",
+    section: "BUCLE DE RECTÁNGULOS",
+    title: "Altura en el borde izquierdo",
+    body: `Para el método izquierda, la altura del rectángulo j es <b>f evaluada en el borde izquierdo</b> de ese rectángulo, que es <b>x[j]</b>.<br><br>Por ejemplo, para j=0, x[0] es el primer punto (el inicio del intervalo).`,
+    analogy: `Mides cuánto mide la curva exactamente en la esquina izquierda del rectángulo, y esa es su altura.`
+  },
+  {
+    code: "            axs[i].bar(x[j], altura, width=dx, align='edge', alpha=0.3, edgecolor='black')",
+    section: "BUCLE DE RECTÁNGULOS",
+    title: "Dibujar el rectángulo (método izquierda)",
+    body: `<b>.bar()</b> dibuja un rectángulo. Parámetros:<br><br>
+• <b>x[j]</b> → posición horizontal del borde izquierdo<br>
+• <b>altura</b> → altura del rectángulo<br>
+• <b>width=dx</b> → ancho del rectángulo<br>
+• <b>align='edge'</b> → alinear al borde izquierdo<br>
+• <b>alpha=0.3</b> → transparencia (0=invisible, 1=sólido)<br>
+• <b>edgecolor='black'</b> → borde negro`,
+    analogy: `Es como dibujar un ladrillo: le dices dónde empieza, qué tan alto y qué tan ancho, y con qué opacidad.`
+  },
+  {
+    code: "        elif metodo == \"derecha\":",
+    section: "BUCLE DE RECTÁNGULOS",
+    title: "¿Método derecha?",
+    body: `Si el método es <b>"derecha"</b>, calculamos la altura del rectángulo usando su borde derecho en lugar del izquierdo.`,
+    analogy: `La misma bifurcación de antes, pero ahora tomamos el camino "derecha".`
+  },
+  {
+    code: "            altura = f(x[j+1])",
+    section: "BUCLE DE RECTÁNGULOS",
+    title: "Altura en el borde derecho",
+    body: `Para el método derecha, usamos <b>x[j+1]</b>, que es el borde <b>derecho</b> del rectángulo j.<br><br>Si x = [0, 0.5, 1.0, 1.5, 2.0] y j=0, entonces x[j+1] = x[1] = 0.5`,
+    analogy: `Ahora mides la altura en la esquina derecha del rectángulo, no en la izquierda.`
+  },
+  {
+    code: "            axs[i].bar(x[j], altura, width=dx, align='edge', alpha=0.3, edgecolor='black')",
+    section: "BUCLE DE RECTÁNGULOS",
+    title: "Dibujar el rectángulo (método derecha)",
+    body: `Dibujamos el rectángulo igual que antes. El punto de inicio sigue siendo el borde izquierdo (<b>x[j]</b>), pero la <b>altura</b> se calculó con el borde derecho, así que el rectángulo se dibuja con esa altura.`,
+    analogy: `El rectángulo siempre empieza en la izquierda, pero su altura se decidió mirando hacia la derecha.`
+  },
+  {
+    code: "        elif metodo == \"punto medio\":",
+    section: "BUCLE DE RECTÁNGULOS",
+    title: "¿Método punto medio?",
+    body: `Tercer opción para el dibujo de rectángulos: método <b>"punto medio"</b>. La altura se mide en el centro de cada intervalo.`,
+    analogy: `El tercer camino en la bifurcación.`
+  },
+  {
+    code: "            altura = f(puntos[j])",
+    section: "BUCLE DE RECTÁNGULOS",
+    title: "Altura en el punto medio",
+    body: `<b>puntos[j]</b> ya contiene el punto medio del rectángulo j (lo calculamos antes con <b>(x[:-1] + x[1:]) / 2</b>). Evaluamos la función en ese punto para obtener la altura.`,
+    analogy: `Mides la curva exactamente en el centro del rectángulo para determinar su altura.`
+  },
+  {
+    code: "            axs[i].bar(x[j], altura, width=dx, align='edge', alpha=0.3, edgecolor='black')",
+    section: "BUCLE DE RECTÁNGULOS",
+    title: "Dibujar el rectángulo (método punto medio)",
+    body: `Mismo comando de siempre para dibujar el rectángulo. En los tres métodos la posición y el ancho son iguales; solo cambia la <b>altura</b> que calculamos de diferente manera.`,
+    analogy: `El ladrillo siempre se coloca igual; lo único que cambia es cuánto mide de alto.`
+  },
+  {
+    code: "        axs[i].set_title(f\"Ejercicio {i+1}\\nMetodo: {metodo}\\nSuma ≈ {suma:.3f}\")",
+    section: "ETIQUETAS",
+    title: "Título de la gráfica",
+    body: `<b>set_title()</b> pone un título encima de la gráfica. Usamos un <b>f-string</b> (cadena de texto que puede incluir variables dentro de llaves <b>{}</b>).<br><br>
+• <b>{i+1}</b> → número del ejercicio (1 al 5)<br>
+• <b>{metodo}</b> → el método usado<br>
+• <b>{suma:.3f}</b> → la suma con 3 decimales<br>
+• <b>\\n</b> → salto de línea`,
+    analogy: `Es como escribir el encabezado de un examen: "Problema 1 / Método: izquierda / Respuesta: 0.375"`
+  },
+  {
+    code: "        axs[i].set_xlabel(\"x\")",
+    section: "ETIQUETAS",
+    title: "Etiqueta del eje horizontal",
+    body: `<b>set_xlabel("x")</b> escribe la letra <b>"x"</b> debajo del eje horizontal de la gráfica. Esto les indica a los lectores qué representa ese eje.`,
+    analogy: `En un mapa, el eje horizontal tiene una etiqueta como "Longitud" o "Km". Aquí simplemente es "x".`
+  },
+  {
+    code: "        axs[i].set_ylabel(\"f(x)\")",
+    section: "ETIQUETAS",
+    title: "Etiqueta del eje vertical",
+    body: `<b>set_ylabel("f(x)")</b> escribe la etiqueta del eje vertical. Indica que el eje y representa el valor de la función.`,
+    analogy: `En el mapa sería "Latitud" o "Metros". Aquí es el valor de la función: "f(x)".`
+  },
+  {
+    code: "        axs[i].legend()",
+    section: "ETIQUETAS",
+    title: "Mostrar la leyenda",
+    body: `<b>legend()</b> muestra un pequeño cuadro con los nombres de las curvas dibujadas. El nombre <b>'f(x)'</b> que pusimos en el <b>label</b> del comando <b>plot()</b> aparecerá aquí.`,
+    analogy: `Es el cuadro de colores en un mapa que explica qué significa cada color.`
+  },
+  {
+    code: "plt.tight_layout()",
+    section: "FINALIZACIÓN",
+    title: "Ajustar el espaciado automáticamente",
+    body: `<b>tight_layout()</b> ajusta automáticamente los márgenes y espacios entre las 5 gráficas para que no se encimen ni se corten los títulos y etiquetas.<br><br>Sin esta línea, los títulos de una gráfica podrían tapar a la gráfica de al lado.`,
+    analogy: `Es como organizar 5 fotos en una hoja: tight_layout calcula el espacio justo para que quepan bien sin solaparse.`
+  },
+  {
+    code: "plt.show()",
+    section: "FINALIZACIÓN",
+    title: "Mostrar la figura",
+    body: `La última línea del programa. <b>plt.show()</b> le dice a matplotlib que despliegue la figura con todas las gráficas en pantalla.<br><br>Sin esta línea, el programa calcularía todo pero no mostraría nada visible.`,
+    analogy: `Es como presionar el botón de "imprimir": hasta este momento todo estaba listo en la memoria, y ahora por fin lo ves en pantalla.`
+  }
+];
+/* ══════════════════════════════════════════════
+   MODO NORMAL — helpers
+   ══════════════════════════════════════════════ */
+let appMode = 'normal'; // 'normal' | 'teach' | 'memo'
+let savedCode = '';
+let teachDecos = [];
+let learnIdx = 0;
+let memoChangeHandler = null;
+
+function consoleEl() { return document.getElementById('console'); }
+function modeBar()    { return document.getElementById('mode-bar'); }
+
+function setModeBar(mode, controlsHTML) {
+  const bar = modeBar();
+  bar.className = 'visible ' + mode;
+  document.getElementById('mode-bar-title').textContent =
+    mode === 'teach' ? '📖 Enseñanza · Sumas de Riemann' : '🧠 Modo memorización · Sumas de Riemann';
+  document.getElementById('mode-bar-controls').innerHTML = controlsHTML;
+  // push monaco content down
+  const padTop = bar.offsetHeight || 36;
+  if (window.editor) {
+    document.querySelector('.monaco-editor')?.parentElement && (
+      window.editor.getDomNode().style.paddingTop = padTop + 'px'
+    );
+  }
+}
+
+function exitMode() {
+  appMode = 'normal';
+  // restore code
+  if (window.editor) {
+    window.editor.setValue(savedCode);
+    window.editor.updateOptions({ readOnly: false });
+    // clear decorations
+    teachDecos = window.editor.deltaDecorations(teachDecos, []);
+    setTimeout(() => window.editor.layout(), 50);
+  }
+  // restore console
+  const c = consoleEl();
+  c.className = '';
+  c.innerHTML = '';
+  // hide mode bar
+  modeBar().className = '';
+  // remove memo change listener
+  if (memoChangeHandler) { memoChangeHandler.dispose(); memoChangeHandler = null; }
+}
+window.exitMode = exitMode;
+
+/* ══════════════════════════════════════════════
+   MODO ENSEÑANZA — código Riemann en el editor,
+   explicación en la consola
+   ══════════════════════════════════════════════ */
+function enterTeachMode() {
+  if (!window.editor) return;
+  appMode = 'teach';
+  savedCode = window.editor.getValue();
+  learnIdx = 0;
+
+  // Load full Riemann code into editor (read-only)
+  const fullCode = RIEMANN_LINES.map(l => l.code).join('\n');
+  window.editor.setValue(fullCode);
+  window.editor.updateOptions({ readOnly: true });
+
+  // Mode bar with prev/next/exit
+  setModeBar('teach', `
+    <button onclick="teachPrev()" style="background:#1a3a1a;border-color:#2ecc71;color:#2ecc71;">← Anterior</button>
+    <span class="step-lbl" id="teach-step-lbl">1 / ${RIEMANN_LINES.length}</span>
+    <button onclick="teachNext()" style="background:#1a3a1a;border-color:#2ecc71;color:#2ecc71;">Siguiente →</button>
+    <button onclick="exitMode()" class="exit-btn">✕ Salir</button>
+  `);
+
+  // Console becomes explanation panel
+  const c = consoleEl();
+  c.className = 'teach-mode';
+  c.innerHTML = `<div id="teach-explain-wrap">
+    <div class="teach-prog-track"><div class="teach-prog-fill" id="teach-prog-fill" style="width:0%"></div></div>
+    <div id="teach-explain-body"></div>
+  </div>`;
+
+  renderTeachLine();
+}
+window.enterTeachMode = enterTeachMode;
+
+function renderTeachLine() {
+  const item  = RIEMANN_LINES[learnIdx];
+  const total = RIEMANN_LINES.length;
+  const pct   = Math.round(((learnIdx + 1) / total) * 100);
+  const lineNo = learnIdx + 1; // 1-based
+
+  // Update step label in mode bar
+  const lbl = document.getElementById('teach-step-lbl');
+  if (lbl) lbl.textContent = `${lineNo} / ${total}`;
+
+  // Progress bar
+  const fill = document.getElementById('teach-prog-fill');
+  if (fill) fill.style.width = pct + '%';
+
+  // Highlight line in editor
+  teachDecos = window.editor.deltaDecorations(teachDecos, [{
+    range: new monaco.Range(lineNo, 1, lineNo, 1),
+    options: {
+      isWholeLine: true,
+      className: 'teach-line-highlight',
+      glyphMarginClassName: 'teach-glyph',
+      overviewRuler: { color: '#2ecc71', position: monaco.editor.OverviewRulerLane.Full }
+    }
+  }]);
+  window.editor.revealLineInCenter(lineNo);
+
+  // Explanation in console
+  const body = document.getElementById('teach-explain-body');
+  if (body) body.innerHTML = `
+    <div style="display:inline-block;background:#0e639c;color:#fff;font-size:10px;font-weight:bold;padding:2px 8px;border-radius:20px;letter-spacing:1px;margin-bottom:10px;text-transform:uppercase;">${item.section}</div>
+    <div style="font-size:15px;font-weight:bold;color:#4fc3f7;margin-bottom:8px;">${item.title}</div>
+    <div style="font-size:13px;color:#ccc;line-height:1.7;">${item.body}</div>
+    ${item.analogy ? `<div style="margin-top:12px;background:#111;border-left:3px solid #f39c12;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;color:#f0c060;"><b>💡 Analogía:</b> ${item.analogy}</div>` : ''}
+  `;
+}
+
+function teachNext() {
+  if (learnIdx < RIEMANN_LINES.length - 1) { learnIdx++; renderTeachLine(); }
+}
+function teachPrev() {
+  if (learnIdx > 0) { learnIdx--; renderTeachLine(); }
+}
+window.teachNext = teachNext;
+window.teachPrev = teachPrev;
+
+// Also inject Monaco CSS for highlight
+(function injectTeachCSS() {
+  const s = document.createElement('style');
+  s.textContent = `.teach-line-highlight { background: rgba(46,204,113,0.15) !important; border-left: 3px solid #2ecc71 !important; }`;
+  document.head.appendChild(s);
+})();
+
+// Keyboard navigation for teach mode
+document.addEventListener('keydown', (e) => {
+  if (appMode !== 'teach') return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') teachNext();
+  if (e.key === 'ArrowUp'   || e.key === 'ArrowLeft')  teachPrev();
+  if (e.key === 'Escape') exitMode();
+});
+
+/* ══════════════════════════════════════════════
+   MODO MEMORIZACIÓN — editor vacío, usuario escribe,
+   evaluación final 1-100
+   ══════════════════════════════════════════════ */
+function enterMemoMode() {
+  if (!window.editor) return;
+  appMode = 'memo';
+  savedCode = window.editor.getValue();
+  teachDecos = window.editor.deltaDecorations(teachDecos, []);
+
+  window.editor.setValue('');
+  window.editor.updateOptions({ readOnly: false });
+  setTimeout(() => { window.editor.focus(); window.editor.layout(); }, 50);
+
+  setModeBar('memo', `
+    <button onclick="finalizeMemo()" style="background:#1a3a1a;border-color:#2ecc71;color:#2ecc71;">✓ Evaluar mi código</button>
+    <button onclick="exitMode()" class="exit-btn">✕ Salir sin evaluar</button>
+  `);
+
+  const c = consoleEl();
+  c.className = 'memo-mode';
+  renderMemoLiveConsole(0, 0);
+
+  // Live listener — counts lines, no answers revealed
+  memoChangeHandler = window.editor.onDidChangeModelContent(() => {
+    if (appMode !== 'memo') return;
+    const lines = window.editor.getValue().split('\n');
+    const written = lines.filter(l => l.trim() !== '').length;
+    const total   = RIEMANN_LINES.length;
+    renderMemoLiveConsole(written, total);
+  });
+}
+window.enterMemoMode = enterMemoMode;
+
+function renderMemoLiveConsole(written, total) {
+  const c = consoleEl();
+  c.innerHTML = `<div id="memo-live-wrap">
+    <div style="color:#ce93d8;font-weight:bold;font-size:13px;margin-bottom:10px;">
+      🧠 Escribe el programa de Sumas de Riemann desde cero.
+    </div>
+    <div style="color:#888;font-size:12px;line-height:1.8;margin-bottom:14px;">
+      No se mostrarán pistas ni respuestas mientras escribes.<br>
+      Cuando termines, pulsa <b style="color:#2ecc71">✓ Evaluar mi código</b> para ver tu puntuación del 1 al 100.
+    </div>
+    <div class="memo-live-row">
+      <div class="memo-live-stat">Líneas escritas: <b>${written}</b></div>
+      <div class="memo-live-stat">Objetivo: <b>${total} líneas</b></div>
+      <div class="memo-live-stat">Progreso: <b>${Math.min(100,Math.round(written/total*100))}%</b></div>
+    </div>
+    <div style="background:#222;border-radius:4px;height:4px;overflow:hidden;margin-top:4px;">
+      <div style="height:100%;background:linear-gradient(90deg,#9b59b6,#ce93d8);border-radius:4px;width:${Math.min(100,Math.round(written/total*100))}%;transition:width .3s;"></div>
+    </div>
+  </div>`;
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m+1}, (_, i) => Array.from({length: n+1}, (_, j) => i === 0 ? j : j === 0 ? i : 0));
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+function finalizeMemo() {
+  if (appMode !== 'memo') return;
+  const userLines  = window.editor.getValue().split('\n');
+  const total      = RIEMANN_LINES.length;
+  let   points     = 0;
+  const breakdown  = [];
+
+  for (let i = 0; i < total; i++) {
+    const expected = RIEMANN_LINES[i].code.trimEnd();
+    const got      = (userLines[i] || '').trimEnd();
+    let status, credit;
+    if (got === expected) {
+      status = 'ok'; credit = 1;
+    } else {
+      // Partial credit via Levenshtein similarity
+      const maxLen = Math.max(expected.length, got.length, 1);
+      const sim    = 1 - levenshtein(got, expected) / maxLen;
+      if (sim >= 0.85) { status = 'near'; credit = 0.6; }
+      else              { status = 'bad';  credit = 0;   }
+    }
+    points += credit;
+    breakdown.push({ i, expected, got, status });
+  }
+
+  const score = Math.round((points / total) * 100);
+  const emoji = score >= 90 ? '🏆' : score >= 70 ? '🎯' : score >= 50 ? '📈' : '💪';
+  const sClass = score >= 70 ? 's-high' : score >= 45 ? 's-mid' : 's-low';
+  const msg = score >= 90 ? '¡Excelente! Dominas el programa completo.' :
+              score >= 70 ? 'Muy bien. Repasa las líneas marcadas en rojo.' :
+              score >= 50 ? 'Buen intento. Usa el modo de Enseñanza para repasar.' :
+              'Sigue practicando. El modo Enseñanza te ayudará a memorizarlo.';
+
+  const badLines = breakdown.filter(b => b.status !== 'ok');
+  const breakdownHTML = breakdown.map(b => {
+    const safe = b.expected.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const safeGot = b.got.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    if (b.status === 'ok') {
+      return `<div class="bl ok"><span class="bi">${b.i+1}</span><span class="bc">✓ ${safe}</span></div>`;
+    } else if (b.status === 'near') {
+      return `<div class="bl near"><span class="bi">${b.i+1}</span><span class="bc">≈ ${safe}</span></div>`;
+    } else {
+      return `<div class="bl bad"><span class="bi">${b.i+1}</span><span class="bc">✗ esperado: ${safe}${b.got ? `<br><span style="color:#888;padding-left:22px;display:block;">  escrito:  ${safeGot}</span>` : ''}</span></div>`;
+    }
+  }).join('');
+
+  const c = consoleEl();
+  c.innerHTML = `<div id="memo-live-wrap">
+    <div style="text-align:center;padding:4px 0 10px;">
+      <div style="font-size:32px;">${emoji}</div>
+      <div class="score-big ${sClass}">${score}<span style="font-size:22px;font-weight:normal;color:#888;">/100</span></div>
+      <div style="color:#aaa;font-size:13px;margin-bottom:8px;">${msg}</div>
+      <div style="display:flex;gap:16px;justify-content:center;font-size:12px;margin-bottom:10px;flex-wrap:wrap;">
+        <span style="color:#2ecc71;">✓ Correctas: <b>${breakdown.filter(b=>b.status==='ok').length}</b></span>
+        <span style="color:#f39c12;">≈ Casi correctas: <b>${breakdown.filter(b=>b.status==='near').length}</b></span>
+        <span style="color:#e74c3c;">✗ Incorrectas: <b>${badLines.length}</b></span>
+        <span style="color:#aaa;">Total: <b>${total}</b></span>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Desglose completo</div>
+    <div class="memo-breakdown">${breakdownHTML}</div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button onclick="enterMemoMode()" style="background:#2a1a3a;border-color:#9b59b6;color:#ce93d8;">↺ Intentar de nuevo</button>
+      <button onclick="exitMode()" style="background:#444;border-color:#666;">✕ Salir</button>
+    </div>
+  </div>`;
+
+  // Mark wrong lines in editor with decorations
+  const errDecos = badLines.map(b => ({
+    range: new monaco.Range(b.i+1,1,b.i+1,1),
+    options: {
+      isWholeLine: true,
+      className: b.status === 'near' ? 'memo-near-line' : 'memo-bad-line',
+      overviewRuler: { color: b.status === 'near' ? '#f39c12' : '#e74c3c', position: monaco.editor.OverviewRulerLane.Full }
+    }
+  }));
+  window.editor.deltaDecorations([], errDecos);
+  window.editor.updateOptions({ readOnly: true });
+
+  // inject decoration CSS if needed
+  if (!document.getElementById('memo-deco-css')) {
+    const s = document.createElement('style');
+    s.id = 'memo-deco-css';
+    s.textContent = `.memo-bad-line{background:rgba(231,76,60,.15)!important;border-left:3px solid #e74c3c!important;}.memo-near-line{background:rgba(243,156,18,.12)!important;border-left:3px solid #f39c12!important;}`;
+    document.head.appendChild(s);
+  }
+}
+window.finalizeMemo = finalizeMemo;
+
+// Legacy aliases (por si acaso)
+window.openLearn = enterTeachMode;
+window.openMemo  = enterMemoMode;
+</script>
+</body>
+</html>
