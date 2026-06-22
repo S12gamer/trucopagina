@@ -634,16 +634,13 @@ const waitForReady = setInterval(() => {
 let files = {
     "Sumas de riemann.py": `import numpy as np
 import matplotlib.pyplot as plt
-
 #funciones de ejemplo
 def f1(x): return x
 def f2(x): return x**2 
 def f3(x): return np.sin(x)
 def f4(x): return np.exp(x)
 def f5(x): return 3*x
-
 #listas de ejercicios (funcion, intervalo, n, metodo)
-
 ejercicios = [
     (f1, 0, 1, 4, "izquierda"),
     (f2, 0, 2, 4, "derecha"),
@@ -654,7 +651,6 @@ ejercicios = [
 def suma_riemann(f, a, b, n, metodo="izquierda"):
     dx = (b - a) / n
     x = np.linspace(a, b, n+1)
-    
     if metodo == "izquierda":
         puntos = x[:-1]
     elif metodo == "derecha":
@@ -663,19 +659,14 @@ def suma_riemann(f, a, b, n, metodo="izquierda"):
         puntos = (x[:-1] + x[1:]) / 2 
     else:
         raise ValueError("Metodo no valido")
-        
     suma = np.sum(f(puntos) * dx)
     return suma, x, puntos, dx
-
 #Graficar cada ejercicio
-
 fig, axs = plt.subplots(1, 5, figsize=(20, 4))
-
 for i, (f, a, b, n, metodo) in enumerate(ejercicios):
     suma, x, puntos, dx = suma_riemann(f, a, b, n, metodo)
     X = np.linspace(a, b, 200)
     Y = f(X)
-    
     axs[i].plot(X, Y, 'b', label='f(x)')
     for j in range(n):
         if metodo == "izquierda":
@@ -687,12 +678,10 @@ for i, (f, a, b, n, metodo) in enumerate(ejercicios):
         elif metodo == "punto medio":
             altura = f(puntos[j])
             axs[i].bar(x[j], altura, width=dx, align='edge', alpha=0.3, edgecolor='black')
-            
         axs[i].set_title(f"Ejercicio {i+1}\\nMetodo: {metodo}\\nSuma ≈ {suma:.3f}")
         axs[i].set_xlabel("x")
         axs[i].set_ylabel("f(x)")
         axs[i].legend()
-            
 plt.tight_layout()        
 plt.show()`
 };
