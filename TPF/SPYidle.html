@@ -386,6 +386,7 @@ import numpy as np
 import sympy as sp
 import matplotlib.pyplot as plt
 import base64
+import json
 
 from js import document, navigator, Blob, URL, window
 from pyodide.ffi import create_proxy
@@ -625,7 +626,42 @@ document.getElementById("copy").addEventListener("click", create_proxy(copy_img)
 window.pythonReady = True
 if window.pythonReady == True:
     console = document.getElementById("console")
-    console.innerText = "CDE_User>> trucopagina/TPF/SPYidle/_init_.py loaded correctly"
+    
+    # 1. Intentamos leer el texto del localStorage (Cambia 'usuario' por tu clave real)
+    usuario_json = window.localStorage.getItem('fo205')
+    user_tag = "CDE_User" # Valor por defecto por si acaso
+    
+    if usuario_json:
+        try:
+            # 2. Convertimos el texto JSON a un diccionario de Python
+            datos = json.loads(usuario_json)
+            control = str(datos.get("control", ""))
+            
+            # 3. Extraemos los últimos 3 dígitos si existen
+            if len(control) >= 3:
+                ultimos_tres = control[-3:]
+                user_tag = f"CDE_{ultimos_tres}"
+            # 4. Extraemos la primera letra de cada palabra en el nombre
+            nombre = datos.get("nombre", "")
+            # split() separa por espacios; palabra[0] toma la primera letra; upper() la hace mayúscula
+            iniciales = "".join([palabra[0].upper() for palabra in nombre.split() if palabra])
+            
+            # 5. Combinamos las iniciales al lado de los números (Resultado: JGJJ286)
+            user_tag = f"CDE_{iniciales}{ultimos_tres}"
+            
+            # NOTA: Si prefieres que lleve un guion en medio (ej. JGJJ-286), cambia la línea de arriba por:
+            # user_tag = f"CDE_{iniciales}-{ultimos_tres}"
+            
+            # O si prefieres los números primero y luego las iniciales (ej. 286JGJJ):
+            # user_tag = f"CDE_{ultimos_tres}{iniciales}"
+            
+        except Exception:
+            # Si algo falla en el proceso, volvemos al valor por defecto
+            user_tag = "CDE_User"
+
+    # 6. Pintamos el resultado en la consola de tu interfaz
+    console.innerText = f"{user_tag}>> trucopagina/TPF/SPYidle/_init_.py loaded correctly"    
+
 
 </script>
 <script>
