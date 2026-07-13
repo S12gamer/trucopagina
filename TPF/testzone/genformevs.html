@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador · FO-205P11000-14</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0f0e0c;
+  --paper:#f7f4ee;
+  --cream:#ede9df;
+  --warm:#d4c9a8;
+  --accent:#b85c20;
+  --accent2:#1d4e4a;
+  --accent2-light:#e8f0ef;
+  --gold:#c9972a;
+  --border:#c8c0a8;
+  --text2:#5a5446;
+  --text3:#9a9080;
+  --success:#1d4e4a;
+  --success-bg:#e8f0ef;
+  --error:#8b2020;
+  --error-bg:#fdf0f0;
+  --r:6px;
+  --r2:12px;
+}
+/* ── INTRO DE VIDEO EN PANTALLA COMPLETA ── */
+    #video-intro {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000000; /* Fondo negro absoluto mientras carga o se reproduce */
+      z-index: 999999; /* Se sitúa por encima de barras de navegación, fondos y pop-ups */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease-out, visibility 0.8s ease-out; /* Transición suave de fundido */
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #intro-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* El video llena la pantalla de forma fluida sin estirarse */
+      pointer-events: none; /* Bloquea clics, doble clics y clic derecho (así no se puede pausar) */
+    }
+
+    /* Clase que activará el JavaScript para hacer el fundido hacia la web */
+    #video-intro.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+    /* Contenedor del fondo aleatorio */
+    #worldcup-bg {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0; /* Cambiado a 0 para que no se esconda detrás del body */
+      pointer-events: none; overflow: hidden;
+    }
+html{font-size:16px;overscroll-behavior-y: none; /* Bloquea el rebote elástico en el eje vertical */}
+body{
+  font-family:'Fraunces',Georgia,serif;
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+  padding-bottom:4rem;
+}
+.Layout {
+  position: relative;
+  z-index: 1; /* Al ser mayor que 0, se posiciona por encima de las figuras animadas */
+}
+/* ── HEADER ── */
+.site-header{
+  background:var(--ink);
+  color:var(--paper);
+  padding:1.5rem 1.25rem 1.25rem;
+  position:relative;
+  overflow:hidden;
+}
+.site-header::before{
+  content:'';
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    45deg,
+    transparent,transparent 20px,
+    rgba(255,255,255,.025) 20px,rgba(255,255,255,.025) 21px
+  );
+  pointer-events:none;
+}
+.header-badge{
+  display:inline-block;
+  font-family:'DM Mono',monospace;
+  font-size:10px;letter-spacing:.12em;
+  color:var(--gold);border:1px solid var(--gold);
+  padding:3px 10px;border-radius:99px;margin-bottom:.75rem;
+  text-transform:uppercase;
+}
+.site-header h1{
+  font-size:clamp(1.4rem,5vw,2rem);
+  font-weight:600;line-height:1.15;
+  font-style:italic;
+  color:#fff;
+}
+.site-header p{
+  font-family:'DM Mono',monospace;
+  font-size:11px;color:rgba(255,255,255,.45);
+  margin-top:.5rem;letter-spacing:.04em;
+}
+
+/* ── LAYOUT ── */
+.wrap{max-width:620px;margin:0 auto;padding:0 1rem}
+
+/* ── STEPPER ── */
+.steps{
+  display:flex;gap:0;
+  margin:1.5rem 0 .5rem;
+  border:1px solid var(--border);
+  border-radius:var(--r2);
+  overflow:hidden;
+  background:var(--cream);
+}
+.step{
+  flex:1;padding:.55rem .25rem;text-align:center;
+  font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:.06em;color:var(--text3);
+  border-right:1px solid var(--border);
+  transition:all .2s;cursor:default;
+  position:relative;
+}
+.step:last-child{border-right:none}
+.step.active{background:var(--ink);color:#fff}
+.step.done{background:var(--accent2);color:#fff}
+.step span{display:block;font-size:16px;margin-bottom:1px}
+
+/* ── CARD ── */
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--r2);
+  padding:1.25rem;
+  margin-bottom:1rem;
+}
+.card-title{
+  font-family:'DM Mono',monospace;
+  font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  margin-bottom:1rem;
+  display:flex;align-items:center;gap:8px;
+}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── FIELDS ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid1{display:grid;grid-template-columns:1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{
+  font-family:'DM Mono',monospace;
+  font-size:11px;letter-spacing:.05em;
+  color:var(--text2);
+}
+.field input,.field select,.field textarea{
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  font-size:14px;font-family:'Fraunces',serif;
+  color:var(--ink);background:var(--paper);
+  outline:none;transition:border-color .15s,box-shadow .15s;
+  appearance:none;-webkit-appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--accent2);
+  box-shadow:0 0 0 3px rgba(29,78,74,.12);
+  background:#fff;
+}
+.field textarea{resize:vertical;min-height:72px;line-height:1.55}
+.field select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+  padding-right:36px;cursor:pointer;
+}
+
+/* ── COMPETENCIA GRID ── */
+.comp-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(64px,1fr));
+  gap:8px;
+  margin-top:4px;
+}
+.comp-btn{
+  aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fraunces',serif;font-size:1.3rem;font-weight:600;
+  border:1.5px solid var(--border);border-radius:var(--r);
+  background:var(--paper);color:var(--text2);
+  cursor:pointer;transition:all .15s;
+  user-select:none;
+}
+.comp-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--cream)}
+.comp-btn.active{
+  background:var(--accent);color:#fff;
+  border-color:var(--accent);
+  box-shadow:0 3px 12px rgba(184,92,32,.3);
+}
+
+/* ── INDICADORES ── */
+.ind-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.ind-btn{
+  padding:10px 0;
+  min-width:48px;flex:1;
+  font-family:'Fraunces',serif;font-size:1rem;font-weight:600;
+  border:1.5px solid var(--border);border-radius:var(--r);
+  background:var(--paper);color:var(--text2);
+  cursor:pointer;transition:all .15s;text-align:center;
+  user-select:none;
+}
+.ind-btn:hover{border-color:var(--accent2);color:var(--accent2);background:var(--accent2-light)}
+.ind-btn.active{
+  background:var(--accent2);color:#fff;
+  border-color:var(--accent2);
+  box-shadow:0 3px 10px rgba(29,78,74,.25);
+}
+
+/* ── DESCRIPCION PREVIEW ── */
+.desc-preview{
+  margin-top:10px;padding:12px 14px;
+  background:var(--cream);border-left:3px solid var(--accent);
+  border-radius:0 var(--r) var(--r) 0;
+  font-size:13px;line-height:1.6;color:var(--text2);
+  display:none;
+}
+.desc-preview.show{display:block}
+
+/* ── GENERATE BTN ── */
+.generate-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;max-width:620px;margin:0 auto;
+  padding:16px;
+  background:var(--ink);color:var(--paper);
+  border:none;border-radius:var(--r2);
+  font-family:'Fraunces',serif;font-size:1.05rem;font-style:italic;font-weight:600;
+  cursor:pointer;transition:opacity .15s,transform .1s;
+  letter-spacing:.01em;
+}
+.generate-btn:hover{opacity:.85}
+.generate-btn:active{transform:scale(.985)}
+.generate-btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-icon{font-style:normal;font-size:1.2rem}
+
+/* ── BANNERS ── */
+.banner{
+  display:none;max-width:620px;margin:1rem auto 0;
+  padding:14px 16px;border-radius:var(--r2);
+  font-family:'DM Mono',monospace;font-size:12px;
+  letter-spacing:.03em;text-align:center;
+}
+.banner.show{display:block}
+.banner-success{background:var(--success-bg);color:var(--success);border:1px solid #b2cfcd}
+.banner-error{background:var(--error-bg);color:var(--error);border:1px solid #e8b2b2}
+.banner-loading{background:#fffbf0;color:var(--gold);border:1px solid #e0cf94}
+
+/* ── NOTICE ── */
+.notice{
+  background:var(--cream);border:1px solid var(--border);
+  border-radius:var(--r);padding:10px 12px;
+  font-family:'DM Mono',monospace;font-size:11px;
+  color:var(--text3);line-height:1.6;margin-top:8px;
+}
+
+/* ── DIVIDER ── */
+hr{border:none;border-top:1px solid var(--border);margin:.75rem 0}
+
+@media(max-width:440px){
+  .grid2{grid-template-columns:1fr}
+  .comp-btn{aspect-ratio:auto;padding:14px 8px}
+}
+/* ── Animaciones para las figuras del fondo del Mundial ── */
+    .bg-shape {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    @keyframes floatRandom1 {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(120px, -150px) rotate(120deg); }
+      66% { transform: translate(-80px, -250px) rotate(240deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+
+    @keyframes floatRandom2 {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(-150px, 120px) rotate(-90deg); }
+      66% { transform: translate(-250px, -50px) rotate(-180deg); }
+      100% { transform: translate(0, 0) rotate(-360deg); }
+    }
+
+    @keyframes floatRandom3 {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(200px, 100px) rotate(45deg); }
+      66% { transform: translate(100px, 200px) rotate(90deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+</style>
+</head>
+<body>
+<div id="worldcup-bg"></div>
+<div id="video-intro">
+    <script>if(localStorage.getItem("intro_video_visto1") === "true"){ document.getElementById("video-intro").style.display = "none"; }</script>
+    <video id="intro-video" autoplay muted playsinline>
+      <source src="introvidm.mp4" type="video/mp4">
+      Tu navegador no soporta videos.
+    </video>
+  </div>
+  <div class="Layout">
+    <header class="site-header">
+    <div class="wrap">
+        <div class="header-badge">S12dev/trucoteca · Centro de archivos</div>
+        <h1>Programa</h1>
+        <p>FO-205P11000-14 · Generador automático de formato de evidencias (version Beta) 0.1.1</p>
+    </div>
+    <a href="https://s12gamer.github.io/trucopagina/TPF/TPF.html" style="
+        text-decoration: none; 
+        color: var(--gold); 
+        border: 1px solid var(--gold); 
+        padding: 8px 15px; 
+        border-radius: var(--r); 
+        font-family: 'DM Mono', monospace; 
+        font-size: 11px; 
+        text-transform: uppercase; 
+        margin-top: 10px;
+        transition: all 0.2s;
+        " onmouseover="this.style.background='var(--gold)'; this.style.color='var(--ink)'" 
+        onmouseout="this.style.background='transparent'; this.style.color='var(--gold)'">
+        ⬅ Volver al Centro
+        </a>
+        
+    </header>
+    <div class="wrap">
+
+    <div class="steps" id="stepper">
+        <div class="step active" id="step1"><span>①</span>ALUMNO</div>
+        <div class="step" id="step2"><span>②</span>MATERIA</div>
+        <div class="step" id="step3"><span>③</span>COMP.</div>
+        <div class="step" id="step4"><span>④</span>GENERAR</div>
+    </div>
+
+    <!-- ① DATOS DEL ALUMNO -->
+    <div class="card" id="sec_alumno">
+        <div class="card-title">① Datos del alumno</div>
+        <div class="grid2" style="margin-bottom:10px">
+        <div class="field">
+            <label>Nombre completo</label>
+            <input type="text" id="nombre" placeholder="Ej. Juan Pérez López">
+        </div>
+        <div class="field">
+            <label>No. de Control</label>
+            <input type="text" id="control" placeholder="Ej. 23060001" maxlength="20">
+        </div>
+        </div>
+        <div class="grid2">
+        <div class="field">
+            <label>División / Carrera</label>
+            <input type="text" id="division" placeholder="Ej. Ing. en Sistemas">
+        </div>
+        <div class="field">
+            <label>Grupo</label>
+            <input type="text" id="grupo" placeholder="Ej. 2S-A">
+        </div>
+        </div>
+    </div>
+
+    <!-- FECHA -->
+    <div class="card">
+        <div class="card-title">Fecha de entrega</div>
+        <div class="grid2">
+        <div class="field">
+            <label>Fecha</label>
+            <input type="date" id="fecha">
+        </div>
+        </div>
+    </div>
+
+    <!-- ② ASIGNATURA -->
+    <div class="card" id="sec_asignatura">
+        <div class="card-title">② Asignatura</div>
+        <div class="field grid1" style="margin-bottom:12px">
+        <label>Materia</label>
+        <select id="asignatura_select">
+            <option value="">— Selecciona una materia —</option>
+            <!--<option value="__vacio__">✏️  Formato vacío (ingresar todo manualmente proximo a arreglar)</option> --> 
+            <option value="Programación Orientada a Objetos">Programación Orientada a Objetos</option>
+            <option value="Probabilidad y Estadística">Probabilidad y Estadística</option>
+            <option value="Física General">Física General</option>
+            <option value="Cálculo Integral">Cálculo Integral</option>
+            <option value="Contabilidad Financiera">Contabilidad Financiera</option>
+            <option value="Algebra Lineal">Algebra Lineal</option>
+        </select>
+        </div>
+
+        <!-- Modo vacío -->
+        <div id="modo_vacio" style="display:none">
+        <div class="grid1" style="gap:10px">
+            <div class="field">
+            <label>Nombre de la asignatura</label>
+            <input type="text" id="materia_manual" placeholder="Nombre completo de la materia">
+            </div>
+            <div class="field">
+            <label>Docente</label>
+            <input type="text" id="docente_manual" placeholder="Nombre completo del docente">
+            </div>
+        </div>
+        </div>
+
+        <!-- Docente autocompletado -->
+        <div id="docente_auto_wrap" style="display:none">
+        <div class="field">
+            <label>Docente</label>
+            <input type="text" id="docente_auto" readonly style="color:var(--text2);background:var(--cream)">
+        </div>
+        </div>
+    </div>
+
+    <!-- ③ COMPETENCIA -->
+    <div class="card" id="card_competencia" style="display:none">
+        <div class="card-title">③ Competencia No.</div>
+        <div class="comp-grid" id="comp_grid"></div>
+        <div class="desc-preview" id="desc_preview"></div>
+    </div>
+
+    <!-- Competencia manual -->
+    <div class="card" id="card_comp_manual" style="display:none">
+        <div class="card-title">③ Competencia (manual)</div>
+        <div class="grid2" style="margin-bottom:10px">
+        <div class="field">
+            <label>Número de competencia</label>
+            <input type="number" id="comp_manual_num" min="1" max="20" placeholder="Ej. 3">
+        </div>
+        </div>
+        <div class="field">
+        <label>Descripción de la competencia</label>
+        <textarea id="comp_manual_desc" placeholder="Describe la competencia a evaluar..."></textarea>
+        </div>
+    </div>
+
+    <!-- ④ INDICADORES -->
+    <div class="card">
+        <div class="card-title">④ Indicadores de desempeño alcanzados</div>
+        <div class="ind-grid" id="ind_grid">
+        <button class="ind-btn" data-ind="A">A</button>
+        <button class="ind-btn" data-ind="B">B</button>
+        <button class="ind-btn" data-ind="C">C</button>
+        <button class="ind-btn" data-ind="D">D</button>
+        <button class="ind-btn" data-ind="E">E</button>
+        <button class="ind-btn" data-ind="F">F</button>
+        </div>
+    </div>
+
+    <!-- EVIDENCIA -->
+    <div class="card">
+        <div class="card-title">Evidencia de aprendizaje</div>
+        <div class="field">
+        <label>Descripción de la evidencia</label>
+        <textarea id="evidencia" placeholder="Ej. Reporte escrito, práctica de laboratorio, proyecto integrador..."></textarea>
+        </div>
+    </div>
+
+    </div><!-- /.wrap -->
+
+
+    <div style="max-width:620px;margin:0 auto;padding:0 1rem">
+    <button class="generate-btn" id="generar_btn" onclick="generarDocumento()">
+        <span class="btn-icon">⬇</span>
+        Descargar Formato
+    </button>
+    </div>
+
+    <div class="banner banner-loading" id="loading_banner">Descargando plantilla y procesando documento...</div>
+    <div class="banner banner-success" id="success_banner">✓ Documento generado y descargado correctamente</div>
+    <div class="banner banner-error" id="error_banner"></div>
+  </div>
+<script>
+/* ════════════════════════════════════════
+   BASE DE DATOS DE ASIGNATURAS
+════════════════════════════════════════ */
+const asignaturasData = {
+  "Programación Orientada a Objetos": {
+    docente: "Terán Gómez David",
+    total_comp: 6,
+    competencias: [
+      "conoce y comprende los conceptos básicos de base de datos y los fundamentos de la programación orientada a objetos.",
+      "aplica los conceptos de clases y objetos en el diseño y desarrollo de software.",
+      "identifica y aplica relaciones de herencia entre clases.",
+      "aplica el concepto de polimorfismo en la resolución de problemas de software.",
+      "comprende y aplica el manejo de excepciones en programas orientados a objetos.",
+      "aplica el uso de archivos e interfaces gráficas de usuario."
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+  "Probabilidad y Estadística": {
+    docente: "M. en A. Lidia González González",
+    total_comp: 8,
+    competencias: [
+      "comprende los conceptos básicos de la estadística descriptiva y su aplicación en ingeniería.",
+      "utiliza los conceptos básicos de la teoría de la probabilidad.",
+      "identifica el tipo de variable aleatoria y su distribución de probabilidad.",
+      "identifica las propiedades y características de las distribuciones de probabilidad continua y discreta.",
+      "aplica los conceptos del modelo de regresión lineal simple y múltiple.",
+      "comprende los conceptos de muestreo y distribuciones muestrales.",
+      "aplica los fundamentos de la teoría de estimación puntual y por intervalos.",
+      "aplica los conceptos básicos de una prueba de hipótesis en problemas de ingeniería."
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase (creatividad).",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+  "Física General": {
+    docente: "Jessica Linnete Morales Hernández",
+    total_comp: 8,
+    competencias: [
+      "comprende y aplica los conceptos de la Estática y equilibrio de cuerpos rígidos.",
+      "comprende y aplica los conocimientos de la dinámica de la partícula y las leyes de Newton.",
+      "soluciona problemas sencillos de reflexión, refracción y óptica física.",
+      "conoce, identifica y distingue los principios de la termodinámica.",
+      "conoce y aplica los conceptos de carga, campo y potencial eléctrico.",
+      "determina la capacitancia de distribuciones elementales de carga.",
+      "conoce los conceptos principales de la electrodinámica.",
+      "conoce los conceptos principales del electromagnetismo e inductancia."
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase (creatividad).",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+  "Cálculo Integral": {
+    docente: "M. en T.I Brian Antonio Mejía Díaz",
+    total_comp: 5,
+    competencias: [
+      "comprende los dos teoremas fundamentales del cálculo integral.",
+      "aplica los teoremas y las propiedades de la integral definida e indefinida.",
+      "identifica el método de integración más adecuado para resolver integrales.",
+      "utiliza las definiciones de integral y las técnicas de integración en aplicaciones de ingeniería.",
+      "aplica series para aproximar la solución de integrales especiales."
+    ],
+    indicadores: ["A","B","C","D","E","F"]
+  },
+  "Contabilidad Financiera": {
+    docente: "L.C Miriam Juárez Gutiérrez",
+    total_comp: 5,
+    competencias: [
+      "conceptos Generales de la Contabilidad.",
+      "estados Financieros e importancia del estado de situación financiera.",
+      "teoría de la Partida Doble y asientos de diario.",
+      "registro de operaciones de mercancías y valuación de inventarios.",
+      "análisis e Interpretación de la Información Financiera."
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+  "Algebra Lineal": {
+    docente: "Jose Juan Santana Ortiz",
+    total_comp: 5,
+    competencias: [
+      "utiliza los números complejos, sus representaciones y las operaciones entre ellos para tener una base de conocimiento a utilizar en ecuaciones diferenciales y en diferentes aplicaciones de ingeniería",
+      "utiliza las matrices, sus propiedades, el determinante y operaciones entre ellas, para resolver problemas de aplicación en las diferentes áreas de las matemáticas y de la ingeniería",
+      "resuelve problemas de aplicación en ingeniería sobre sistemas de ecuaciones lineales para interpretar las soluciones y tomar decisiones con base en ellas, utilizando los métodos de Gauss, Gauss-Jordan, matriz inversa y regla de Cramer",
+      "comprende la definición de espacio vectorial como una abstracción para relacionarlo con otras áreas de las matemáticas",
+      "utiliza la definición de transformación lineal y sus propiedades para representarla matricialmente"
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Realiza su trabajo de manera autónoma y autorregulada.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  }
+};
+
+/* ════════════════════════════════════════
+   ESTADO
+════════════════════════════════════════ */
+let selectedComp = null;
+let selectedIndicadores = [];
+
+const $ = id => document.getElementById(id);
+
+/* ════════════════════════════════════════
+   PERSISTENCIA localStorage
+════════════════════════════════════════ */
+function guardarLS() {
+  localStorage.setItem('fo205', JSON.stringify({
+    nombre: $('nombre').value,
+    control: $('control').value,
+    division: $('division').value,
+    grupo: $('grupo').value
+  }));
+}
+function cargarLS() {
+  try {
+    const d = JSON.parse(localStorage.getItem('fo205') || '{}');
+    ['nombre','control','division','grupo'].forEach(k => { if(d[k]) $(k).value = d[k]; });
+  } catch(e){}
+}
+['nombre','control','division','grupo'].forEach(id => $(id).addEventListener('input', guardarLS));
+
+/* ════════════════════════════════════════
+   STEPPER
+════════════════════════════════════════ */
+function updateStepper() {
+  const mat = $('asignatura_select').value;
+  const s1 = $('nombre').value.trim() && $('control').value.trim();
+  const s2 = mat !== '';
+  const s3 = selectedComp !== null || mat === '__vacio__';
+  ['step1','step2','step3','step4'].forEach(id => {
+    $(id).classList.remove('active','done');
+  });
+  if(s1 && s2 && s3){ $(  'step4').classList.add('active'); ['step1','step2','step3'].forEach(id => $(id).classList.add('done')); }
+  else if(s1 && s2){ $('step3').classList.add('active'); ['step1','step2'].forEach(id => $(id).classList.add('done')); }
+  else if(s1){ $('step2').classList.add('active'); $('step1').classList.add('done'); }
+  else { $('step1').classList.add('active'); }
+}
+['nombre','control','asignatura_select'].forEach(id => $(id).addEventListener('input', updateStepper));
+['nombre','control'].forEach(id => $(id).addEventListener('change', updateStepper));
+
+/* ════════════════════════════════════════
+   SELECTOR DE ASIGNATURA
+════════════════════════════════════════ */
+$('asignatura_select').addEventListener('change', function() {
+  const val = this.value;
+  $('modo_vacio').style.display = val === '__vacio__' ? 'block' : 'none';
+  $('docente_auto_wrap').style.display = (val && val !== '__vacio__') ? 'block' : 'none';
+  $('card_competencia').style.display = (val && val !== '__vacio__') ? 'block' : 'none';
+  $('card_comp_manual').style.display = val === '__vacio__' ? 'block' : 'none';
+
+  selectedComp = null;
+  selectedIndicadores = [];
+  $('desc_preview').className = 'desc-preview';
+
+  if(val && val !== '__vacio__' && asignaturasData[val]) {
+    const d = asignaturasData[val];
+    $('docente_auto').value = d.docente;
+    renderCompGrid(d.total_comp);
+    renderIndGrid(d.indicadores);
+  }
+  updateStepper();
+});
+
+function renderCompGrid(total) {
+  const g = $('comp_grid'); g.innerHTML = '';
+  for(let i=1; i<=total; i++) {
+    const b = document.createElement('button');
+    b.className = 'comp-btn'; b.textContent = i; b.dataset.num = i;
+    b.addEventListener('click', () => selectComp(i, b));
+    g.appendChild(b);
+  }
+}
+
+function renderIndGrid(indicadores) {
+  const g = $('ind_grid'); g.innerHTML = '';
+  selectedIndicadores = [];
+  indicadores.forEach((ind, idx) => {
+    const letra = typeof ind === 'string' && ind.length <= 2 ? ind : ind.charAt(0);
+    const b = document.createElement('button');
+    b.className = 'ind-btn'; b.textContent = letra;
+    b.dataset.letra = letra; b.dataset.full = ind;
+    b.addEventListener('click', () => toggleInd(letra, ind, b));
+    g.appendChild(b);
+  });
+}
+
+function selectComp(num, btn) {
+  document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedComp = num;
+  const mat = $('asignatura_select').value;
+  const data = asignaturasData[mat];
+  if(data && data.competencias[num-1]) {
+    const prev = $('desc_preview');
+    prev.textContent = data.competencias[num-1];
+    prev.className = 'desc-preview show';
+  }
+  updateStepper();
+}
+
+function toggleInd(letra, full, btn) {
+  btn.classList.toggle('active');
+  if(selectedIndicadores.find(i => i.letra === letra)) {
+    selectedIndicadores = selectedIndicadores.filter(i => i.letra !== letra);
+  } else {
+    selectedIndicadores.push({ letra, full });
+  }
+}
+
+/* ════════════════════════════════════════
+   URLS DE PLANTILLAS EN GITHUB
+   Cambia la base BASE_URL por la ruta de tu repositorio
+════════════════════════════════════════ */
+const BASE_URL = 'https://raw.githubusercontent.com/s12gamer/gxdasnz/main/';
+const githubUrls = {
+  'Programación Orientada a Objetos':  BASE_URL + 'Programación Orientada a Objetos 2 form.docx',
+  'Probabilidad y Estadística':        BASE_URL + 'probabilidad form.docx',
+  'Física General':                    BASE_URL + 'fisica form.docx',
+  'Cálculo Integral':                  BASE_URL + 'Calculo integral form.docx',
+  'Contabilidad Financiera':           BASE_URL + 'Conta form.docx',
+  'Algebra Lineal':                    BASE_URL + 'Algebra form.docx',
+};
+
+/* ════════════════════════════════════════
+   FORMATO FECHA
+════════════════════════════════════════ */
+function formatFecha(val) {
+  if(!val) return '';
+  const [y,m,d] = val.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+/* ════════════════════════════════════════
+   BANNERS
+════════════════════════════════════════ */
+function hideBanners() {
+  ['loading_banner','success_banner','error_banner'].forEach(id => $(id).className = $(id).className.replace(' show','').trim());
+}
+function showLoading(msg) { hideBanners(); $('loading_banner').textContent = msg; $('loading_banner').classList.add('show'); }
+function showSuccess(msg) { hideBanners(); $('success_banner').textContent = msg; $('success_banner').classList.add('show'); setTimeout(hideBanners,5000); }
+function showError(msg)   { hideBanners(); $('error_banner').textContent = msg; $('error_banner').classList.add('show'); setTimeout(hideBanners,7000); }
+
+/* ════════════════════════════════════════
+   VALIDACIÓN
+════════════════════════════════════════ */
+function validar() {
+  const nombre   = $('nombre').value.trim();
+  const control  = $('control').value.trim();
+  const materia  = $('asignatura_select').value;
+  if(!nombre)   { showError('Ingresa tu nombre completo.'); return false; }
+  if(!control)  { showError('Ingresa tu No. de Control.'); return false; }
+  if(!materia)  { showError('Selecciona una materia.'); return false; }
+  if(materia === '__vacio__') {
+    if(!$('materia_manual').value.trim()) { showError('Ingresa el nombre de la asignatura.'); return false; }
+    if(!$('docente_manual').value.trim()) { showError('Ingresa el nombre del docente.'); return false; }
+  } else {
+    if(selectedComp === null) { showError('Selecciona una competencia.'); return false; }
+  }
+  return true;
+}
+
+/* ════════════════════════════════════════
+   LÓGICA PRINCIPAL: EDICIÓN DEL DOCX
+════════════════════════════════════════ */
+async function generarDocumento() {
+  if(!validar()) return;
+  $('generar_btn').disabled = true;
+  showLoading('Descargando plantilla y procesando documento...');
+
+  const materia_sel = $('asignatura_select').value;
+  const nombre    = $('nombre').value.trim();
+  const control   = $('control').value.trim();
+  const division  = $('division').value.trim();
+  const grupo     = $('grupo').value.trim();
+  const fecha     = formatFecha($('fecha').value);
+  const evidencia = $('evidencia').value.trim();
+
+  let materia, docente, compNum, compDesc, indLetras, indFull;
+
+  if(materia_sel === '__vacio__') {
+    materia   = $('materia_manual').value.trim();
+    docente   = $('docente_manual').value.trim();
+    compNum   = $('comp_manual_num').value.trim();
+    compDesc  = $('comp_manual_desc').value.trim().toLowerCase();
+    indLetras = selectedIndicadores.map(i => i.letra);
+    indFull   = selectedIndicadores.map(i => i.full);
+  } else {
+    const data = asignaturasData[materia_sel];
+    materia   = materia_sel;
+    docente   = data.docente;
+    compNum   = String(selectedComp);
+    compDesc  = data.competencias[selectedComp - 1];
+    indLetras = selectedIndicadores.map(i => i.letra);
+    indFull   = selectedIndicadores.map(i => i.full);
+  }
+
+  const githubUrl = githubUrls[materia_sel] || null;
+
+  try {
+    let blob;
+    if(githubUrl) {
+      blob = await procesarDesdeGithub({ githubUrl, nombre, control, division, grupo, fecha,
+        materia, docente, compNum, compDesc, indLetras, indFull, evidencia, materia_sel });
+    } else {
+      blob = generarDocxNuevo({ nombre, control, division, grupo, fecha,
+        materia, docente, compNum, compDesc, indLetras, indFull, evidencia });
+    }
+    const filename = `FO-205P11000-14_${nombre.replace(/\s+/g,'_')}_Comp${compNum}.docx`;
+    saveAs(blob, filename);
+    showSuccess('✓ Documento generado y descargado: ' + filename);
+  } catch(e) {
+    showError('Error al generar el documento: ' + e.message);
+    console.error(e);
+  } finally {
+    $('generar_btn').disabled = false;
+  }
+}
+
+/* ════════════════════════════════════════
+   PROCESAMIENTO DEL .DOCX DE GITHUB
+   Estrategia: edición directa del XML interno
+════════════════════════════════════════ */
+async function procesarDesdeGithub(opts) {
+  const resp = await fetch(opts.githubUrl);
+  if(!resp.ok) throw new Error(`No se pudo descargar el archivo (HTTP ${resp.status})`);
+  const ab   = await resp.arrayBuffer();
+  const zip  = new PizZip(ab);
+
+  /* Obtener el XML del documento */
+  let xmlStr = zip.file('word/document.xml').asText();
+
+  xmlStr = aplicarSustitucionesXML(xmlStr, opts);
+
+  zip.file('word/document.xml', xmlStr);
+
+  return zip.generate({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  });
+}
+
+/* ════════════════════════════════════════
+   SUSTITUCIONES EN EL XML
+   
+   ESTRATEGIA: El formato tiene filas con 4 celdas:
+     Col1=etiqueta | Col2=valor | Col3=etiqueta | Col4=valor
+   O filas con 2 celdas anchas:
+     Col1=etiqueta | Col2=valor (para descripción e indicadores)
+   
+   Trabajamos a nivel de <w:tr> (fila), identificamos la etiqueta
+   y escribimos el valor en la celda ADYACENTE A LA DERECHA.
+════════════════════════════════════════ */
+function aplicarSustitucionesXML(xml, opts) {
+  /* Paso 1 — reemplazar datos en celdas de valor adyacentes a la etiqueta */
+  xml = procesarFilasDeTabla(xml, opts);
+
+  /* Paso 2 — filtrar competencias (número y descripción) */
+  if(opts.materia_sel !== '__vacio__') {
+    xml = filtrarCompetencias(xml, opts);
+  }
+
+  /* Paso 3 — filtrar indicadores */
+  if(opts.indLetras.length > 0) {
+    xml = filtrarIndicadores(xml, opts);
+  }
+
+  return xml;
+}
+
+/* ──────────────────────────────────────
+   NIVEL FILA: iterar <w:tr> y reemplazar
+   la celda de valor que está justo a la
+   derecha de la celda de etiqueta.
+────────────────────────────────────── */
+function procesarFilasDeTabla(xml, opts) {
+  /* Separar el XML en filas preservando todo lo que hay entre ellas */
+  return xml.replace(/(<w:tr\b[\s\S]*?<\/w:tr>)/g, fila => {
+    /* Extraer todas las celdas de esta fila */
+    const celdas = [];
+    const reCell = /<w:tc\b[\s\S]*?<\/w:tc>/g;
+    let m;
+    while((m = reCell.exec(fila)) !== null) {
+      celdas.push({ match: m[0], index: m.index });
+    }
+    if(celdas.length < 2) return fila;
+
+    let filaModificada = fila;
+
+    /* Recorrer pares: celda etiqueta (par) → celda valor (impar) */
+    for(let i = 0; i < celdas.length - 1; i++) {
+      const txtEtiqueta = extraerTexto(celdas[i].match).toLowerCase().trim();
+
+      let nuevoValor = null;
+
+      /* ── Mapeo etiqueta → valor ── */
+      if(/nombre.*alumno|nombre.*estudiante|^nombre$/i.test(txtEtiqueta)) {
+        nuevoValor = opts.nombre + ' ' + opts.control;
+      } else if(/no\.?\s*control|n[uú]mero.*control|control/i.test(txtEtiqueta)) {
+        nuevoValor = opts.nombre + ' ' + opts.control;
+      } else if(/divisi[oó]n|carrera|programa/i.test(txtEtiqueta)) {
+        nuevoValor = opts.division;
+      } else if(/^grupo$|^gr\.?$/i.test(txtEtiqueta)) {
+        nuevoValor = opts.grupo;
+      } else if(/fecha/i.test(txtEtiqueta)) {
+        nuevoValor = opts.fecha;
+      } else if(/asignatura|materia/i.test(txtEtiqueta)) {
+        nuevoValor = opts.materia;
+      } else if(/docente|profesor|maestro/i.test(txtEtiqueta)) {
+        nuevoValor = opts.docente;
+      } else if(/competencia.*no|no.*competencia|competencia\s*#|n[uú]m.*competencia/i.test(txtEtiqueta)) {
+        nuevoValor = opts.compNum;
+      } else if(/evidencia/i.test(txtEtiqueta)) {
+        nuevoValor = opts.evidencia;
+      }
+
+      if(nuevoValor !== null) {
+        const celdaValorOriginal = celdas[i + 1].match;
+        const celdaValorNueva = escribirValorEnCelda(celdaValorOriginal, nuevoValor);
+        /* Reemplazar en la fila solo la primera ocurrencia exacta */
+        filaModificada = filaModificada.replace(celdaValorOriginal, celdaValorNueva);
+      }
+    }
+
+    return filaModificada;
+  });
+}
+
+/* Escribe un valor de texto en la celda, conservando el formato (rPr) del primer run */
+function escribirValorEnCelda(celda, valor) {
+  /* Encontrar el primer <w:r> con su <w:rPr> para conservar el formato */
+  const matchRpr = celda.match(/<w:rPr[\s\S]*?<\/w:rPr>/);
+  const rPr = matchRpr ? matchRpr[0] : '';
+
+  /* Encontrar el primer <w:p> para conservar propiedades de párrafo */
+  const matchPPr = celda.match(/<w:pPr[\s\S]*?<\/w:pPr>/);
+  const pPr = matchPPr ? matchPPr[0] : '';
+
+  /* Encontrar propiedades de celda <w:tcPr> */
+  const matchTcPr = celda.match(/<w:tcPr[\s\S]*?<\/w:tcPr>/);
+  const tcPr = matchTcPr ? matchTcPr[0] : '';
+
+  /* Reconstruir la celda con un único párrafo y un único run */
+  return `<w:tc>${tcPr}<w:p>${pPr}<w:r>${rPr}<w:t xml:space="preserve">${escXml(valor)}</w:t></w:r></w:p></w:tc>`;
+}
+
+function extraerTexto(xml) {
+  return (xml.match(/<w:t[^>]*>([^<]*)<\/w:t>/g) || [])
+    .map(m => m.replace(/<[^>]+>/g,''))
+    .join('');
+}
+
+/* ══════════════════════════════════════
+   FILTRADO DE COMPETENCIAS
+   
+   La tabla tiene:
+   - Una celda etiqueta "Competencia No." → celda valor con todos los números (col2)
+   - Una celda etiqueta "Descripción"     → celda valor con todos los textos  (col4)
+   
+   Buscamos esas celdas de VALOR (la que está a la derecha de la etiqueta)
+   y limpiamos los párrafos que no correspondan a la competencia elegida.
+══════════════════════════════════════ */
+function filtrarCompetencias(xml, opts) {
+  const data = asignaturasData[opts.materia_sel];
+  if(!data) return xml;
+
+  const compElegida = String(opts.compNum);
+  const todasComps  = data.competencias;
+
+  xml = xml.replace(/(<w:tr\b[\s\S]*?<\/w:tr>)/g, fila => {
+    const celdas = extraerCeldas(fila);
+    if(celdas.length < 2) return fila;
+
+    let filaModificada = fila;
+
+    for(let i = 0; i < celdas.length - 1; i++) {
+      const txtEtiq = extraerTexto(celdas[i]).toLowerCase().trim();
+      const celdaValor = celdas[i + 1];
+
+      /* ── Celda de número de competencia ── */
+      if(/competencia.*no|no.*competencia|competencia\s*#|n[uú]m.*competencia/i.test(txtEtiq)) {
+        const nueva = limpiarNumerosCompetencia(celdaValor, compElegida, data.total_comp);
+        filaModificada = filaModificada.replace(celdaValor, nueva);
+      }
+
+      /* ── Celda de descripción ── */
+      if(/descripci[oó]n/i.test(txtEtiq)) {
+        const nueva = limpiarDescripcionesCompetencia(celdaValor, compElegida, todasComps);
+        filaModificada = filaModificada.replace(celdaValor, nueva);
+      }
+    }
+
+    return filaModificada;
+  });
+
+  return xml;
+}
+
+function extraerCeldas(fila) {
+  const celdas = [];
+  const re = /<w:tc\b[\s\S]*?<\/w:tc>/g;
+  let m;
+  while((m = re.exec(fila)) !== null) celdas.push(m[0]);
+  return celdas;
+}
+
+/* Deja solo el párrafo cuyo texto es el número elegido */
+function limpiarNumerosCompetencia(celda, compElegida, total) {
+  const parrafos = extraerParrafos(celda);
+  const mantenidos = parrafos.filter(p => {
+    const txt = extraerTexto(p).trim();
+    if(!txt) return false; /* eliminar párrafos vacíos también */
+    /* ¿Este párrafo contiene solo el número elegido? */
+    return txt === compElegida || txt === compElegida + '.' || txt.startsWith(compElegida);
+  });
+
+  /* Si no encontramos nada con ese criterio estricto, buscar con más amplitud */
+  const resultado = mantenidos.length > 0 ? mantenidos : parrafos.filter(p => {
+    const txt = extraerTexto(p).trim();
+    return txt.includes(compElegida);
+  });
+
+  return reconstruirCelda(celda, resultado.length > 0 ? resultado : [crearParrafoTexto(celda, compElegida)]);
+}
+
+/* Deja solo el párrafo de la descripción de la competencia elegida */
+function limpiarDescripcionesCompetencia(celda, compElegida, todasComps) {
+  const descElegida = todasComps[parseInt(compElegida) - 1];
+  if(!descElegida) return celda;
+
+  const parrafos = extraerParrafos(celda);
+  // Filtramos dejando solo los párrafos que tienen texto visible
+  const conTexto = parrafos.filter(p => extraerTexto(p).trim().length > 0);
+  
+  const numActual = parseInt(compElegida);
+  const numSiguiente = numActual + 1;
+  
+  let guardar = false;
+  const elegidos = [];
+  
+  // Extraemos los primeros 20 caracteres como "firma" de la competencia actual y la siguiente
+  const firmaActual = descElegida.toLowerCase().trim().substring(0, 20);
+  const descSiguiente = todasComps[numSiguiente - 1];
+  const firmaSiguiente = descSiguiente ? descSiguiente.toLowerCase().trim().substring(0, 20) : null;
+  
+  for (let i = 0; i < conTexto.length; i++) {
+    const txtParagraph = extraerTexto(conTexto[i]).toLowerCase().trim();
+    
+    // Si el párrafo actual contiene el inicio de nuestra competencia, empezamos a acumular
+    if (txtParagraph.includes(firmaActual) || firmaActual.includes(txtParagraph)) {
+      guardar = true;
+    } 
+    // Si detectamos que ya empezó el texto de la SIGUIENTE competencia, dejamos de acumular
+    else if (firmaSiguiente && (txtParagraph.includes(firmaSiguiente) || firmaSiguiente.includes(txtParagraph))) {
+      guardar = false;
+    }
+    
+    // Si estamos en el rango correcto, guardamos el párrafo completo con todo su formato
+    if (guardar) {
+      elegidos.push(conTexto[i]);
+    }
+  }
+
+  // RESPALDO: Si la búsqueda por texto en el Word falló por diferencias de redacción,
+  // inyectamos directamente el texto limpio desde la base de datos de JavaScript.
+  const resultado = elegidos.length > 0 ? elegidos : [crearParrafoTexto(celda, descElegida)];
+
+  return reconstruirCelda(celda, resultado);
+}
+
+function extraerParrafos(celda) {
+  return celda.match(/<w:p\b[\s\S]*?<\/w:p>/g) || [];
+}
+
+function reconstruirCelda(celdaOriginal, parrafosNuevos) {
+  const matchTcPr = celdaOriginal.match(/<w:tcPr[\s\S]*?<\/w:tcPr>/);
+  const tcPr = matchTcPr ? matchTcPr[0] : '';
+  return `<w:tc>${tcPr}${parrafosNuevos.join('')}</w:tc>`;
+}
+
+function crearParrafoTexto(celdaRef, texto) {
+  const matchRpr = celdaRef.match(/<w:rPr[\s\S]*?<\/w:rPr>/);
+  const rPr = matchRpr ? matchRpr[0] : '';
+  return `<w:p><w:r>${rPr}<w:t xml:space="preserve">${escXml(texto)}</w:t></w:r></w:p>`;
+}
+
+/* ══════════════════════════════════════
+   FILTRADO DE INDICADORES
+   
+   Busca la fila cuya etiqueta sea "Indicadores" (o similar)
+   y en la celda de valor adyacente elimina los párrafos
+   cuya letra inicial no esté en la selección del usuario.
+══════════════════════════════════════ */
+function filtrarIndicadores(xml, opts) {
+  const letraSet = new Set(opts.indLetras);
+
+  xml = xml.replace(/(<w:tr\b[\s\S]*?<\/w:tr>)/g, fila => {
+    const celdas = extraerCeldas(fila);
+    if(celdas.length < 2) return fila;
+
+    let filaModificada = fila;
+
+    for(let i = 0; i < celdas.length - 1; i++) {
+      const txtEtiq = extraerTexto(celdas[i]).toLowerCase().trim();
+
+      if(/indicador|desempe[nñ]o/i.test(txtEtiq)) {
+        const celdaValor = celdas[i + 1];
+        const parrafos = extraerParrafos(celdaValor);
+
+        const mantenidos = parrafos.filter(p => {
+          const txt = extraerTexto(p).trim();
+          if(!txt) return false;
+          /* ¿Empieza con letra de indicador? */
+          const m = txt.match(/^([A-F])[.):\s]/i);
+          if(!m) return true; /* No es indicador → conservar */
+          return letraSet.has(m[1].toUpperCase());
+        });
+
+        const nueva = reconstruirCelda(celdaValor,
+          mantenidos.length > 0 ? mantenidos : [crearParrafoTexto(celdaValor, opts.indFull.join(' / ') || '—')]
+        );
+        filaModificada = filaModificada.replace(celdaValor, nueva);
+      }
+    }
+
+    return filaModificada;
+  });
+
+  return xml;
+}
+
+function escXml(str) {
+  return String(str||'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+/* ════════════════════════════════════════
+   FALLBACK: GENERAR DOCX DESDE CERO
+   Se usa si no hay URL de GitHub
+════════════════════════════════════════ */
+function generarDocxNuevo(opts) {
+  const { nombre, control, division, grupo, fecha, materia, docente,
+          compNum, compDesc, indLetras, indFull, evidencia } = opts;
+
+  const indTexto = indFull.length > 0
+    ? indFull.map(i => `<w:p><w:r><w:rPr><w:sz w:val="19"/></w:rPr><w:t xml:space="preserve">${escXml(i)}</w:t></w:r></w:p>`).join('')
+    : `<w:p><w:r><w:t>—</w:t></w:r></w:p>`;
+
+  const fila = (k, v, shade) => `
+    <w:tr>
+      <w:tc>
+        <w:tcPr><w:tcW w:w="3200" w:type="dxa"/>${shade?`<w:shd w:val="clear" w:color="auto" w:fill="F0EDE5"/>`:''}
+        </w:tcPr>
+        <w:p><w:r><w:rPr><w:b/><w:sz w:val="19"/><w:color w:val="3D2B1A"/></w:rPr>
+          <w:t>${escXml(k)}</w:t></w:r></w:p>
+      </w:tc>
+      <w:tc>
+        <w:tcPr><w:tcW w:w="6300" w:type="dxa"/></w:tcPr>
+        <w:p><w:r><w:rPr><w:sz w:val="19"/></w:rPr>
+          <w:t xml:space="preserve">${escXml(v||'')}</w:t></w:r></w:p>
+      </w:tc>
+    </w:tr>`;
+
+  const filaInd = () => `
+    <w:tr>
+      <w:tc>
+        <w:tcPr><w:tcW w:w="3200" w:type="dxa"/><w:shd w:val="clear" w:color="auto" w:fill="E8F0EF"/>
+        </w:tcPr>
+        <w:p><w:r><w:rPr><w:b/><w:sz w:val="19"/><w:color w:val="1D4E4A"/></w:rPr>
+          <w:t>Indicadores alcanzados</w:t></w:r></w:p>
+      </w:tc>
+      <w:tc>
+        <w:tcPr><w:tcW w:w="6300" w:type="dxa"/></w:tcPr>
+        ${indTexto}
+      </w:tc>
+    </w:tr>`;
+
+  const docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:body>
+  <w:p>
+    <w:pPr><w:jc w:val="center"/></w:pPr>
+    <w:r><w:rPr><w:b/><w:sz w:val="30"/></w:rPr><w:t>FO-205P11000-14</w:t></w:r>
+  </w:p>
+  <w:p>
+    <w:pPr><w:jc w:val="center"/></w:pPr>
+    <w:r><w:rPr><w:sz w:val="22"/><w:i/></w:rPr><w:t>Avance Programático · Registro de Competencias</w:t></w:r>
+  </w:p>
+  <w:p><w:r><w:t xml:space="preserve"> </w:t></w:r></w:p>
+  <w:tbl>
+    <w:tblPr>
+      <w:tblW w:w="9500" w:type="dxa"/>
+      <w:tblBorders>
+        <w:top w:val="single" w:sz="4" w:color="C8C0A8"/>
+        <w:left w:val="single" w:sz="4" w:color="C8C0A8"/>
+        <w:bottom w:val="single" w:sz="4" w:color="C8C0A8"/>
+        <w:right w:val="single" w:sz="4" w:color="C8C0A8"/>
+        <w:insideH w:val="single" w:sz="4" w:color="C8C0A8"/>
+        <w:insideV w:val="single" w:sz="4" w:color="C8C0A8"/>
+      </w:tblBorders>
+    </w:tblPr>
+    <w:tblGrid>
+      <w:gridCol w:w="3200"/>
+      <w:gridCol w:w="6300"/>
+    </w:tblGrid>
+    ${fila('Nombre del alumno', nombre, true)}
+    ${fila('No. de Control', control, false)}
+    ${fila('División / Carrera', division, true)}
+    ${fila('Grupo', grupo, false)}
+    ${fila('Fecha', fecha, true)}
+    ${fila('Materia / Asignatura', materia, false)}
+    ${fila('Docente', docente, true)}
+    ${fila('Competencia No.', compNum, false)}
+    ${fila('Descripción', compDesc, true)}
+    ${filaInd()}
+    ${fila('Evidencia de aprendizaje', evidencia, true)}
+  </w:tbl>
+  <w:sectPr>
+    <w:pgSz w:w="12240" w:h="15840"/>
+    <w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720"/>
+  </w:sectPr>
+</w:body>
+</w:document>`;
+
+  const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`;
+
+  const relsRoot = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+
+  const ct = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+</Types>`;
+
+  const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:docDefaults>
+    <w:rPrDefault><w:rPr>
+      <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>
+      <w:sz w:val="20"/>
+    </w:rPr></w:rPrDefault>
+  </w:docDefaults>
+</w:styles>`;
+
+  const zip = new PizZip();
+  zip.file('[Content_Types].xml', ct);
+  zip.file('_rels/.rels', relsRoot);
+  zip.file('word/document.xml', docXml);
+  zip.file('word/_rels/document.xml.rels', rels);
+  zip.file('word/styles.xml', styles);
+  return zip.generate({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  });
+}
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  cargarLS();
+  $('fecha').value = new Date().toISOString().slice(0,10);
+});
+
+/* ════════════════════════════════════════
+   Intro video
+════════════════════════════════════════ */
+document.addEventListener("DOMContentLoaded", () => {
+  const introContainer = document.getElementById("video-intro");
+  const introVideo = document.getElementById("intro-video");
+
+  if (!introContainer || !introVideo) return;
+
+  // 🔍 COMPROBACIÓN ESTILO "UPDATE":
+  // Si en el navegador ya está guardado que el usuario vio el video, 
+  // lo eliminamos instantáneamente del HTML sin reproducir nada.
+  if (localStorage.getItem("intro_video_visto1") === "true") {
+    introContainer.remove();
+    return; // Detiene el script aquí para que la web cargue normal
+  }
+
+  // Función encargada de realizar el fundido
+  const finalizarIntro = () => {
+    if (introContainer.classList.contains("fade-out")) return;
+    
+    introContainer.classList.add("fade-out");
+    
+    // 💾 GUARDAR EL REGISTRO:
+    // Guardamos la marca de forma permanente en el navegador del usuario
+    localStorage.setItem("intro_video_visto1", "true");
+    
+    setTimeout(() => {
+      introContainer.remove();
+    }, 800); // 0.8s de la transición CSS
+  };
+
+  // Detección anticipada (0.5 segundos antes de que termine)
+  introVideo.addEventListener("timeupdate", () => {
+    const segundosAnticipados = 0.5; 
+    if (introVideo.duration) {
+      const tiempoRestante = introVideo.duration - introVideo.currentTime;
+      if (tiempoRestante <= segundosAnticipados) {
+        finalizarIntro();
+      }
+    }
+  });
+
+  // Mecanismo de seguridad por si falla el video
+  setTimeout(finalizarIntro, 6000); 
+});
+/* ══════════════════════════════════════════
+   GENERADOR DE FONDO ANIMADO MUNDIALISTA
+══════════════════════════════════════════ */
+function generarFondoTrionda() {
+  const bgContainer = document.getElementById('worldcup-bg');
+  if (!bgContainer) return;
+  
+  // Colores principales de la paleta Trionda
+  const colors = ['#e20047', '#0044ff', '#00cc44'];
+  const numShapes = 250; 
+  
+  // Figuras SVG relacionadas al mundial
+  const pentagono = `<svg viewBox="0 0 100 100"><polygon points="50,10 90,40 75,90 25,90 10,40" fill="none" stroke="COLOR" stroke-width="5"/><circle cx="50" cy="53" r="10" fill="COLOR"/></svg>`;
+  const cancha = `<svg viewBox="0 0 100 100"><rect x="10" y="15" width="80" height="70" rx="5" fill="none" stroke="COLOR" stroke-width="4"/><line x1="50" y1="15" x2="50" y2="85" stroke="COLOR" stroke-width="4"/><circle cx="50" cy="50" r="12" fill="none" stroke="COLOR" stroke-width="4"/></svg>`;
+  const trofeo = `<svg viewBox="0 0 100 100"><path d="M30 20 C30 10, 70 10, 70 20 C70 45, 55 55, 55 70 L45 70 C45 55, 30 45, 30 20 Z" fill="none" stroke="COLOR" stroke-width="4"/><rect x="35" y="70" width="30" height="15" fill="none" stroke="COLOR" stroke-width="4"/><line x1="15" y1="20" x2="30" y2="20" stroke="COLOR" stroke-width="4"/><line x1="70" y1="20" x2="85" y2="20" stroke="COLOR" stroke-width="4"/></svg>`;
+  const silbato = `<svg viewBox="0 0 100 100"><circle cx="65" cy="50" r="20" fill="none" stroke="COLOR" stroke-width="5"/><path d="M15 45 L45 45 L45 55 L15 55 Z" fill="COLOR"/><circle cx="65" cy="50" r="6" fill="COLOR"/></svg>`;
+  const zapato = `<svg viewBox="0 0 100 100"><path d="M15 70 L85 70 C90 70, 95 60, 90 50 C80 35, 55 35, 45 25 L20 25 L15 70 Z" fill="none" stroke="COLOR" stroke-width="4"/><circle cx="25" cy="75" r="4" fill="COLOR"/><circle cx="50" cy="75" r="4" fill="COLOR"/><circle cx="75" cy="75" r="4" fill="COLOR"/></svg>`;
+  const tarjetas = `<svg viewBox="0 0 100 100"><rect x="20" y="15" width="35" height="50" rx="3" fill="none" stroke="COLOR" stroke-width="4" transform="rotate(-15 37 40)"/><rect x="45" y="25" width="35" height="50" rx="3" fill="none" stroke="COLOR" stroke-width="4" transform="rotate(10 62 50)"/></svg>`;
+  const pelota = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="COLOR" stroke-width="4"/><polygon points="50,35 63,44 58,59 42,59 37,44" fill="none" stroke="COLOR" stroke-width="4"/><line x1="50" y1="35" x2="50" y2="10" stroke="COLOR" stroke-width="4"/><line x1="63" y1="44" x2="84" y2="31" stroke="COLOR" stroke-width="4"/><line x1="58" y1="59" x2="74" y2="82" stroke="COLOR" stroke-width="4"/><line x1="42" y1="59" x2="26" y2="82" stroke="COLOR" stroke-width="4"/><line x1="37" y1="44" x2="16" y2="31" stroke="COLOR" stroke-width="4"/></svg>`;
+  const camiseta = `<svg viewBox="0 0 100 100"><path d="M35 20 L20 32 L28 44 L36 38 L36 80 L64 80 L64 38 L72 44 L80 32 L65 20 C60 25, 40 25, 35 20 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><line x1="36" y1="45" x2="64" y2="45" stroke="COLOR" stroke-width="2"/></svg>`;
+  const mundial26 = `<svg viewBox="0 0 100 100"><path d="M18 38 C18 22, 45 22, 45 38 C45 52, 18 55, 18 75 L48 75" fill="none" stroke="COLOR" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M78 28 C63 28, 54 45, 54 60 C54 75, 82 75, 82 58 C82 45, 54 45, 54 58" fill="none" stroke="COLOR" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const banderin = `<svg viewBox="0 0 100 100"><line x1="30" y1="15" x2="30" y2="85" stroke="COLOR" stroke-width="5" stroke-linecap="round"/><polygon points="30,15 75,32 30,50" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><line x1="15" y1="85" x2="55" y2="85" stroke="COLOR" stroke-width="5" stroke-linecap="round"/></svg>`;
+  const cronometro = `<svg viewBox="0 0 100 100"><circle cx="50" cy="55" r="30" fill="none" stroke="COLOR" stroke-width="4"/><rect x="45" y="12" width="10" height="10" fill="COLOR"/><line x1="38" y1="12" x2="62" y2="12" stroke="COLOR" stroke-width="4"/><line x1="50" y1="55" x2="50" y2="35" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="50" y1="55" x2="68" y2="45" stroke="COLOR" stroke-width="3" stroke-linecap="round"/></svg>`;
+  const medalla = `<svg viewBox="0 0 100 100"><path d="M32 15 L50 48 L68 15" fill="none" stroke="COLOR" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="50" cy="65" r="20" fill="none" stroke="COLOR" stroke-width="4"/><circle cx="50" cy="65" r="8" fill="COLOR"/></svg>`;
+  const estadio = `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="45" ry="32" fill="none" stroke="COLOR" stroke-width="4"/><ellipse cx="50" cy="50" rx="32" ry="20" fill="none" stroke="COLOR" stroke-width="3"/><rect x="36" y="42" width="28" height="16" rx="2" fill="none" stroke="COLOR" stroke-width="3"/><line x1="50" y1="18" x2="50" y2="30" stroke="COLOR" stroke-width="3"/><line x1="50" y1="70" x2="50" y2="82" stroke="COLOR" stroke-width="3"/><line x1="5" y1="50" x2="18" y2="50" stroke="COLOR" stroke-width="3"/><line x1="82" y1="50" x2="95" y2="50" stroke="COLOR" stroke-width="3"/></svg>`;
+  const copa = `<svg viewBox="0 0 100 100"><path d="M35 85 L65 85 L62 70 L38 70 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><line x1="36.5" y1="77" x2="63.5" y2="77" stroke="COLOR" stroke-width="3"/><path d="M42 70 C42 55, 30 48, 38 36 C43 30, 48 34, 50 38 C52 34, 57 30, 62 36 C70 48, 58 55, 58 70" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><circle cx="50" cy="24" r="13" fill="none" stroke="COLOR" stroke-width="4"/><path d="M40 20 Q50 26 60 20" fill="none" stroke="COLOR" stroke-width="3"/></svg>`;
+  const viajeMundial = `<svg viewBox="0 0 100 100"><path d="M50 12 L55 35 L88 55 L56 55 L50 85 L44 55 L12 55 L45 35 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M20 25 A40 40 0 0 1 80 25" fill="none" stroke="COLOR" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round"/></svg>`;
+  const porteria = `<svg viewBox="0 0 100 100"><path d="M10 80 L10 25 L90 25 L90 80" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="10" y1="43" x2="90" y2="43" stroke="COLOR" stroke-width="2"/><line x1="10" y1="61" x2="90" y2="61" stroke="COLOR" stroke-width="2"/><line x1="36" y1="25" x2="36" y2="80" stroke="COLOR" stroke-width="2"/><line x1="64" y1="25" x2="64" y2="80" stroke="COLOR" stroke-width="2"/><circle cx="36" cy="43" r="7" fill="COLOR"/></svg>`;
+  const logoOficial26 = `<svg viewBox="0 0 100 100">
+  <!-- El número 26 vertical de fondo (grueso) -->
+  <path d="M40 10 C25 10, 20 25, 30 35 L50 55 C60 65, 55 80, 40 80 L60 80" fill="none" stroke="COLOR" stroke-width="8" stroke-linecap="round"/>
+  <path d="M80 20 C65 20, 60 35, 60 50 C60 65, 80 65, 80 50 C80 35, 60 35, 60 50" fill="none" stroke="COLOR" stroke-width="8" stroke-linecap="round"/>
+  <!-- La Copa FIFA en el centro (más fina para contrastar y superpuesta) -->
+  <path d="M42 85 L58 85 L56 75 L44 75 Z" fill="COLOR"/>
+  <path d="M50 75 C50 65, 42 60, 44 52 C46 48, 50 50, 50 52 C50 50, 54 48, 56 52 C58 60, 50 65, 50 75" fill="none" stroke="COLOR" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="50" cy="46" r="7" fill="none" stroke="COLOR" stroke-width="3"/>
+</svg>`;
+  const banderasHost = `<svg viewBox="0 0 100 100">
+  <!-- CANADÁ (Izquierda: Hoja de maple estilizada) -->
+  <rect x="5" y="25" width="25" height="50" rx="2" fill="none" stroke="COLOR" stroke-width="3"/>
+  <path d="M17.5 35 L19 41 L25 40 L21 45 L23 51 L17.5 48 L12 51 L14 45 L10 40 L16 41 Z" fill="COLOR"/>
+  
+  <!-- USA (Centro: Barras y zona de estrellas) -->
+  <rect x="37.5" y="25" width="25" height="50" rx="2" fill="none" stroke="COLOR" stroke-width="3"/>
+  <rect x="37.5" y="25" width="12" height="15" fill="COLOR"/>
+  <line x1="50" y1="31" x2="62.5" y2="31" stroke="COLOR" stroke-width="2"/>
+  <line x1="37.5" y1="37" x2="62.5" y2="37" stroke="COLOR" stroke-width="2"/>
+  <line x1="37.5" y1="43" x2="62.5" y2="43" stroke="COLOR" stroke-width="2"/>
+  
+  <!-- MÉXICO (Derecha: Tricolor y escudo central) -->
+  <rect x="70" y="25" width="25" height="50" rx="2" fill="none" stroke="COLOR" stroke-width="3"/>
+  <line x1="78.3" y1="25" x2="78.3" y2="75" stroke="COLOR" stroke-width="2"/>
+  <line x1="86.6" y1="25" x2="86.6" y2="75" stroke="COLOR" stroke-width="2"/>
+  <circle cx="82.5" cy="50" r="4" fill="COLOR"/>
+</svg>`;
+  const fanCelebrando = `<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="25" r="10" fill="none" stroke="COLOR" stroke-width="4"/>
+  <path d="M20 40 Q50 30, 80 40 L75 55 Q50 45, 25 55 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M35 52 L35 90 M65 52 L65 90" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/>
+  <path d="M20 40 L10 15 M80 40 L90 15" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/>
+</svg>`;
+  // 17. Guante de portero (Atajada clave)
+  const guantePortero = `<svg viewBox="0 0 100 100"><rect x="35" y="72" width="30" height="15" rx="2" fill="none" stroke="COLOR" stroke-width="4"/><path d="M30 72 L30 40 C30 32, 40 32, 40 40 L40 30 C40 22, 50 22, 50 30 L50 28 C50 20, 60 20, 60 28 L60 35 C60 27, 70 27, 70 35 L70 72 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M30 60 Q18 55, 22 45 Q30 45, 34 55" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/></svg>`;
+
+// 18. Brazalete de Capitán (Liderazgo en la cancha)
+  const brazaleteCapitan = `<svg viewBox="0 0 100 100"><rect x="15" y="30" width="70" height="40" rx="5" fill="none" stroke="COLOR" stroke-width="4"/><path d="M60 42 C44 42, 40 46, 40 50 C40 54, 44 58, 60 58" fill="none" stroke="COLOR" stroke-width="6" stroke-linecap="round"/><line x1="15" y1="50" x2="25" y2="50" stroke="COLOR" stroke-width="3"/><line x1="75" y1="50" x2="85" y2="50" stroke="COLOR" stroke-width="3"/></svg>`;
+
+// 19. Banderín de Juez de Línea (Fueras de juego)
+  const banderaLinier = `<svg viewBox="0 0 100 100"><line x1="20" y1="15" x2="20" y2="85" stroke="COLOR" stroke-width="5" stroke-linecap="round"/><rect x="20" y="20" width="60" height="42" fill="none" stroke="COLOR" stroke-width="4"/><line x1="20" y1="20" x2="80" y2="62" stroke="COLOR" stroke-width="4"/><line x1="20" y1="62" x2="80" y2="20" stroke="COLOR" stroke-width="2" stroke-dasharray="3,3"/></svg>`;
+
+// 20. Entrada / Ticket del Partido (Acceso al estadio)
+  const ticketMundial = `<svg viewBox="0 0 100 100"><rect x="15" y="25" width="70" height="50" rx="4" fill="none" stroke="COLOR" stroke-width="4"/><line x1="65" y1="25" x2="65" y2="75" stroke="COLOR" stroke-width="4" stroke-dasharray="4,4"/><circle cx="65" cy="25" r="6" fill="COLOR"/><circle cx="65" cy="75" r="6" fill="COLOR"/><line x1="25" y1="40" x2="55" y2="40" stroke="COLOR" stroke-width="4"/><line x1="25" y1="52" x2="45" y2="52" stroke="COLOR" stroke-width="3"/><line x1="25" y1="62" x2="35" y2="62" stroke="COLOR" stroke-width="2"/></svg>`;
+
+// 21. Cámara de TV / Transmisión (Cobertura global del evento)
+  const camaraTransmision = `<svg viewBox="0 0 100 100"><rect x="15" y="25" width="45" height="30" rx="3" fill="none" stroke="COLOR" stroke-width="4"/><polygon points="60,32 82,20 82,58 60,48" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><circle cx="30" cy="40" r="6" fill="COLOR"/><line x1="37" y1="55" x2="20" y2="85" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="37" y1="55" x2="55" y2="85" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="37" y1="55" x2="37" y2="85" stroke="COLOR" stroke-width="3"/></svg>`;
+
+// 22. Spray Evanescente del Árbitro (Falta y barrera)
+  const sprayEspuma = `<svg viewBox="0 0 100 100"><rect x="35" y="45" width="30" height="40" rx="3" fill="none" stroke="COLOR" stroke-width="4"/><rect x="43" y="37" width="14" height="8" fill="none" stroke="COLOR" stroke-width="3"/><path d="M50 37 L50 30 L42 33" fill="none" stroke="COLOR" stroke-width="3" stroke-linecap="round"/><circle cx="35" cy="20" r="6" fill="COLOR"/><circle cx="50" cy="15" r="8" fill="COLOR"/><circle cx="65" cy="22" r="5" fill="COLOR"/></svg>`;
+
+// 23. Autobús del Equipo (Logística y traslados de las selecciones)
+  const autobusEquipo = `<svg viewBox="0 0 100 100"><path d="M10 35 L80 35 C88 35, 90 42, 90 50 L90 70 L10 70 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><circle cx="30" cy="72" r="8" fill="none" stroke="COLOR" stroke-width="4"/><circle cx="70" cy="72" r="8" fill="none" stroke="COLOR" stroke-width="4"/><line x1="10" y1="48" x2="85" y2="48" stroke="COLOR" stroke-width="3"/><line x1="35" y1="35" x2="35" y2="48" stroke="COLOR" stroke-width="2"/><line x1="60" y1="35" x2="60" y2="48" stroke="COLOR" stroke-width="2"/></svg>`;
+
+// 24. Fuegos Artificiales / Fiesta (Ceremonia de inauguración y final)
+  const fiestaEstadio = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="5" fill="COLOR"/><line x1="50" y1="35" x2="50" y2="15" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="50" y1="65" x2="50" y2="85" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="35" y1="50" x2="15" y2="50" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="65" y1="50" x2="85" y2="50" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="39" y1="39" x2="25" y2="25" stroke="COLOR" stroke-width="3" stroke-linecap="round"/><line x1="61" y1="61" x2="75" y2="75" stroke="COLOR" stroke-width="3" stroke-linecap="round"/><line x1="61" y1="39" x2="75" y2="25" stroke="COLOR" stroke-width="3" stroke-linecap="round"/><line x1="39" y1="61" x2="25" y2="75" stroke="COLOR" stroke-width="3" stroke-linecap="round"/></svg>`;
+
+// 25. Estrella de Campeón (La gloria máxima)
+  const estrellaVictoria = `<svg viewBox="0 0 100 100"><polygon points="50,12 63,38 92,38 68,55 77,85 50,68 23,85 32,55 8,38 37,38" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><circle cx="50" cy="50" r="7" fill="COLOR"/></svg>`;
+
+// 26. Pasaportes de Viaje (Cruzar fronteras entre CAN, USA y MEX)
+  const pasaporteViajero = `<svg viewBox="0 0 100 100"><rect x="20" y="15" width="45" height="65" rx="4" fill="none" stroke="COLOR" stroke-width="4" transform="rotate(-10 42 50)"/><rect x="35" y="20" width="45" height="65" rx="4" fill="none" stroke="COLOR" stroke-width="4" transform="rotate(5 57 52)"/><circle cx="58" cy="50" r="10" fill="none" stroke="COLOR" stroke-width="3"/><path d="M52 50 L64 50 M58 44 L58 56" stroke="COLOR" stroke-width="2"/></svg>`;
+  // 27. Hoja de Maple Clásica (Símbolo nacional absoluto, geometría simétrica de 11 puntas)
+  const hojaMaple = `<svg viewBox="0 0 100 100"><path d="M50 85 L50 70 L32 75 L38 58 L15 52 L35 45 L25 25 L46 32 L50 10 L54 32 L75 25 L65 45 L85 52 L62 58 L68 75 L50 70" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/></svg>`;
+
+// 28. Bosque y Montañas Rocosas (La imponente naturaleza canadiense con un pino alpino en primer plano)
+  const naturalezaCanada = `<svg viewBox="0 0 100 100"><path d="M10 75 L45 30 L75 65 L90 50 L95 75 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><polygon points="25,75 25,62 18,62 28,48 38,62 31,62 31,75" fill="COLOR"/></svg>`;
+  // 29. Estatua de la Libertad (Silueta icónica de la corona de rayos y la antorcha encendida)
+  const estatuaLibertad = `<svg viewBox="0 0 100 100"><path d="M35 75 L38 52 C38 42, 62 42, 62 52 L65 75" fill="none" stroke="COLOR" stroke-width="4"/><path d="M34 48 L18 42 M39 44 L25 25 M45 42 L45 12 M55 42 L55 12 M61 44 L75 25 M66 48 L82 42" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><path d="M72 75 L72 50 L68 50 L66 42 L78 42 L76 50 L72 50" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M72 42 C68 32, 72 25, 72 25 C72 25, 76 32, 72 42" fill="COLOR"/></svg>`;
+
+// 30. Águila Calva (Perfil estilizado del ave nacional americana con el pico sólido)
+  const aguilaUSA = `<svg viewBox="0 0 100 100"><path d="M20 70 C20 40, 40 25, 65 25 C72 25, 76 30, 72 40 L85 46 L68 58 C60 75, 35 75, 20 70 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M68 40 L85 46 L68 58 C64 52, 64 45, 68 40 Z" fill="COLOR"/><circle cx="55" cy="40" r="3" fill="COLOR"/></svg>`;
+  // 31. Pirámide de Chichén Itzá / El Castillo (Legado prehispánico con escalinata central y niveles simétricos)
+  const piramideMexico = `<svg viewBox="0 0 100 100"><path d="M10 80 L20 62 L30 44 L40 30 L60 30 L70 44 L80 62 L90 80 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><line x1="20" y1="62" x2="80" y2="62" stroke="COLOR" stroke-width="3"/><line x1="30" y1="44" x2="70" y2="44" stroke="COLOR" stroke-width="3"/><rect x="42" y="16" width="16" height="14" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><polygon points="44,80 46,30 54,30 56,80" fill="none" stroke="COLOR" stroke-width="3"/></svg>`;
+
+// 32. Sombrero de Charro (El rey de la fiesta en las tribunas del mundial, adornado con un mini balón abajo)
+  const sombreroMexico = `<svg viewBox="0 0 100 100"><path d="M30 60 C30 25, 42 15, 50 15 C58 15, 70 25, 70 60" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M8 60 Q50 82 92 60 Q50 48 8 60" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M31 52 Q50 58 69 52" stroke="COLOR" stroke-width="3" stroke-dasharray="4,2"/><circle cx="50" cy="70" r="5" fill="COLOR"/></svg>`;
+
+  const shapes = [pentagono, cancha, trofeo, silbato, zapato, tarjetas, pelota, camiseta, mundial26, banderin, cronometro, medalla, estadio, copa, viajeMundial, porteria, logoOficial26, banderasHost, fanCelebrando, guantePortero, brazaleteCapitan, ticketMundial,camaraTransmision, sprayEspuma, autobusEquipo, fiestaEstadio, estrellaVictoria, pasaporteViajero, hojaMaple, naturalezaCanada, estatuaLibertad,aguilaUSA, piramideMexico, sombreroMexico];
+  const animations = ['floatRandom1', 'floatRandom2', 'floatRandom3'];
+
+  for (let i = 0; i < numShapes; i++) {
+    const div = document.createElement('div');
+    const size = Math.random() * 70 + 35; 
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const svgCode = shapes[Math.floor(Math.random() * shapes.length)].replace(/COLOR/g, color);
+    
+    div.innerHTML = svgCode;
+    div.className = 'bg-shape';
+    
+    div.style.left = (Math.random() * 120 - 10) + 'vw';
+    div.style.top = (Math.random() * 120 - 10) + 'vh';
+    div.style.width = size + 'px';
+    div.style.height = size + 'px';
+    
+    // Aumenté la opacidad (entre 6% y 15%) para que sí se vean
+    div.style.opacity = Math.random() * 0.09 + 0.06; 
+    
+    const anim = animations[Math.floor(Math.random() * animations.length)];
+    const duration = Math.random() * 40 + 30; 
+    const delay = Math.random() * -50; 
+    
+    div.style.animation = `${anim} ${duration}s infinite ease-in-out ${delay}s`;
+    
+    bgContainer.appendChild(div);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', generarFondoTrionda);
+</script>
+</body>
+</html>
