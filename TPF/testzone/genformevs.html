@@ -1473,5 +1473,123 @@ function generarFondoTrionda() {
 
 document.addEventListener('DOMContentLoaded', generarFondoTrionda);
 </script>
+<div id="pwa-install-banner" style="
+    display: none; 
+    position: fixed; 
+    bottom: 24px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    background-color: #1C1917; 
+    color: #EDE8DF; 
+    padding: 16px 20px; 
+    border-radius: 12px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4); 
+    z-index: 99999; 
+    font-family: 'DM Sans', sans-serif; 
+    width: 90%; 
+    max-width: 420px; 
+    border: 1px solid rgba(200, 137, 58, 0.3);
+    box-sizing: border-box;
+">
+  <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+    <p id="pwa-text" style="margin: 0; font-size: 13px; line-height: 1.4; font-family: 'DM Sans', sans-serif;">
+      </p>
+    
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button id="pwa-btn-install" style="
+          display: none; 
+          background-color: #C8893A; 
+          color: #1C1917; 
+          border: none; 
+          padding: 8px 14px; 
+          border-radius: 6px; 
+          font-weight: 600; 
+          font-size: 12px; 
+          cursor: pointer; 
+          white-space: nowrap;
+          font-family: 'DM Sans', sans-serif;
+          transition: background 0.2s;
+      " onmouseover="this.style.backgroundColor='#b0742f'" onmouseout="this.style.backgroundColor='#C8893A'">
+        Instalar
+      </button>
+      
+      <button id="pwa-btn-close" style="
+          background: transparent; 
+          color: #9A9490; 
+          border: none; 
+          font-size: 18px; 
+          cursor: pointer; 
+          padding: 4px;
+          line-height: 1;
+      " onmouseover="this.style.color='#EDE8DF'" onmouseout="this.style.color='#9A9490'">
+        &times;
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    let deferredPrompt;
+    const banner = document.getElementById('pwa-install-banner');
+    const pwaText = document.getElementById('pwa-text');
+    const btnInstall = document.getElementById('pwa-btn-install');
+    const btnClose = document.getElementById('pwa-btn-close');
+
+    // 1. Validaciones de entorno y dispositivo
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    // Detecta si ya se está ejecutando como app instalada (standalone)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    // Verifica si el usuario ya cerró el banner en esta sesión de navegación
+    const isDismissed = sessionStorage.getItem('pwa-prompt-dismissed');
+
+    // Si ya está instalada o el usuario ya lo cerró, no hacemos nada
+    if (isStandalone || isDismissed) return;
+
+    // 2. COMPORTAMIENTO PARA ANDROID / WINDOWS (Navegadores basados en Chromium)
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Evita que Chrome muestre su mini-infobar automático abajo
+      e.preventDefault();
+      // Guarda el evento para activarlo cuando el usuario dé clic
+      deferredPrompt = e;
+
+      // Configura el banner para Android
+      pwaText.innerHTML = "✨ ¡Instala esta plataforma en tu pantalla de inicio para acceso rápido!";
+      btnInstall.style.display = 'inline-block';
+      banner.style.display = 'block';
+    });
+
+    // Acción al presionar el botón "Instalar" en Android
+    btnInstall.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      
+      // Muestra la ventana nativa de confirmación de instalación
+      deferredPrompt.prompt();
+      
+      // Espera la respuesta del usuario
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`PWA: El usuario eligió guardar la app: ${outcome}`);
+      
+      // Limpia la variable, ya no se puede reutilizar el mismo evento
+      deferredPrompt = null;
+      banner.style.display = 'none';
+    });
+
+    // 3. COMPORTAMIENTO ESPECIAL PARA IPHONE / IPAD (iOS Safari)
+    if (isIOS) {
+      // Modifica el texto con instrucciones específicas de Apple
+      pwaText.innerHTML = "📱 Añade esta app a tu iPhone: toca el botón de <strong>Compartir</strong> <span style='font-size: 15px;'>⎋</span> y luego selecciona <strong>'Agregar al inicio'</strong>.";
+      btnInstall.style.display = 'none'; // iOS no soporta instalación por clic de script
+      banner.style.display = 'block';
+    }
+
+    // 4. LOGICA PARA CERRAR EL BANNER
+    btnClose.addEventListener('click', () => {
+      banner.style.display = 'none';
+      // Guarda en la memoria del navegador que el usuario lo cerró para no enfadarlo en esta sesión
+      sessionStorage.setItem('pwa-prompt-dismissed', 'true');
+    });
+  })();
+</script>
 </body>
 </html>
