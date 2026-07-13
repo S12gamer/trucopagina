@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tpftest-cache-v2';
+const CACHE_NAME = 'tpftest-cache-v3';
 const ASSETS = [
   '/trucopagina/TPF/testzone/TPF.html',
   '/trucopagina/TPF/testzone/genformevs.html',
