@@ -9,7 +9,12 @@
 <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css"/>
 
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+<link rel="manifest" href="manifest.json">
 
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CDRA App">
+<link rel="apple-touch-icon" href="icono-192.png">
 <style>
 body{
     margin:0;
@@ -284,6 +289,19 @@ button{max-width:100%;}
 }
 
 </style>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(registration => {
+          console.log('PWA: Service Worker registrado con éxito bajo el alcance:', registration.scope);
+        })
+        .catch(error => {
+          console.error('PWA: Error al registrar el Service Worker:', error);
+        });
+    });
+  }
+</script>
 </head>
 <script>
 

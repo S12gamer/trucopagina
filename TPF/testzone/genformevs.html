@@ -8,6 +8,12 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.min.js"></script>
+<link rel="manifest" href="manifest.json">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CDRA App">
+<link rel="apple-touch-icon" href="icono-192.png">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -307,6 +313,19 @@ hr{border:none;border-top:1px solid var(--border);margin:.75rem 0}
       100% { transform: translate(0, 0) rotate(0deg); }
     }
 </style>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(registration => {
+          console.log('PWA: Service Worker registrado con éxito bajo el alcance:', registration.scope);
+        })
+        .catch(error => {
+          console.error('PWA: Error al registrar el Service Worker:', error);
+        });
+    });
+  }
+</script>
 </head>
 <body>
 <div id="worldcup-bg"></div>
