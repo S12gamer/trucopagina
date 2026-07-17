@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador · Personalizado</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Quill Editor Assets (Importados del Word Complex Test) -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.min.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════ */
+:root {
+  --bg: #EDE8DF; 
+  --surface: #FAF8F4; 
+  --surface-2: #F4F0E8;
+  --ink: #1C1917; 
+  --ink-m: #5C5751; 
+  --ink-faint: #9A9490;
+  --sidebar: #1C1917;
+  
+  --amber: #C8893A; --amber-l: rgba(200,137,58,.14);
+  --teal: #1B7A6E;   --teal-l: rgba(27,122,110,.12);
+  --rust: #923A28;   --rust-l: rgba(146,58,40,.12);
+  --green: #2A6545;  --green-l: rgba(42,101,69,.12);
+  --purple: #5B3E8F; --purple-l: rgba(91,62,143,.12);
+  
+  --sh-s: 0 2px 8px rgba(28,25,23,.07);
+  --sh-m: 0 8px 28px rgba(28,25,23,.12);
+  --sh-l: 0 24px 56px rgba(28,25,23,.18);
+  
+  --r-s: 8px; --r-m: 14px; --r-l: 20px;
+  
+  --spring: cubic-bezier(.34,1.56,.64,1);
+  --smooth: cubic-bezier(.4,0,.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  overscroll-behavior-y: none;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-bottom: 4rem;
+}
+
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: .45;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  overscroll-behavior-y: none;
+}
+
+/* ── HEADER SUPERIOR ── */
+.site-header {
+  background: var(--sidebar);
+  color: #fff;
+  padding: 2.5rem 2rem 2rem;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 3px solid var(--amber);
+}
+.site-header::after {
+  content: ''; position: absolute; top: 0; right: 0; width: 30%; height: 100%;
+  background: radial-gradient(circle at top right, rgba(200,137,58,.15), transparent 70%);
+  pointer-events: none;
+}
+.header-badge {
+  display: inline-block;
+  font-size: .65rem; font-weight: 700; letter-spacing: .12em;
+  color: var(--amber); text-transform: uppercase;
+  background: var(--amber-l); padding: 4px 12px; border-radius: 20px;
+  margin-bottom: 1rem;
+}
+.site-header h1 {
+  font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; line-height: 1.2;
+}
+.site-header p {
+  font-size: .9rem; color: rgba(255,255,255,.6); margin-top: .5rem; font-weight: 300;
+}
+
+/* ── LAYOUT PRINCIPAL ── */
+.layout-wrapper {
+  max-width: 1100px;
+  margin: -2rem auto 0;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2rem;
+  align-items: start;
+  position: relative;
+  z-index: 10;
+}
+
+/* ── STEPPER ── */
+.steps {
+  display: flex; gap: 8px;
+  margin-bottom: 2rem;
+  background: var(--surface); padding: 8px; border-radius: var(--r-m);
+  box-shadow: var(--sh-s); border: 1px solid rgba(200,137,58,.1);
+}
+.step {
+  flex: 1; padding: .6rem .25rem; text-align: center;
+  font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-faint); background: transparent; border-radius: var(--r-s);
+  transition: all .3s var(--spring);
+}
+.step.active { background: var(--amber-l); color: var(--amber); }
+.step.done { background: var(--teal-l); color: var(--teal); }
+.step span { display: block; font-size: 1.1rem; margin-bottom: 4px; font-weight: 700; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1.5px solid rgba(200,137,58,.1);
+  border-radius: var(--r-m);
+  padding: 1.8rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--sh-s);
+  transition: box-shadow .3s, border-color .3s;
+}
+.card:hover { box-shadow: var(--sh-m); border-color: rgba(200,137,58,.2); }
+.card-title {
+  font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700;
+  color: var(--ink); margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 12px;
+}
+.card-title::after { content: ''; flex: 1; height: 1px; background: rgba(200,137,58,.15); }
+
+/* ── INPUTS Y CAMPOS ── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid1 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-m);
+}
+.field input, .field select, .field textarea {
+  padding: 12px 14px;
+  border: 1.5px solid rgba(28,25,23,.1);
+  border-radius: var(--r-s);
+  font-family: 'DM Sans', sans-serif; font-size: .9rem;
+  color: var(--ink); background: var(--surface-2);
+  outline: none; transition: border-color .2s, box-shadow .2s, background .2s;
+  width: 100%;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--amber); background: #fff;
+  box-shadow: 0 0 0 4px var(--amber-l);
+}
+.field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9080' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  padding-right: 40px; cursor: pointer; font-weight: 500;
+}
+
+/* ── EDITOR DE TEXTO (QUILL) ── */
+#editor_wrapper {
+  margin-top: 1rem;
+}
+#editor-container {
+  height: 250px;
+  background: #fff;
+  border-radius: 0 0 var(--r-s) var(--r-s);
+  border: 1.5px solid rgba(28,25,23,.1);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+}
+.ql-toolbar.ql-snow {
+  border: 1.5px solid rgba(28,25,23,.1) !important;
+  border-bottom: none !important;
+  border-radius: var(--r-s) var(--r-s) 0 0;
+  background: var(--surface-2);
+}
+.ql-container.ql-snow {
+  border: 1.5px solid rgba(28,25,23,.1) !important;
+  border-radius: 0 0 var(--r-s) var(--r-s);
+}
+/* Estilos específicos para el contenido dentro de Quill */
+.ql-editor {
+    font-family: 'DM Sans', sans-serif; /* O Gotham Book, la que prefieras */
+    font-size: 14px; /* Tamaño del texto normal (párrafos) */
+    line-height: 1.6;
+}
+
+/* Hacer que los títulos h3 destaquen visualmente */
+.ql-editor h3 {
+    font-size: 18px !important; /* Tamaño más grande para distinguir el título */
+    font-weight: bold !important;
+    color: var(--ink, #000); /* Usa tu variable de color oscuro */
+    margin-top: 16px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(0,0,0,0.1); /* Opcional: una línea sutil abajo */
+}
+
+/* Asegurar que las negritas se vean gruesas */
+.ql-editor strong, .ql-editor b {
+    font-weight: 700 !important;
+}
+
+/* Dar espacio a las listas */
+.ql-editor ul, .ql-editor ol {
+    margin-bottom: 12px;
+}
+
+/* ── COMPETENCIA GRID ── */
+.comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 10px; }
+.comp-btn {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 700;
+  border: 1.5px solid rgba(28,25,23,.1); border-radius: var(--r-s);
+  background: var(--surface-2); color: var(--ink-m);
+  cursor: pointer; transition: all .2s var(--spring); user-select: none;
+}
+.comp-btn:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-l); transform: translateY(-2px); }
+.comp-btn.active {
+  background: var(--amber); color: #fff; border-color: var(--amber);
+  box-shadow: 0 4px 12px rgba(200,137,58,.35); transform: translateY(-2px) scale(1.05);
+}
+
+/* ── INDICADORES ── */
+.ind-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.ind-btn {
+  flex: 1; min-width: 45px; padding: 12px 0;
+  font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 700;
+  border: 1.5px solid rgba(28,25,23,.1); border-radius: var(--r-s);
+  background: var(--surface-2); color: var(--ink-m);
+  cursor: pointer; transition: all .2s var(--spring); text-align: center; user-select: none;
+}
+.ind-btn:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-l); transform: translateY(-2px); }
+.ind-btn.active {
+  background: var(--teal); color: #fff; border-color: var(--teal);
+  box-shadow: 0 4px 12px rgba(27,122,110,.35); transform: translateY(-2px) scale(1.05);
+}
+
+.desc-preview {
+  margin-top: 1rem; padding: 1rem 1.2rem;
+  background: var(--amber-l); border-left: 4px solid var(--amber);
+  border-radius: 0 var(--r-s) var(--r-s) 0;
+  font-size: .9rem; line-height: 1.6; color: var(--ink); font-weight: 500;
+  display: none; animation: fadeIn .4s var(--smooth);
+}
+.desc-preview.show { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+
+/* ── COLUMNA LATERAL (Sidebar Herramientas) ── */
+.sidebar-tools { display: flex; flex-direction: column; gap: 1.5rem; }
+
+/* ── PANEL GESTOR DE MATERIAS ── */
+.custom-mat-panel {
+  background: var(--surface); border: 1.5px solid rgba(91,62,143,.25);
+  border-radius: var(--r-m); box-shadow: var(--sh-m); overflow: hidden;
+  transition: box-shadow .3s;
+}
+.custom-mat-panel:hover { box-shadow: var(--sh-l); }
+.custom-mat-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 1.2rem; background: linear-gradient(135deg, var(--purple), #7B52C4);
+  color: #fff; cursor: pointer; user-select: none;
+}
+.custom-mat-header .cm-icon { font-size: 1.3rem; }
+.custom-mat-header h3 { font-size: .9rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin:0; }
+.custom-mat-header .cm-arrow { margin-left: auto; font-size: 1.2rem; transition: transform .3s var(--spring); }
+.custom-mat-panel.open .cm-arrow { transform: rotate(180deg); }
+
+.custom-mat-body { display: none; padding: 1.2rem; background: var(--surface); }
+.custom-mat-panel.open .custom-mat-body { display: block; animation: fadeIn .3s ease-out; }
+
+.saved-materias-grid { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 10px; 
+  margin-bottom: 1rem; 
+  max-height: 220px;          
+  overflow-y: auto;           
+  padding-right: 6px;         
+}
+.saved-materias-grid::-webkit-scrollbar { width: 4px; }
+.saved-materias-grid::-webkit-scrollbar-thumb { background: rgba(91,62,143,.2); border-radius: 4px; }
+
+.saved-materia-card {
+  background: #fff; border: 1px solid rgba(28,25,23,.1);
+  border-radius: var(--r-s); padding: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  box-shadow: var(--sh-s);
+}
+.saved-materia-card:hover {
+  border-color: var(--purple);
+  background: var(--purple-l);
+  box-shadow: var(--sh-m);
+}
+.saved-materia-card h4 { font-size: .9rem; color: var(--ink); font-weight: 700; margin: 0; }
+.smc-actions { display: flex; gap: 6px; }
+.smc-btn {
+  flex: 1; padding: 6px; border-radius: 4px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: .75rem; font-weight: 600; cursor: pointer;
+  transition: all .2s; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.smc-btn.edit { background: var(--teal-l); color: var(--teal); }
+.smc-btn.edit:hover { background: var(--teal); color: #fff; }
+.smc-btn.export { background: var(--amber-l); color: var(--amber); }
+.smc-btn.export:hover { background: var(--amber); color: #fff; }
+.smc-btn.delete { background: var(--rust-l); color: var(--rust); }
+.smc-btn.delete:hover { background: var(--rust); color: #fff; }
+
+.cm-actions { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid rgba(28,25,23,.1); padding-top: 1rem; }
+.cm-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 14px; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  border-radius: var(--r-s); border: 1.5px solid transparent; cursor: pointer; transition: all .2s; text-align: center;
+}
+.cm-btn.secondary { background: var(--surface-2); color: var(--ink-m); border-color: rgba(28,25,23,.1); }
+.cm-btn.secondary:hover { background: #fff; border-color: var(--ink-faint); transform: translateY(-1px); }
+.cm-btn.primary { background: var(--purple-l); color: var(--purple); border-color: var(--purple); }
+.cm-btn.primary:hover { background: var(--purple); color: #fff; box-shadow: 0 4px 12px rgba(91,62,143,.3); transform: translateY(-2px); }
+
+/* ── MODAL CREAR/EDITAR MATERIA ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(28,25,23,.6); backdrop-filter: blur(4px);
+  z-index: 10000; display: none; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .3s;
+}
+.modal-overlay.active { display: flex; opacity: 1; }
+.modal-content {
+  background: var(--surface); width: 90%; max-width: 600px; max-height: 90vh;
+  border-radius: var(--r-m); box-shadow: var(--sh-l); display: flex; flex-direction: column;
+  transform: translateY(20px); transition: transform .3s var(--spring); overflow: hidden;
+}
+.modal-overlay.active .modal-content { transform: translateY(0); }
+.modal-header {
+  padding: 1.2rem 1.5rem; background: var(--purple); color: #fff;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin: 0; }
+.modal-close {
+  background: transparent; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;
+  transition: transform .2s;
+}
+.modal-close:hover { transform: scale(1.2); }
+.modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+.modal-footer { padding: 1.2rem 1.5rem; border-top: 1px solid rgba(28,25,23,.1); display: flex; justify-content: flex-end; gap: 10px; background: #fff; }
+.dynamic-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.dynamic-item { display: flex; gap: 8px; }
+.dynamic-item input, .dynamic-item textarea { flex: 1; }
+.btn-remove { background: var(--rust-l); color: var(--rust); border: none; border-radius: 6px; padding: 0 12px; cursor: pointer; font-weight: bold; }
+.btn-remove:hover { background: var(--rust); color: #fff; }
+
+/* ── BOTÓN GENERAR PRINCIPAL ── */
+.generate-btn {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  width: 100%; padding: 1.2rem; margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--amber), #E8A44A);
+  color: #fff; border: none; border-radius: var(--r-m);
+  font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; font-style: italic;
+  cursor: pointer; transition: all .3s var(--spring); box-shadow: var(--sh-m);
+}
+.generate-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(200,137,58,.4); }
+.generate-btn:active { transform: translateY(0) scale(.98); }
+.generate-btn:disabled { opacity: .5; cursor: not-allowed; filter: grayscale(1); transform: none; box-shadow: none; }
+
+/* ── VISTA PREVIA PANEL ── */
+.preview-toggle-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 14px; background: transparent; color: var(--ink);
+  border: 2px dashed rgba(28,25,23,.2); border-radius: var(--r-m);
+  font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; cursor: pointer; transition: all .3s;
+  margin-bottom: 1.5rem;
+}
+.preview-toggle-btn:hover { border-color: var(--ink); background: rgba(28,25,23,.03); }
+.preview-toggle-btn.active { background: var(--ink); color: #fff; border-style: solid; }
+
+.preview-panel { display: none; margin-bottom: 1.5rem; animation: fadeIn .4s var(--smooth); }
+.preview-panel.show { display: block; }
+.preview-doc {
+  background: #fff; border-radius: var(--r-m); box-shadow: var(--sh-l);
+  width: 100%; max-width: 100%; overflow: hidden; 
+  box-sizing: border-box; font-family: 'Arial', sans-serif; border: 1px solid rgba(0,0,0,.08);
+}
+.preview-doc-header {
+  background: var(--sidebar); color: #fff; text-align: center; padding: 16px 20px 12px;
+}
+.preview-doc-header .ph-sub { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 4px; }
+.preview-doc-header .ph-title { font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 2px; }
+.preview-doc-header .ph-code { font-size: 10px; color: rgba(255,255,255,.6); font-family: 'DM Mono', monospace; }
+
+/* ── TABLA ESTRICTAMENTE RESPONSIVA ── */
+.preview-tbl { 
+  width: 100%; 
+  table-layout: fixed; 
+  border-collapse: collapse; 
+  font-size: 11px; 
+}
+.preview-tbl td { 
+  border: 1px solid #ddd; 
+  padding: 8px 10px; 
+  vertical-align: top; 
+  line-height: 1.5; 
+  color: #111;
+  word-wrap: break-word; 
+  overflow-wrap: break-word;
+}
+.preview-tbl .lbl { background: #f8f9fa; font-weight: bold; color: #444; width: 30%; font-size: 10px; text-transform: uppercase; }
+.preview-tbl .val.empty { color: #aaa; font-style: italic; }
+.preview-tbl .ind-row td { background: var(--teal-l); }
+.preview-tbl .ind-row .lbl { color: var(--teal); }
+.preview-tbl .ind-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.preview-tbl .ind-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 4px; background: var(--teal); color: #fff;
+  font-weight: bold; font-size: 10px;
+}
+.preview-watermark {
+  text-align: center; padding: 10px; font-size: 10px; color: #999;
+  background: #fafafa; border-top: 1px solid #eee; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.preview-live-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+  animation: pulse-dot 1.5s infinite;
+}
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+
+/* ── BANNERS ── */
+.banner {
+  position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+  padding: 14px 20px; border-radius: var(--r-s); box-shadow: var(--sh-l);
+  font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600;
+  display: flex; align-items: center; gap: 10px;
+  transform: translateY(100px); opacity: 0; transition: all .4s var(--spring); pointer-events: none;
+}
+.banner.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.banner-success { background: var(--green); color: #fff; }
+.banner-error { background: var(--rust); color: #fff; }
+.banner-loading { background: var(--surface); border: 2px solid var(--amber); color: var(--amber); }
+
+/* ── MEDIA QUERIES (DESKTOP) ── */
+@media(min-width: 900px) {
+  .sidebar-tools {
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+  .sidebar-tools::-webkit-scrollbar { width: 6px; }
+  .sidebar-tools::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
+}
+
+/* ── MEDIA QUERIES (MÓVIL - RESPONSIVE) ── */
+@media(max-width: 899px) {
+  .layout-wrapper { grid-template-columns: 1fr; margin-top: 1.5rem; padding: 0 1rem; }
+  .grid2 { grid-template-columns: 1fr; }
+  
+  .banner {
+    bottom: auto; top: 15px; left: 15px; right: 15px; width: auto;
+    transform: translateY(-100px); justify-content: center; text-align: center;
+  }
+  
+  .sidebar-tools {
+    position: fixed;
+    bottom: 15px; right: 15px;
+    z-index: 9990;
+    display: flex; flex-direction: column-reverse; gap: 15px;
+    pointer-events: none;
+  }
+  
+  .sidebar-tools > * {
+    pointer-events: auto;
+  }
+
+  .generate-btn {
+    width: 60px; height: 60px; border-radius: 50%;
+    padding: 0; margin: 0;
+    box-shadow: 0 6px 20px rgba(200,137,58,0.4);
+    align-self: flex-end;
+  }
+  .generate-btn .btn-text { display: none; }
+  .generate-btn .btn-icon { font-size: 1.8rem; margin: 0; }
+
+  .custom-mat-panel {
+    background: transparent; border: none; box-shadow: none;
+    position: relative; 
+    align-self: flex-end;
+    overflow: visible !important; 
+  }
+  
+  .custom-mat-header {
+    width: 60px; height: 60px; border-radius: 50%;
+    padding: 0; justify-content: center;
+    box-shadow: 0 6px 20px rgba(91,62,143,0.4);
+    margin-left: auto;
+  }
+  .custom-mat-header .cm-text, .custom-mat-header .cm-arrow { display: none; }
+  .custom-mat-header .cm-icon { font-size: 1.6rem; margin: 0; }
+  
+  .custom-mat-body {
+    position: fixed; 
+    bottom: 85px; 
+    right: 15px;
+    width: calc(100vw - 30px);
+    max-width: 320px;
+    box-sizing: border-box;
+    border: 1.5px solid rgba(91,62,143,.25);
+    border-radius: var(--r-m);
+    box-shadow: var(--sh-l);
+    background: var(--surface);
+    max-height: 65vh;
+    overflow-y: auto;
+    z-index: 10001;
+  }
+}
+
+/* ── MEDIA QUERIES (PANTALLAS MUY PEQUEÑAS) ── */
+@media(max-width: 600px) {
+  .site-header { padding: 1.5rem 1rem; }
+  .site-header h1 { font-size: 1.8rem; }
+  .step { font-size: 0.65rem; padding: 0.4rem 0.2rem; }
+  .step span { font-size: 0.9rem; }
+  .card { padding: 1.2rem; }
+  .card-title { font-size: 1.1rem; }
+  .modal-content { width: 95%; max-height: 85vh; border-radius: 12px; }
+  .modal-header, .modal-body, .modal-footer { padding: 1.2rem; }
+  
+  .preview-tbl { font-size: 9.5px; }
+  .preview-tbl td { padding: 5px 6px; }
+  .preview-tbl .lbl { font-size: 8.5px; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-badge">Centro de Archivos TESCI</div>
+  <h1>Generador de Formatos</h1>
+  <p>Formatos de Evidencia FO-205P11000-14 Ver 0.1.0</p>
+</header>
+
+<main class="layout-wrapper">
+  
+  <div class="column-form">
+    
+    <div class="steps" id="stepper">
+      <div class="step active" id="step1"><span>1</span>Alumno</div>
+      <div class="step" id="step2"><span>2</span>Materia</div>
+      <div class="step" id="step3"><span>3</span>Comp.</div>
+      <div class="step" id="step4"><span>4</span>Generar</div>
+    </div>
+
+    <div class="card" id="sec_alumno">
+      <div class="card-title">① Datos del Alumno</div>
+      <div class="grid2" style="margin-bottom:16px">
+        <div class="field">
+          <label>Nombre completo</label>
+          <input type="text" id="nombre" placeholder="Ej. Juan Pérez López">
+        </div>
+        <div class="field">
+          <label>No. de Control</label>
+          <input type="text" id="control" placeholder="Ej. 23060001" maxlength="20">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>División / Carrera</label>
+          <input type="text" id="division" placeholder="Ej. Ing. en Sistemas">
+        </div>
+        <div class="field">
+          <label>Grupo</label>
+          <input type="text" id="grupo" placeholder="Ej. 2S-A">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Fecha de Entrega</div>
+      <div class="grid2">
+        <div class="field">
+          <label>Fecha</label>
+          <input type="date" id="fecha">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="sec_asignatura">
+      <div class="card-title">② Asignatura</div>
+      <div class="field grid1" style="margin-bottom:16px">
+        <label>Materia</label>
+        <select id="asignatura_select">
+          </select>
+      </div>
+
+      <div id="modo_vacio" style="display:none">
+        <div class="grid1" style="gap:16px">
+          <div class="field">
+            <label>Nombre de la asignatura</label>
+            <input type="text" id="materia_manual" placeholder="Nombre completo de la materia">
+          </div>
+          <div class="field">
+            <label>Docente</label>
+            <input type="text" id="docente_manual" placeholder="Nombre completo del docente">
+          </div>
+        </div>
+      </div>
+
+      <div id="docente_auto_wrap" style="display:none; margin-top:16px;">
+        <div class="field">
+          <label>Docente Asignado</label>
+          <input type="text" id="docente_auto" readonly style="color:var(--ink-m); font-weight:600; cursor:not-allowed;">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="card_competencia" style="display:none">
+      <div class="card-title">③ Competencia No.</div>
+      <div class="comp-grid" id="comp_grid"></div>
+      <div class="desc-preview" id="desc_preview"></div>
+    </div>
+
+    <div class="card" id="card_comp_manual" style="display:none">
+      <div class="card-title">③ Competencia (Manual)</div>
+      <div class="grid2" style="margin-bottom:16px">
+        <div class="field">
+          <label>Número de competencia</label>
+          <input type="number" id="comp_manual_num" min="1" max="20" placeholder="Ej. 3">
+        </div>
+      </div>
+      <div class="field">
+        <label>Descripción de la competencia</label>
+        <textarea id="comp_manual_desc" placeholder="Describe la competencia a evaluar..."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">④ Indicadores Alcanzados</div>
+      <div class="ind-grid" id="ind_grid">
+        <button class="ind-btn" data-ind="A">A</button>
+        <button class="ind-btn" data-ind="B">B</button>
+        <button class="ind-btn" data-ind="C">C</button>
+        <button class="ind-btn" data-ind="D">D</button>
+        <button class="ind-btn" data-ind="E">E</button>
+        <button class="ind-btn" data-ind="F">F</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Evidencia de Aprendizaje</div>
+      <div class="field">
+        <label>Descripción de la evidencia</label>
+        <textarea id="evidencia" placeholder="Ej. Reporte de Investigación, práctica de laboratorio, proyecto integrador..."></textarea>
+      </div>
+    </div>
+    
+    <!-- ── SECCIÓN: TEXTO ENRIQUECIDO ADICIONAL ── -->
+    <div class="card">
+      <div class="card-title">⑤ Texto Adicional (Opcional)</div>
+      <div class="field" style="margin-bottom: 12px;">
+        <label style="display:flex; align-items:center; gap:8px; text-transform:none; cursor:pointer; font-weight:600;">
+          <input type="checkbox" id="insertar_texto_adicional" style="width:auto; margin:0; cursor:pointer;">
+          <span>¿Insertar texto adicional como desarrollo del trabajo debajo del cuadro?</span>
+        </label>
+      </div>
+      <!-- NUEVO: Controles de IA -->
+      <div id="ai_controls" style="display:none; gap:10px; margin-bottom: 12px; animation:fadeIn .3s var(--smooth)">
+        <select id="ai_template_select" style="flex:1; padding:10px; border: 1.5px solid rgba(28,25,23,.1); border-radius: var(--r-s); font-family: 'DM Sans', sans-serif;">
+          <option value="ensayo">Ensayo Académico</option>
+          <option value="reporte">Reporte Técnico</option>
+          <option value="arquitectura">Arquitectura de Software</option>
+          <option value="libre">Redacción Libre</option>
+        </select>
+        <button id="btn_ai_generate" type="button" style="padding:10px 16px; background:var(--purple); color:#fff; border:none; border-radius:var(--r-s); cursor:pointer; font-weight:bold; font-family: 'DM Sans', sans-serif;">
+          ✨ Auto-redactar
+        </button>
+        <button type="button" onclick="resetearApiKey()" style="background:transparent; border:none; color:var(--ink-faint); font-size:12px; cursor:pointer; text-decoration:underline;" title="Cambiar API Key de Gemini">
+          🔑 Reset Key
+        </button>
+      </div>
+      <div id="editor_wrapper" style="display:none; animation:fadeIn .3s var(--smooth)">
+        <div id="editor-container">
+          <p>Escribe aquí el contenido adicional que se insertará al como desarrollo del contenido</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="preview-toggle-btn" id="preview_toggle_btn" onclick="toggleVistaPrvia()">
+      <span>👁</span> Vista Previa en Vivo <span id="ptb_arrow">▾</span>
+    </button>
+
+    <div class="preview-panel" id="preview_panel">
+      <div class="preview-doc">
+        <div class="preview-doc-header">
+          <div class="ph-sub">Tecnológico Nacional De Mexico</div>
+          <div class="ph-title">Dirección Académica</div>
+          <div class="ph-code">FO-205P11000-14 · Formato de Entrega de Evidencias</div>
+        </div>
+        
+        <table class="preview-tbl" id="preview_table">
+          <tr>
+            <td class="lbl">División / Carrera</td>
+            <td class="val" id="pv_division">—</td>
+            <td class="lbl" style="width:15%">Grupo</td>
+            <td class="val" id="pv_grupo" style="width:20%">—</td>
+          </tr>
+          <tr>
+            <td class="lbl">Asignatura</td>
+            <td class="val" id="pv_materia">—</td>
+            <td class="lbl">Docente</td>
+            <td class="val" id="pv_docente">—</td>
+          </tr>
+          <tr>
+            <td class="lbl">Nombre y No. Control</td>
+            <td class="val" colspan="3" id="pv_alumno">—</td>
+          </tr>
+          <tr>
+            <td class="lbl">Fecha de entrega</td>
+            <td class="val" colspan="3" id="pv_fecha">—</td>
+          </tr>
+          <tr>
+            <td class="lbl">Competencia No.</td>
+            <td class="val" colspan="3" id="pv_comp_num">—</td>
+          </tr>
+          <tr>
+            <td class="lbl">Descripción</td>
+            <td class="val" colspan="3" id="pv_comp_desc" style="font-style:italic; color:#444">—</td>
+          </tr>
+          <tr class="ind-row">
+            <td class="lbl">Indicador de alcance</td>
+            <td class="val" colspan="3" id="pv_indicadores"><span class="empty">Ninguno seleccionado</span></td>
+          </tr>
+          <tr>
+            <td class="lbl">Evidencia</td>
+            <td class="val" colspan="3" id="pv_evidencia">—</td>
+          </tr>
+        </table>
+
+        <!-- VISTA PREVIA DEL TEXTO ENRIQUECIDO EXTRA -->
+        <div id="pv_texto_adicional_wrap" style="display:none; padding:20px; border-top:1px solid #ddd; background:#fff;">
+          <div style="font-size:9px; font-weight:bold; text-transform:uppercase; color:var(--amber); margin-bottom:8px; letter-spacing:.05em;">Texto Adicional (Formato Gotham Book en Word)</div>
+          <div id="pv_texto_adicional_content" style="font-size:11px; line-height:1.5; color:#111;"></div>
+        </div>
+        
+        <div class="preview-watermark">
+          <span class="preview-live-dot"></span> Renderizado en tiempo real
+        </div>
+      </div>
+    </div>
+
+  </div> 
+
+  <div class="sidebar-tools">
+    
+    <div class="custom-mat-panel open" id="custom_mat_panel">
+      <div class="custom-mat-header" onclick="toggleCustomPanel()">
+        <span class="cm-icon">⚙️</span>
+        <h3 class="cm-text">Gestor de Mis Materias</h3>
+        <span class="cm-arrow">▾</span>
+      </div>
+      <div class="custom-mat-body">
+        
+        <div id="saved_materias_grid" class="saved-materias-grid">
+          </div>
+
+        <div class="cm-actions">
+          <button class="cm-btn primary" onclick="openMateriaModal()">
+            + Crear Nueva Materia
+          </button>
+          <label class="cm-btn secondary" style="cursor:pointer; margin:0;">
+            ⬆ Importar archivo JSON
+            <input type="file" id="cm_file_input" accept=".json" style="display:none" onchange="cargarMateriaDesdeArchivo(this)">
+          </label>
+          <button class="cm-btn secondary" onclick="descargarPlantillaJSON()" style="margin:0; border:none; background:transparent; font-size:10px; text-decoration:underline;">
+            Descargar Plantilla Base
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button class="generate-btn" id="generar_btn" onclick="generarDocumento()">
+      <span class="btn-icon">⬇</span> <span class="btn-text">Generar Documento</span>
+    </button>
+
+  </div> 
+</main>
+
+<div class="modal-overlay" id="materia_modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modal_mat_title">Crear Materia</h3>
+      <button class="modal-close" onclick="closeMateriaModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Nombre de la Materia</label>
+        <input type="text" id="modal_mat_name" placeholder="Ej. Arquitectura de Computadoras">
+      </div>
+      <div class="field">
+        <label>Docente</label>
+        <input type="text" id="modal_mat_docente" placeholder="Nombre completo del docente">
+      </div>
+      
+      <div class="field">
+        <label style="display:flex; justify-content:space-between; align-items:center;">
+          Competencias
+          <button class="cm-btn secondary" style="padding:4px 8px; font-size:10px;" onclick="addModalField('modal_comps', '', true)">+ Añadir</button>
+        </label>
+        <div id="modal_comps" class="dynamic-list"></div>
+      </div>
+
+      <div class="field">
+        <label style="display:flex; justify-content:space-between; align-items:center;">
+          Indicadores de Desempeño
+          <button class="cm-btn secondary" style="padding:4px 8px; font-size:10px;" onclick="addModalField('modal_inds', '', false)">+ Añadir</button>
+        </label>
+        <div id="modal_inds" class="dynamic-list"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="cm-btn secondary" onclick="closeMateriaModal()">Cancelar</button>
+      <button class="cm-btn primary" onclick="saveMateriaModal()">Guardar Materia</button>
+    </div>
+  </div>
+</div>
+
+<div class="banner banner-loading" id="loading_banner">⏳ Procesando documento...</div>
+<div class="banner banner-success" id="success_banner">✓ ¡Documento generado con éxito!</div>
+<div class="banner banner-error" id="error_banner">⚠ Hubo un error</div>
+
+<script src="ai-module.js"></script>
+<script>
+/* ════════════════════════════════════════
+   BASE DE DATOS DE ASIGNATURAS (VACÍA)
+════════════════════════════════════════ */
+const asignaturasData = {};
+
+/* ════════════════════════════════════════
+   MATERIA PERSONALIZADA Y LOCALSTORAGE
+════════════════════════════════════════ */
+let customMateriaData = null; 
+let quill; 
+
+
+function toggleCustomPanel() {
+  const panel = document.getElementById('custom_mat_panel');
+  panel.classList.toggle('open');
+}
+
+function renderizarSelectorMaterias() {
+  const select = document.getElementById('asignatura_select');
+  const valorActual = select.value;
+  select.innerHTML = ''; 
+
+  select.add(new Option('— Selecciona una materia —', ''));
+  select.add(new Option('✏️ Formato vacío (ingresar todo manualmente)', '__vacio__'));
+
+  try {
+    const stored = localStorage.getItem('custom_materias');
+    if (stored) {
+      const custom = JSON.parse(stored);
+      const keys = Object.keys(custom);
+      
+      if (keys.length > 0) {
+        const optCustom = document.createElement('option');
+        optCustom.disabled = true;
+        optCustom.text = '─── MIS MATERIAS ───';
+        select.add(optCustom);
+
+        for (const key in custom) {
+          select.add(new Option('⭐ ' + key, key));
+          asignaturasData[key] = custom[key]; 
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Error leyendo localStorage:", e);
+  }
+
+  if (Array.from(select.options).some(opt => opt.value === valorActual)) {
+    select.value = valorActual;
+  }
+  
+  renderSavedMaterias();
+}
+
+function renderSavedMaterias() {
+  const grid = document.getElementById('saved_materias_grid');
+  let custom = {};
+  try { custom = JSON.parse(localStorage.getItem('custom_materias') || '{}'); } catch(e){}
+  
+  const keys = Object.keys(custom);
+  grid.innerHTML = '';
+
+  if(keys.length === 0) {
+    grid.innerHTML = '<div style="font-size:12px; color:var(--ink-faint); text-align:center; padding:10px;">No hay materias guardadas.</div>';
+    return;
+  }
+
+  /* ════════════════════════════════════════
+    onclick="seleccionarMateriaCard('${escHtml(key)}')""
+    ════════════════════════════════════════ */
+  keys.forEach(key => {
+    grid.innerHTML += `
+      <div class="saved-materia-card"> 
+        <h4>⭐ ${escHtml(key)}</h4>
+        <div class="smc-actions">
+          <button class="smc-btn edit" onclick="openMateriaModal('${escHtml(key)}')">✏️ Editar</button>
+          <button class="smc-btn export" onclick="exportarMateriaPersonalizada('${escHtml(key)}')">⬇ Exportar</button>
+          <button class="smc-btn delete" onclick="borrarMateriaPersonalizada('${escHtml(key)}')">🗑 Borrar</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function borrarMateriaPersonalizada(nombre) {
+  if (confirm(`¿Estás seguro de borrar permanentemente la materia "${nombre}"?`)) {
+    let custom = JSON.parse(localStorage.getItem('custom_materias') || '{}');
+    delete custom[nombre];
+    localStorage.setItem('custom_materias', JSON.stringify(custom));
+    delete asignaturasData[nombre];
+    
+    renderizarSelectorMaterias();
+    document.getElementById('asignatura_select').value = '__vacio__';
+    document.getElementById('asignatura_select').dispatchEvent(new Event('change'));
+    showSuccess(`Materia "${nombre}" eliminada correctamente.`);
+  }
+}
+
+function exportarMateriaPersonalizada(nombre) {
+  let custom = JSON.parse(localStorage.getItem('custom_materias') || '{}');
+  if(!custom[nombre]) return;
+  
+  const exportData = { [nombre]: custom[nombre] };
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  saveAs(blob, `${nombre.replace(/\s+/g,'_')}.json`);
+}
+
+function descargarPlantillaJSON() {
+  const plantilla = {
+    "Nombre de la Materia": {
+      docente: "Apellido Nombre del Docente",
+      total_comp: 4,
+      competencias: [
+        "descripción de la competencia 1.",
+        "descripción de la competencia 2.",
+        "descripción de la competencia 3.",
+        "descripción de la competencia 4."
+      ],
+      indicadores: [
+        "A. Se adapta a situaciones y contextos complejos.",
+        "B. Hace aportaciones a las actividades académicas desarrolladas.",
+        "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+        "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+        "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+        "F. Realiza su trabajo de manera autónoma y autorregulada."
+      ]
+    }
+  };
+  const blob = new Blob([JSON.stringify(plantilla, null, 2)], { type: 'application/json' });
+  saveAs(blob, 'plantilla_materia.json');
+}
+
+function cargarMateriaDesdeArchivo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const raw = JSON.parse(e.target.result);
+      const keys = Object.keys(raw);
+      if (keys.length === 0) throw new Error('El archivo está vacío.');
+      const nombre = keys[0];
+      const d = raw[nombre];
+      
+      if (!d.docente || !Array.isArray(d.competencias) || !Array.isArray(d.indicadores))
+        throw new Error('Formato inválido. Asegúrate de usar la plantilla descargada.');
+      if (d.competencias.length === 0) throw new Error('La materia debe tener al menos una competencia.');
+
+      let custom = {};
+      try { custom = JSON.parse(localStorage.getItem('custom_materias') || '{}'); } catch(e){}
+      
+      custom[nombre] = {
+        docente: d.docente,
+        total_comp: d.total_comp || d.competencias.length,
+        competencias: d.competencias,
+        indicadores: d.indicadores
+      };
+      localStorage.setItem('custom_materias', JSON.stringify(custom));
+
+      renderizarSelectorMaterias();
+      document.getElementById('asignatura_select').value = nombre;
+      
+      document.getElementById('asignatura_select').dispatchEvent(new Event('change'));
+      showSuccess(`✓ Materia "${nombre}" guardada e integrada al sistema.`);
+
+    } catch(err) {
+      showError('Error al leer el archivo: ' + err.message);
+    }
+    input.value = ''; 
+  };
+  reader.readAsText(file);
+}
+
+/* ════════════════════════════════════════
+   LÓGICA DEL FORMULARIO MODAL
+════════════════════════════════════════ */
+let editandoMateriaOldName = null;
+
+function openMateriaModal(nombre = null) {
+  editandoMateriaOldName = nombre;
+  document.getElementById('modal_comps').innerHTML = '';
+  document.getElementById('modal_inds').innerHTML = '';
+  
+  if(nombre) {
+    document.getElementById('modal_mat_title').textContent = 'Editar Materia';
+    let custom = JSON.parse(localStorage.getItem('custom_materias') || '{}');
+    const data = custom[nombre];
+    
+    document.getElementById('modal_mat_name').value = nombre;
+    document.getElementById('modal_mat_docente').value = data.docente;
+    data.competencias.forEach(c => addModalField('modal_comps', c, true));
+    data.indicadores.forEach(i => addModalField('modal_inds', i, false));
+  } else {
+    document.getElementById('modal_mat_title').textContent = 'Crear Nueva Materia';
+    document.getElementById('modal_mat_name').value = '';
+    document.getElementById('modal_mat_docente').value = '';
+    addModalField('modal_comps', '', true);
+    
+    const defInds = [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ];
+    defInds.forEach(i => addModalField('modal_inds', i, false));
+  }
+  
+  document.getElementById('materia_modal').classList.add('active');
+}
+
+function closeMateriaModal() {
+  document.getElementById('materia_modal').classList.remove('active');
+}
+
+function addModalField(containerId, value = '', isTextArea = false) {
+  const container = document.getElementById(containerId);
+  const div = document.createElement('div');
+  div.className = 'dynamic-item';
+  
+  const input = isTextArea ? document.createElement('textarea') : document.createElement('input');
+  if(isTextArea) input.rows = 2;
+  input.value = value;
+  input.className = 'modal-dyn-input';
+  input.placeholder = isTextArea ? "Descripción..." : "Indicador...";
+  
+  const btn = document.createElement('button');
+  btn.textContent = 'x';
+  btn.className = 'btn-remove';
+  btn.onclick = () => container.removeChild(div);
+  
+  div.appendChild(input);
+  div.appendChild(btn);
+  container.appendChild(div);
+}
+
+function saveMateriaModal() {
+  const nombre = document.getElementById('modal_mat_name').value.trim();
+  const docente = document.getElementById('modal_mat_docente').value.trim();
+  if(!nombre) { showError('Ingresa el nombre de la materia'); return; }
+  
+  const comps = Array.from(document.getElementById('modal_comps').querySelectorAll('.modal-dyn-input')).map(i => i.value.trim()).filter(v => v);
+  const inds = Array.from(document.getElementById('modal_inds').querySelectorAll('.modal-dyn-input')).map(i => i.value.trim()).filter(v => v);
+  
+  if(comps.length === 0) { showError('Agrega al menos una competencia'); return; }
+  if(inds.length === 0) { showError('Agrega al menos un indicador'); return; }
+  
+  let custom = JSON.parse(localStorage.getItem('custom_materias') || '{}');
+  
+  if(editandoMateriaOldName && editandoMateriaOldName !== nombre) {
+    delete custom[editandoMateriaOldName];
+    delete asignaturasData[editandoMateriaOldName];
+  }
+  
+  custom[nombre] = {
+    docente: docente,
+    total_comp: comps.length,
+    competencias: comps,
+    indicadores: inds
+  };
+  
+  localStorage.setItem('custom_materias', JSON.stringify(custom));
+  renderizarSelectorMaterias();
+  
+  document.getElementById('asignatura_select').value = nombre;
+  document.getElementById('asignatura_select').dispatchEvent(new Event('change'));
+  
+  closeMateriaModal();
+  showSuccess(`✓ Materia "${nombre}" guardada correctamente`);
+}
+
+/* ════════════════════════════════════════
+   ESTADO Y UTILIDADES GLOBALES
+════════════════════════════════════════ */
+let selectedComp = null;
+let selectedIndicadores = [];
+const el = id => document.getElementById(id);
+
+function escHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escXml(str) {
+  return String(str || '').replace(/&/g, '&amp;')
+                           .replace(/</g, '&lt;')
+                           .replace(/>/g, '&gt;')
+                           .replace(/"/g, '&quot;')
+                           .replace(/'/g, '&apos;');
+}
+
+/* ════════════════════════════════════════
+   PERSISTENCIA localStorage
+════════════════════════════════════════ */
+function guardarLS() {
+  localStorage.setItem('fo205', JSON.stringify({
+    nombre: el('nombre').value,
+    control: el('control').value,
+    division: el('division').value,
+    grupo: el('grupo').value
+  }));
+}
+function cargarLS() {
+  try {
+    const d = JSON.parse(localStorage.getItem('fo205') || '{}');
+    ['nombre','control','division','grupo'].forEach(k => { if(d[k]) el(k).value = d[k]; });
+  } catch(e){}
+}
+['nombre','control','division','grupo'].forEach(id => el(id).addEventListener('input', guardarLS));
+
+/* ════════════════════════════════════════
+   STEPPER Y ASIGNATURA EVENTOS
+════════════════════════════════════════ */
+function updateStepper() {
+  const mat = el('asignatura_select').value;
+  const s1 = el('nombre').value.trim() && el('control').value.trim();
+  const s2 = mat !== '';
+  const s3 = selectedComp !== null || (mat === '__vacio__' && !customMateriaData);
+  ['step1','step2','step3','step4'].forEach(id => el(id).classList.remove('active','done'));
+  if(s1 && s2 && s3){ el('step4').classList.add('active'); ['step1','step2','step3'].forEach(id => el(id).classList.add('done')); }
+  else if(s1 && s2){ el('step3').classList.add('active'); ['step1','step2'].forEach(id => el(id).classList.add('done')); }
+  else if(s1){ el('step2').classList.add('active'); el('step1').classList.add('done'); }
+  else { el('step1').classList.add('active'); }
+}
+['nombre','control','asignatura_select'].forEach(id => el(id).addEventListener('input', updateStepper));
+['nombre','control'].forEach(id => el(id).addEventListener('change', updateStepper));
+
+el('asignatura_select').addEventListener('change', function() {
+  const val = this.value;
+  el('modo_vacio').style.display = val === '__vacio__' ? 'block' : 'none';
+  el('docente_auto_wrap').style.display = (val && val !== '__vacio__') ? 'block' : 'none';
+  el('card_competencia').style.display = (val && val !== '__vacio__') ? 'block' : 'none';
+  el('card_comp_manual').style.display = val === '__vacio__' ? 'block' : 'none';
+
+  selectedComp = null;
+  selectedIndicadores = [];
+  el('desc_preview').className = 'desc-preview';
+
+  if(val && val !== '__vacio__' && asignaturasData[val]) {
+    const d = asignaturasData[val];
+    el('docente_auto').value = d.docente;
+    renderCompGrid(d.total_comp);
+    renderIndGrid(d.indicadores);
+  }
+  updateStepper();
+});
+
+function renderCompGrid(total) {
+  const g = el('comp_grid'); g.innerHTML = '';
+  for(let i=1; i<=total; i++) {
+    const b = document.createElement('button');
+    b.className = 'comp-btn'; b.textContent = i; b.dataset.num = i;
+    b.addEventListener('click', () => selectComp(i, b));
+    g.appendChild(b);
+  }
+}
+
+function renderIndGrid(indicadores) {
+  const g = el('ind_grid'); g.innerHTML = '';
+  selectedIndicadores = [];
+  indicadores.forEach((ind, idx) => {
+    const letra = typeof ind === 'string' && ind.length <= 2 ? ind : ind.charAt(0);
+    const b = document.createElement('button');
+    b.className = 'ind-btn'; b.textContent = letra;
+    b.dataset.letra = letra; b.dataset.full = ind;
+    b.addEventListener('click', () => toggleInd(letra, ind, b));
+    g.appendChild(b);
+  });
+}
+
+function selectComp(num, btn) {
+  document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedComp = num;
+  const mat = el('asignatura_select').value;
+  const data = asignaturasData[mat];
+  if(data && data.competencias[num-1]) {
+    const prev = el('desc_preview');
+    prev.textContent = data.competencias[num-1];
+    prev.className = 'desc-preview show';
+  }
+  updateStepper();
+}
+
+function toggleInd(letra, full, btn) {
+  btn.classList.toggle('active');
+  if(selectedIndicadores.find(i => i.letra === letra)) {
+    selectedIndicadores = selectedIndicadores.filter(i => i.letra !== letra);
+  } else {
+    selectedIndicadores.push({ letra, full });
+  }
+}
+
+/* ════════════════════════════════════════
+   BANNERS Y VALIDACIÓN Y GITHUB URLS
+════════════════════════════════════════ */
+const BASE_URL = 'https://raw.githubusercontent.com/s12gamer/gxdasnz/main/';
+const githubUrls = {
+  '__vacio__': BASE_URL + 'Formato vacio form2.docx',
+};
+
+function formatFecha(val) { if(!val) return ''; const [y,m,d] = val.split('-'); return `${d}/${m}/${y}`; }
+
+function hideBanners() { ['loading_banner','success_banner','error_banner'].forEach(id => el(id).className = el(id).className.replace(' show','').trim()); }
+function showLoading(msg) { hideBanners(); el('loading_banner').textContent = msg; el('loading_banner').classList.add('show'); }
+function showSuccess(msg) { hideBanners(); el('success_banner').textContent = msg; el('success_banner').classList.add('show'); setTimeout(hideBanners,5000); }
+function showError(msg)   { hideBanners(); el('error_banner').textContent = msg; el('error_banner').classList.add('show'); setTimeout(hideBanners,7000); }
+
+function validar() {
+  const nombre   = el('nombre').value.trim();
+  const control  = el('control').value.trim();
+  const materia  = el('asignatura_select').value;
+  if(!nombre)   { showError('Ingresa tu nombre completo.'); return false; }
+  if(!control)  { showError('Ingresa tu No. de Control.'); return false; }
+  if(!materia)  { showError('Selecciona una materia.'); return false; }
+  if(materia === '__vacio__') {
+    if(!el('materia_manual').value.trim()) { showError('Ingresa el nombre de la asignatura.'); return false; }
+    if(!el('docente_manual').value.trim()) { showError('Ingresa el nombre del docente.'); return false; }
+    if(!el('comp_manual_num').value.trim()) { showError('Ingresa el número de competencia.'); return false; }
+  } else {
+    if(selectedComp === null) { showError('Selecciona una competencia.'); return false; }
+  }
+  return true;
+}
+
+/* ════════════════════════════════════════
+   TRADUCTOR OOXML RECURSIVO (NATIVO DESDE EL COMPLEJO)
+════════════════════════════════════════ */
+function convertirHtmlAWordXML(htmlContenido) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlContenido, 'text/html');
+  let bodyXml = "";
+  const bloques = doc.body.childNodes;
+  
+  const pPrEstandar = '<w:pPr><w:jc w:val="left"/></w:pPr>';
+
+  bloques.forEach(bloque => {
+    if (bloque.nodeType === Node.ELEMENT_NODE) {
+      if (bloque.nodeName === 'UL' || bloque.nodeName === 'OL') {
+        bloque.childNodes.forEach(li => {
+          if (li.nodeType === Node.ELEMENT_NODE && li.nodeName === 'LI') {
+            bodyXml += "<w:p>" + pPrEstandar;
+            bodyXml += '<w:r><w:rPr><w:rFonts w:ascii="Gotham Book" w:hAnsi="Gotham Book" w:cs="Gotham Book"/><w:b/></w:rPr><w:t xml:space="preserve">• </w:t></w:r>';
+            bodyXml += procesarNodo(li, { bold: false, italic: false, underline: false, size: null });
+            bodyXml += "</w:p>";
+          }
+        });
+      } else {
+        bodyXml += "<w:p>" + pPrEstandar;
+        bodyXml += procesarNodo(bloque, { bold: false, italic: false, underline: false, size: null });
+        bodyXml += "</w:p>";
+      }
+    }
+  });
+
+  return bodyXml;
+}
+
+function procesarNodo(nodo, formatoActual ) {
+  let xmlResultado = "";
+  let formato = { ...formatoActual };
+
+  if (nodo.nodeName === 'STRONG' || nodo.nodeName === 'B') formato.bold = true;
+  if (nodo.nodeName === 'EM' || nodo.nodeName === 'I') formato.italic = true;
+  if (nodo.nodeName === 'U') formato.underline = true;
+  if (nodo.nodeName === 'H3') {
+    formato.size = "36"; // Tamaño 16pt para el Word
+    formato.bold = true; // Forzamos negrita para los subtítulos
+  }
+  if (nodo.nodeName === 'H1') {
+    formato.size = "36"; // Tamaño 16pt para el Word
+    formato.bold = true; // Forzamos negrita para los subtítulos
+  }
+  if (nodo.nodeName === 'H2') {
+    formato.size = "36"; // Tamaño 16pt para el Word
+    formato.bold = true; // Forzamos negrita para los subtítulos
+  }
+  
+  if (nodo.classList && nodo.classList.contains('ql-size-small')) formato.size = "12"; 
+  if (nodo.classList && nodo.classList.contains('ql-size-large')) formato.size = "18"; 
+  if (nodo.classList && nodo.classList.contains('ql-size-huge'))  formato.size = "32"; 
+
+  if (nodo.nodeName === 'BR') {
+    return "<w:r><w:br/></w:r>";
+  }
+
+  if (nodo.nodeType === Node.TEXT_NODE) {
+    const textoEscapado = nodo.nodeValue
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    if (textoEscapado.trim() === "" && nodo.nodeValue !== " ") return "";
+
+    xmlResultado += "<w:r>";
+    
+    let rPr = "<w:rPr>";
+    rPr += '<w:rFonts w:ascii="Gotham Book" w:hAnsi="Gotham Book" w:cs="Gotham Book"/>';
+    if (formato.bold) rPr += "<w:b/>";
+    if (formato.italic) rPr += "<w:i/>";
+    if (formato.underline) rPr += '<w:u w:val="single"/>';
+    if (formato.size) rPr += `<w:sz w:val="${formato.size}"/>`; 
+    rPr += "</w:rPr>";
+    
+    xmlResultado += rPr;
+    xmlResultado += `<w:t xml:space="preserve">${nodo.nodeValue}</w:t>`;
+    xmlResultado += "</w:r>";
+  } else {
+    nodo.childNodes.forEach(hijo => {
+      xmlResultado += procesarNodo(hijo, formato);
+    });
+  }
+
+  return xmlResultado;
+}
+
+/* ════════════════════════════════════════
+   LÓGICA PRINCIPAL: EDICIÓN DEL DOCX
+════════════════════════════════════════ */
+async function generarDocumento() {
+  if(!validar()) return;
+  el('generar_btn').disabled = true;
+  showLoading('Descargando plantilla y procesando documento...');
+
+  const materia_sel = el('asignatura_select').value;
+  const nombre    = el('nombre').value.trim();
+  const control   = el('control').value.trim();
+  const division  = el('division').value.trim();
+  const grupo     = el('grupo').value.trim();
+  const fecha     = formatFecha(el('fecha').value);
+  const evidencia = el('evidencia').value.trim();
+
+  let materia, docente, compNum, compDesc, indLetras, indFull;
+
+  if(materia_sel === '__vacio__') {
+    materia = el('materia_manual').value.trim();
+    docente = el('docente_manual').value.trim();
+    compNum  = el('comp_manual_num').value.trim();
+    compDesc = el('comp_manual_desc').value.trim().toLowerCase();
+    indLetras = selectedIndicadores.map(i => i.letra);
+    indFull   = selectedIndicadores.map(i => i.full);
+  } else {
+    const data = asignaturasData[materia_sel];
+    materia   = materia_sel;
+    docente   = data.docente;
+    compNum   = String(selectedComp);
+    compDesc  = data.competencias[selectedComp - 1];
+    indLetras = selectedIndicadores.map(i => i.letra);
+    indFull   = selectedIndicadores.map(i => i.full);
+  }
+
+  const urlFinal = githubUrls[materia_sel] || (BASE_URL + 'Formato vacio form2.docx');
+
+  try {
+    let blob = await procesarDesdeGithub({ 
+      githubUrl: urlFinal, 
+      nombre, control, division, grupo, fecha,
+      materia, docente, compNum, compDesc, indLetras, indFull, evidencia, materia_sel 
+    });
+    
+    const filename = `${evidencia.replace(/\s+/g,'_')}_${nombre.replace(/\s+/g,'_')}__${materia.replace(/\s+/g,'_')}_C${compNum}.docx`;
+    saveAs(blob, filename);
+    showSuccess('✓ Documento generado y descargado: ' + filename);
+  } catch(e) {
+    showError('Error al generar el documento: ' + e.message);
+    console.error(e);
+  } finally {
+    el('generar_btn').disabled = false;
+  }
+}
+
+async function procesarDesdeGithub(opts) {
+  const resp = await fetch(opts.githubUrl);
+  if(!resp.ok) throw new Error(`No se pudo descargar el archivo (HTTP ${resp.status})`);
+  const ab   = await resp.arrayBuffer();
+  const zip  = new PizZip(ab);
+
+  let xmlStr = zip.file('word/document.xml').asText();
+  xmlStr = aplicarSustitucionesXML(xmlStr, opts);
+
+  // INYECCIÓN DE TEXTO ENRIQUECIDO ADICIONAL AL FINAL DE LA HOJA (SI ESTÁ ACTIVO)
+  if (el('insertar_texto_adicional').checked) {
+    const htmlAdicional = quill.root.innerHTML;
+    const xmlAdicional = convertirHtmlAWordXML(htmlAdicional);
+    xmlStr = insertarTextoEnXML(xmlStr, xmlAdicional);
+  }
+
+  zip.file('word/document.xml', xmlStr);
+
+  return zip.generate({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  });
+}
+
+// Inserta de forma robusta las nuevas líneas de contenido justo antes del cierre del body/sectPr
+function insertarTextoEnXML(xml, textoXml) {
+  const lastSectPrIdx = xml.lastIndexOf('<w:sectPr');
+  
+  // Eliminamos 'parrafoEspaciador' para evitar el tercer salto de línea innecesario.
+  // Al insertar 'textoXml' directamente, se respeta el espacio nativo de la plantilla 
+  // dejando exactamente dos espacios de separación bajo el cuadro.
+  const totalAInsertar = textoXml;
+
+  if (lastSectPrIdx !== -1) {
+    return xml.slice(0, lastSectPrIdx) + totalAInsertar + xml.slice(lastSectPrIdx);
+  } else {
+    const bodyEndIdx = xml.lastIndexOf('</w:body>');
+    if (bodyEndIdx !== -1) {
+      return xml.slice(0, bodyEndIdx) + totalAInsertar + xml.slice(bodyEndIdx);
+    }
+  }
+  return xml;
+}
+
+function aplicarSustitucionesXML(xml, opts) {
+  xml = procesarFilasDeTabla(xml, opts);
+  if(opts.materia_sel !== '__vacio__') xml = filtrarCompetencias(xml, opts);
+  xml = filtrarIndicadores(xml, opts);
+  return xml;
+}
+
+function procesarFilasDeTabla(xml, opts) {
+  return xml.replace(/(<w:tr\b[\s\S]*?<\/w:tr>)/g, fila => {
+    const celdas = [];
+    const reCell = /<w:tc\b[\s\S]*?<\/w:tc>/g;
+    let m;
+    while((m = reCell.exec(fila)) !== null) celdas.push({ match: m[0], index: m.index });
+    if(celdas.length < 2) return fila;
+
+    let filaModificada = fila;
+
+    for(let i = 0; i < celdas.length - 1; i++) {
+      const txtEtiqueta = extraerTexto(celdas[i].match).toLowerCase().trim();
+      let nuevoValor = null;
+
+      if(/nombre.*alumno|nombre.*estudiante|^nombre$/i.test(txtEtiqueta)) nuevoValor = opts.nombre + ' ' + opts.control;
+      else if(/no\.?\s*control|n[uú]mero.*control|control/i.test(txtEtiqueta)) nuevoValor = opts.nombre + ' ' + opts.control;
+      else if(/divisi[oó]n|carrera|programa/i.test(txtEtiqueta)) nuevoValor = opts.division;
+      else if(/grupo/i.test(txtEtiqueta)) nuevoValor = opts.grupo;
+      else if(/fecha/i.test(txtEtiqueta)) nuevoValor = opts.fecha;
+      else if(/asignatura|materia/i.test(txtEtiqueta)) nuevoValor = opts.materia;
+      else if(/docente|profesor|maestro/i.test(txtEtiqueta)) nuevoValor = opts.docente;
+      else if(/competencia.*no|no.*competencia|competencia\s*#|n[uú]m.*competencia/i.test(txtEtiqueta)) nuevoValor = opts.compNum;
+      else if(/evidencia/i.test(txtEtiqueta)) nuevoValor = opts.evidencia;
+
+      if(nuevoValor !== null) {
+        const celdaValorOriginal = celdas[i + 1].match;
+        const celdaValorNueva = escribirValorEnCelda(celdaValorOriginal, nuevoValor);
+        filaModificada = filaModificada.replace(celdaValorOriginal, celdaValorNueva);
+      }
+    }
+    return filaModificada;
+  });
+}
+
+function escribirValorEnCelda(celda, valor) {
+  const matchRpr = celda.match(/<w:rPr[\s\S]*?<\/w:rPr>/);
+  const rPr = matchRpr ? matchRpr[0] : '';
+  const matchPPr = celda.match(/<w:pPr[\s\S]*?<\/w:pPr>/);
+  const pPr = matchPPr ? matchPPr[0] : '';
+  const matchTcPr = celda.match(/<w:tcPr[\s\S]*?<\/w:tcPr>/);
+  const tcPr = matchTcPr ? matchTcPr[0] : '';
+  return `<w:tc>${tcPr}<w:p>${pPr}<w:r>${rPr}<w:t xml:space="preserve">${escXml(valor)}</w:t></w:r></w:p></w:tc>`;
+}
+
+function extraerTexto(xml) {
+  return (xml.match(/<w:t[^>]*>([^<]*)<\/w:t>/g) || []).map(m => m.replace(/<[^>]+>/g,'')).join('');
+}
+
+function filtrarCompetencias(xml, opts) {
+  const data = asignaturasData[opts.materia_sel];
+  if(!data) return xml;
+
+  const compElegida = String(opts.compNum);
+  const todasComps  = data.competencias;
+
+  xml = xml.replace(/(<w:tr\b[\s\S]*?<\/w:tr>)/g, fila => {
+    const celdas = extraerCeldas(fila);
+    if(celdas.length < 2) return fila;
+
+    let filaModificada = fila;
+
+    for(let i = 0; i < celdas.length - 1; i++) {
+      const txtEtiq = extraerTexto(celdas[i]).toLowerCase().trim();
+      const celdaValor = celdas[i + 1];
+
+      if(/competencia.*no|no.*competencia|competencia\s*#|n[uú]m.*competencia/i.test(txtEtiq)) {
+        const nueva = limpiarNumerosCompetencia(celdaValor, compElegida, data.total_comp);
+        filaModificada = filaModificada.replace(celdaValor, nueva);
+      }
+      if(/descripci[oó]n/i.test(txtEtiq)) {
+        const nueva = limpiarDescripcionesCompetencia(celdaValor, compElegida, todasComps);
+        filaModificada = filaModificada.replace(celdaValor, nueva);
+      }
+    }
+    return filaModificada;
+  });
+  return xml;
+}
+
+function extraerCeldas(fila) {
+  const celdas = [];
+  const re = /<w:tc\b[\s\S]*?<\/w:tc>/g;
+  let m;
+  while((m = re.exec(fila)) !== null) celdas.push(m[0]);
+  return celdas;
+}
+
+function limpiarNumerosCompetencia(celda, compElegida, total) {
+  const parrafos = extraerParrafos(celda);
+  const mantenidos = parrafos.filter(p => {
+    const txt = extraerTexto(p).trim();
+    if(!txt) return false;
+    return txt === compElegida || txt === compElegida + '.' || txt.startsWith(compElegida);
+  });
+  const resultado = mantenidos.length > 0 ? mantenidos : parrafos.filter(p => extraerTexto(p).trim().includes(compElegida));
+  return reconstruirCelda(celda, resultado.length > 0 ? resultado : [crearParrafoTexto(celda, compElegida)]);
+}
+
+function limpiarDescripcionesCompetencia(celda, compElegida, todasComps) {
+  const descElegida = todasComps[parseInt(compElegida) - 1];
+  if(!descElegida) return celda;
+
+  const parrafos = extraerParrafos(celda);
+  const conTexto = parrafos.filter(p => extraerTexto(p).trim().length > 0);
+  const numActual = parseInt(compElegida);
+  const numSiguiente = numActual + 1;
+  let guardar = false;
+  const elegidos = [];
+  const firmaActual = descElegida.toLowerCase().trim().substring(0, 20);
+  const descSiguiente = todasComps[numSiguiente - 1];
+  const firmaSiguiente = descSiguiente ? descSiguiente.toLowerCase().trim().substring(0, 20) : null;
+  
+  for (let i = 0; i < conTexto.length; i++) {
+    const txtParagraph = extraerTexto(conTexto[i]).toLowerCase().trim();
+    if (txtParagraph.includes(firmaActual) || firmaActual.includes(txtParagraph)) guardar = true;
+    else if (firmaSiguiente && (txtParagraph.includes(firmaSiguiente) || firmaSiguiente.includes(txtParagraph))) guardar = false;
+    if (guardar) elegidos.push(conTexto[i]);
+  }
+  const resultado = elegidos.length > 0 ? elegidos : [crearParrafoTexto(celda, descElegida)];
+  return reconstruirCelda(celda, resultado);
+}
+
+function extraerParrafos(celda) { return celda.match(/<w:p\b[\s\S]*?<\/w:p>/g) || []; }
+
+function reconstruirCelda(celdaOriginal, parrafosNuevos) {
+  const matchTcPr = celdaOriginal.match(/<w:tcPr[\s\S]*?<\/w:tcPr>/);
+  const tcPr = matchTcPr ? matchTcPr[0] : '';
+  return `<w:tc>${tcPr}${parrafosNuevos.join('')}</w:tc>`;
+}
+
+function crearParrafoTexto(celdaRef, texto) {
+  const matchRpr = celdaRef.match(/<w:rPr[\s\S]*?<\/w:rPr>/);
+  const rPr = matchRpr ? matchRpr[0] : '';
+  const matchPPr = celdaRef.match(/<w:pPr[\s\S]*?<\/w:pPr>/);
+  const pPr = matchPPr ? matchPPr[0] : '';
+  return `<w:p>${pPr}<w:r>${rPr}<w:t xml:space="preserve">${escXml(texto)}</w:t></w:r></w:p>`;
+}
+
+function filtrarIndicadores(xml, opts) {
+  return xml.replace(/(<w:tr\b[\s\S]*?<\/w:tr>)/g, fila => {
+    const celdas = extraerCeldas(fila);
+    if(celdas.length < 2) return fila;
+
+    let filaModificada = fila;
+    for(let i = 0; i < celdas.length - 1; i++) {
+      const txtEtiq = extraerTexto(celdas[i]).toLowerCase().trim();
+      if(/indicador|desempe[nñ]o/i.test(txtEtiq)) {
+        const celdaValor = celdas[i + 1];
+        let parrafosNuevos = [];
+        if(opts.indFull && opts.indFull.length > 0) {
+          const ordenados = opts.indFull.slice().sort((a, b) => a.localeCompare(b));
+          parrafosNuevos = ordenados.map(ind => crearParrafoTexto(celdaValor, ind));
+        } else {
+          parrafosNuevos = [crearParrafoTexto(celdaValor, '—')];
+        }
+        const nueva = reconstruirCelda(celdaValor, parrafosNuevos);
+        filaModificada = filaModificada.replace(celdaValor, nueva);
+      }
+    }
+    return filaModificada;
+  });
+}
+
+/* ════════════════════════════════════════
+   VISTA PREVIA
+════════════════════════════════════════ */
+let previewVisible = false;
+
+function toggleVistaPrvia() {
+  previewVisible = !previewVisible;
+  const panel = el('preview_panel');
+  const btn   = el('preview_toggle_btn');
+  const arrow = el('ptb_arrow');
+  if(previewVisible) {
+    panel.classList.add('show'); btn.classList.add('active'); arrow.textContent = '▴'; actualizarVistaPrevia();
+  } else {
+    panel.classList.remove('show'); btn.classList.remove('active'); arrow.textContent = '▾';
+  }
+}
+
+function pv(id, text, isEmpty) {
+  const e = el(id);
+  if(!e) return;
+  if(!text || text === '—' || isEmpty) { e.innerHTML = '<span class="empty">—</span>'; e.classList.add('empty'); }
+  else { e.textContent = text; e.classList.remove('empty'); }
+}
+
+function actualizarVistaPrevia() {
+  if(!previewVisible) return;
+  const matSel  = el('asignatura_select').value;
+  const nombre  = el('nombre').value.trim();
+  const control = el('control').value.trim();
+  const division= el('division').value.trim();
+  const grupo   = el('grupo').value.trim();
+  const fecha   = formatFecha(el('fecha').value);
+  const evidencia = el('evidencia').value.trim();
+
+  const alumnoStr = [nombre, control].filter(Boolean).join('  ·  ');
+  pv('pv_alumno',   alumnoStr || null);
+  pv('pv_division', division || null);
+  pv('pv_grupo',    grupo || null);
+  pv('pv_fecha',    fecha || null);
+  pv('pv_evidencia',evidencia || null);
+
+  let materia = '', docente = '', compNum = '', compDesc = '';
+  if(matSel === '__vacio__') {
+    materia = el('materia_manual').value.trim(); docente = el('docente_manual').value.trim();
+    compNum  = el('comp_manual_num').value.trim(); compDesc = el('comp_manual_desc').value.trim();
+  } else if(matSel && asignaturasData[matSel]) {
+    const d = asignaturasData[matSel];
+    materia = matSel; docente = d.docente;
+    if(selectedComp !== null) { compNum = String(selectedComp); compDesc = d.competencias[selectedComp - 1] || ''; }
+  }
+
+  pv('pv_materia',   materia || null);
+  pv('pv_docente',   docente || null);
+  pv('pv_comp_num',  compNum || null);
+  pv('pv_comp_desc', compDesc || null);
+
+  const indEl = el('pv_indicadores');
+  if(selectedIndicadores.length === 0) indEl.innerHTML = '<span class="empty">Ninguno seleccionado</span>';
+  else {
+    const chips = selectedIndicadores.slice().sort((a,b) => a.letra.localeCompare(b.letra)).map(i => {
+      const fullText = i.full.length > 2 ? `<span class="ind-chip">${i.letra}</span> ${escHtml(i.full)}` : `<span class="ind-chip">${i.letra}</span>`;
+      return `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px">${fullText}</div>`;
+    }).join('');
+    indEl.innerHTML = chips;
+  }
+
+  const insertAdicional = el('insertar_texto_adicional').checked;
+  const wrapAdicional = el('pv_texto_adicional_wrap');
+  if (insertAdicional) {
+    wrapAdicional.style.display = 'block';
+    el('pv_texto_adicional_content').innerHTML = quill.root.innerHTML;
+  } else {
+    wrapAdicional.style.display = 'none';
+  }
+}
+
+function hookPreviewListeners() {
+  ['nombre','control','division','grupo','fecha','evidencia','materia_manual','docente_manual','comp_manual_num','comp_manual_desc'].forEach(id => {
+    const e = el(id); if(e) e.addEventListener('input', actualizarVistaPrevia);
+  });
+  el('asignatura_select').addEventListener('change', actualizarVistaPrevia);
+}
+
+const _origSelectComp = selectComp;
+selectComp = function(num, btn) { _origSelectComp(num, btn); actualizarVistaPrevia(); };
+
+const _origToggleInd = toggleInd;
+toggleInd = function(letra, full, btn) { _origToggleInd(letra, full, btn); actualizarVistaPrevia(); };
+
+function seleccionarMateriaCard(nombre) {
+  const select = document.getElementById('asignatura_select');
+  if (select) {
+    select.value = nombre;
+    select.dispatchEvent(new Event('change'));
+    showSuccess(`Materia "${nombre}" seleccionada.`);
+  }
+}
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  renderizarSelectorMaterias(); 
+  cargarLS();
+  el('fecha').value = new Date().toISOString().slice(0,10);
+  hookPreviewListeners();
+  
+  if(window.innerWidth < 900) {
+    el('custom_mat_panel').classList.remove('open');
+  }
+
+  quill = new Quill('#editor-container', {
+    theme: 'snow',
+    formats: [
+    'header', 
+    'bold', 'italic', 'underline', 
+    'list', 'bullet'
+    ],
+    modules: {
+      toolbar: [
+        [{ 'header': [1, 2, 3, false] }],
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        ['bold', 'italic', 'underline', 'strike']
+      ]
+    }
+  });
+
+  quill.on('text-change', () => {
+    actualizarVistaPrevia();
+  });
+
+  el('insertar_texto_adicional').addEventListener('change', function() {
+    el('editor_wrapper').style.display = this.checked ? 'block' : 'none';
+    el('ai_controls').style.display = this.checked ? 'flex' : 'none';
+    actualizarVistaPrevia();
+  });
+});
+</script>
+</body>
+</html>
