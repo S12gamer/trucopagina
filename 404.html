@@ -9,246 +9,329 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-  /* =========================================================
-     BASE / RESET
-     ========================================================= */
-  * { box-sizing: border-box; }
+/* =============================================================
+   BASE
+   ============================================================= */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; min-height: 100vh; }
+body { min-height: 100vh; }
+#app { min-height: 100vh; }
 
-  html, body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-  }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.anim-1 { animation: fadeUp .5s cubic-bezier(.16,1,.3,1) .05s both; }
+.anim-2 { animation: fadeUp .5s cubic-bezier(.16,1,.3,1) .15s both; }
+.anim-3 { animation: fadeUp .5s cubic-bezier(.16,1,.3,1) .25s both; }
+.anim-4 { animation: fadeUp .5s cubic-bezier(.16,1,.3,1) .35s both; }
 
-  body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    transition: background 0.4s ease, color 0.4s ease;
-  }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600;
+  text-decoration: none; cursor: pointer; border: 1px solid transparent;
+  transition: background .15s ease, transform .15s ease, border-color .15s ease;
+  font-family: inherit;
+}
+.btn:active { transform: scale(.97); }
 
-  #app { width: 100%; max-width: 640px; }
+/* =============================================================
+   TEMA: trucoteca  (raíz / index.html y archivos raíz sin match)
+   Replica: header oscuro + nav horizontal + sección + footer
+   ============================================================= */
+body[data-theme="trucoteca"] {
+  background: #0d1117;
+  color: #e6edf3;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+.tc-page { display: flex; flex-direction: column; min-height: 100vh; }
+.tc-header {
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  padding: 20px 5vw;
+  animation: fadeIn .5s ease both;
+}
+.tc-header h1 { margin: 0 0 12px; font-size: 22px; letter-spacing: .02em; }
+.tc-header nav ul {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 22px;
+}
+.tc-header nav a {
+  color: #8b949e; text-decoration: none; font-size: 14px; font-weight: 500;
+  padding-bottom: 4px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+}
+.tc-header nav a:hover { color: #58a6ff; border-color: #58a6ff; }
+.tc-main {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 48px 5vw;
+}
+.tc-card { max-width: 560px; width: 100%; }
+.tc-card .badge {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 10px; border-radius: 999px;
+  background: rgba(88,166,255,.12); color: #58a6ff; border: 1px solid rgba(88,166,255,.3);
+  margin-bottom: 16px;
+}
+.tc-card h2 { font-size: 28px; margin: 0 0 12px; }
+.tc-card p.desc { color: #8b949e; font-size: 15px; line-height: 1.6; margin: 0 0 22px; }
+.tc-card .path-box {
+  display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13.5px;
+  background: #1c2128; border: 1px solid #30363d; border-radius: 8px;
+  padding: 12px 14px; color: #79c0ff; word-break: break-all; margin-bottom: 24px;
+}
+.tc-card .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.tc-card .btn-primary { background: #58a6ff; color: #0d1117; }
+.tc-card .btn-primary:hover { background: #79c0ff; }
+.tc-card .btn-secondary { background: transparent; border-color: #30363d; color: #e6edf3; }
+.tc-card .btn-secondary:hover { background: #1c2128; border-color: #8b949e; }
+.tc-footer {
+  text-align: center; padding: 18px; font-size: 12.5px; color: #6e7681;
+  border-top: 1px solid #30363d;
+}
 
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
-    font-family: inherit;
-  }
-  .btn:active { transform: scale(0.97); }
+/* =============================================================
+   TEMA: license  (gen_lic_de_conducir.html)
+   Replica: layout de 2 columnas, tarjeta de licencia morada
+   ============================================================= */
+body[data-theme="license"] {
+  font-family: 'Montserrat', sans-serif;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  color: #333; padding: 24px;
+}
+.lic-container {
+  background: #fff; width: 100%; max-width: 900px; border-radius: 10px;
+  box-shadow: 0 15px 30px rgba(0,0,0,.2);
+  display: flex; flex-wrap: wrap; padding: 30px; gap: 30px;
+}
+.lic-info { flex: 1 1 350px; min-width: 280px; }
+.lic-info .badge {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 12px; border-radius: 999px;
+  background: #ede9fe; color: #4b3f72; margin-bottom: 16px;
+}
+.lic-info h2 { margin: 0 0 16px; color: #4b3f72; font-size: 24px; }
+.lic-info p.desc { color: #555; font-size: 14.5px; line-height: 1.6; margin: 0 0 20px; }
+.lic-info .path-box {
+  display: block; font-family: monospace; font-size: 13px;
+  background: #f4f2fb; border: 1.8px solid #ddd; border-radius: 6px;
+  padding: 12px 14px; color: #564abb; word-break: break-all; margin-bottom: 24px;
+}
+.lic-info .actions { display: flex; flex-direction: column; gap: 10px; }
+.lic-info .btn { width: 100%; justify-content: center; padding: 13px 20px; font-weight: 700; }
+.lic-info .btn-primary { background: #667eea; color: #fff; }
+.lic-info .btn-primary:hover { background: #564abb; }
+.lic-info .btn-secondary { background: transparent; border: 1.8px solid #ddd; color: #4b3f72; }
+.lic-info .btn-secondary:hover { background: #f4f2fb; }
 
-  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.lic-preview {
+  flex: 1 1 340px; min-width: 280px;
+  background: linear-gradient(135deg, #764ba2, #667eea);
+  border-radius: 15px; color: #fff; padding: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  display: flex; flex-direction: column; align-items: center; position: relative;
+}
+.lic-header {
+  font-weight: 900; font-size: 18px; letter-spacing: 2px; margin-bottom: 18px;
+  border-bottom: 2px solid #fff; width: 100%; text-align: center; padding-bottom: 8px;
+}
+.lic-photo {
+  width: 120px; height: 155px; background: #d9d3ec; border-radius: 10px;
+  margin-bottom: 18px; box-shadow: 0 6px 15px rgba(0,0,0,.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; color: #9184c2;
+}
+.lic-row {
+  display: flex; justify-content: space-between; width: 100%; margin-bottom: 9px; font-size: 13.5px;
+}
+.lic-label { font-weight: 700; color: #e0d7f5; }
+.lic-value { font-weight: 600; color: #e7dbfc; }
+.lic-stamp {
+  margin-top: 10px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  color: #ffb3c6; border: 1px solid #ffb3c6; padding: 3px 10px; border-radius: 4px;
+}
+.lic-footer-note {
+  margin-top: 16px; font-size: 10px; color: #ccc; text-align: center; font-style: italic;
+}
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .anim-1 { animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) 0.05s both; }
-  .anim-2 { animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) 0.15s both; }
-  .anim-3 { animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) 0.25s both; }
-  .anim-4 { animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) 0.35s both; }
-  .anim-5 { animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) 0.45s both; }
+/* =============================================================
+   TEMA: trionda  (TPF.html)
+   Replica: sidebar oscura + logo + nav + área de contenido
+   con page-header y tarjeta estilo "card"
+   ============================================================= */
+body[data-theme="trionda"] {
+  font-family: 'DM Sans', sans-serif;
+  background: #fdfcfb;
+  color: #11111a;
+  --trionda-red: #e20047;
+  --trionda-blue: #0044ff;
+  --trionda-green: #00cc44;
+}
+.tr-layout { display: flex; min-height: 100vh; }
+.tr-sidebar {
+  width: 260px; flex-shrink: 0;
+  background: #11111a;
+  border-right: 2px solid var(--trionda-green);
+  display: flex; flex-direction: column;
+}
+.tr-logo { padding: 1.8rem 1.5rem 1.4rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+.tr-logo h1 { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: #fff; margin: 0 0 6px; }
+.tr-logo p { font-size: .75rem; color: var(--trionda-green); font-weight: 600; margin: 0; }
+.tr-nav { padding: 1.2rem .8rem; flex: 1; }
+.tr-nav-title { font-size: .65rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.4); padding: .6rem .7rem .4rem; }
+.tr-nav-link {
+  display: flex; align-items: center; gap: .75rem; padding: .65rem .9rem; border-radius: 8px;
+  color: rgba(255,255,255,.7); font-size: .85rem; text-decoration: none; margin-bottom: .15rem;
+}
+.tr-nav-link:hover { background: rgba(255,255,255,.07); color: #fff; }
+.tr-nav-link.active { background: rgba(226,0,71,.15); color: var(--trionda-red); font-weight: 600; }
+.tr-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.tr-dot.blue { background: var(--trionda-blue); }
+.tr-dot.red { background: var(--trionda-red); }
+.tr-dot.green { background: var(--trionda-green); }
 
-  @media (max-width: 480px) {
-    .actions { flex-direction: column; }
-    .actions .btn { justify-content: center; width: 100%; }
-  }
+.tr-content { flex: 1; min-width: 0; }
+.tr-page-header {
+  padding: 2.2rem 3rem 1.8rem; border-bottom: 1px solid rgba(0,0,0,.05);
+  position: relative; background: rgba(253,252,251,.85);
+}
+.tr-page-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--trionda-red); }
+.tr-page-header h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; margin: 0; }
+.tr-page-header p { color: #666; font-size: .85rem; margin: .3rem 0 0; }
 
-  /* =========================================================
-     TEMA: trucoteca  (raíz / index y cualquier archivo raíz
-     no reconocido — default)
-     ========================================================= */
-  body[data-theme="trucoteca"] {
-    background: #0d1117;
-    background-image:
-      radial-gradient(circle at 15% 20%, rgba(88,166,255,0.08), transparent 40%),
-      radial-gradient(circle at 85% 80%, rgba(63,185,80,0.06), transparent 40%);
-    color: #e6edf3;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  }
-  [data-theme="trucoteca"] .card {
-    background: #161b22;
-    border: 1px solid #30363d;
-    border-radius: 12px;
-    padding: 40px 36px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
-  }
-  [data-theme="trucoteca"] .badge {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: rgba(88,166,255,0.12);
-    color: #58a6ff;
-    border: 1px solid rgba(88,166,255,0.3);
-    margin-bottom: 18px;
-  }
-  [data-theme="trucoteca"] .eyebrow { color: #8b949e; font-size: 14px; margin: 0 0 4px; }
-  [data-theme="trucoteca"] h1 { font-size: 26px; margin: 0 0 12px; font-weight: 700; }
-  [data-theme="trucoteca"] p.desc { color: #8b949e; font-size: 15px; line-height: 1.6; margin: 0 0 24px; }
-  [data-theme="trucoteca"] .path-box {
-    display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 13.5px; background: #1c2128; border: 1px solid #30363d; border-radius: 8px;
-    padding: 12px 14px; color: #79c0ff; word-break: break-all; margin-bottom: 26px;
-  }
-  [data-theme="trucoteca"] .btn-primary { background: #58a6ff; color: #0d1117; }
-  [data-theme="trucoteca"] .btn-primary:hover { background: #79c0ff; }
-  [data-theme="trucoteca"] .btn-secondary { background: transparent; border-color: #30363d; color: #e6edf3; }
-  [data-theme="trucoteca"] .btn-secondary:hover { background: #1c2128; border-color: #8b949e; }
+.tr-body { padding: 2rem 3rem 3rem; }
+.tr-card {
+  background: #fff; border-radius: 12px; border: 1.5px solid #ece6d8;
+  max-width: 480px; padding: 1.6rem 1.7rem; animation: fadeUp .4s ease both;
+}
+.tr-card .tr-badge {
+  display: inline-block; font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; padding: .22rem .6rem; border-radius: 4px;
+  background: var(--trionda-red); color: #fff; margin-bottom: .9rem;
+}
+.tr-card .path-box {
+  display: block; font-family: monospace; font-size: 12.5px;
+  background: #faf9f7; border: 1px solid #eee; border-radius: 6px;
+  padding: 10px 12px; color: var(--trionda-blue); word-break: break-all; margin: 1rem 0 1.3rem;
+}
+.tr-card p.desc { color: #666; font-size: .85rem; line-height: 1.6; margin: 0 0 1.2rem; }
+.tr-btn-dl {
+  display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+  padding: .6rem 1rem; border-radius: 7px; border: none; font-family: 'DM Sans', sans-serif;
+  font-size: .82rem; font-weight: 600; cursor: pointer; text-decoration: none; color: #fff;
+  background: var(--trionda-red); margin-right: .6rem;
+}
+.tr-btn-dl:hover { filter: brightness(1.1); }
+.tr-btn-outline {
+  display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+  padding: .6rem 1rem; border-radius: 7px; border: 1.5px solid #ddd; font-family: 'DM Sans', sans-serif;
+  font-size: .82rem; font-weight: 600; cursor: pointer; text-decoration: none; color: #11111a; background: #fff;
+}
+.tr-btn-outline:hover { background: #f7f7f5; }
 
-  /* =========================================================
-     TEMA: license  (gen_lic_de_conducir.html)
-     ========================================================= */
-  body[data-theme="license"] {
-    font-family: 'Montserrat', sans-serif;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #333;
-  }
-  [data-theme="license"] .card {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-    padding: 40px 36px;
-  }
-  [data-theme="license"] .badge {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    padding: 4px 12px;
-    border-radius: 999px;
-    background: #ede9fe;
-    color: #4b3f72;
-    margin-bottom: 18px;
-  }
-  [data-theme="license"] .eyebrow { color: #8677b3; font-size: 14px; margin: 0 0 4px; }
-  [data-theme="license"] h1 { color: #4b3f72; font-size: 26px; margin: 0 0 12px; font-weight: 700; }
-  [data-theme="license"] p.desc { color: #555; font-size: 15px; line-height: 1.6; margin: 0 0 24px; }
-  [data-theme="license"] .path-box {
-    display: block; font-family: monospace; font-size: 13.5px;
-    background: #f4f2fb; border: 1.8px solid #ddd; border-radius: 6px;
-    padding: 12px 14px; color: #564abb; word-break: break-all; margin-bottom: 26px;
-  }
-  [data-theme="license"] .btn-primary { background: #667eea; color: #fff; }
-  [data-theme="license"] .btn-primary:hover { background: #564abb; }
-  [data-theme="license"] .btn-secondary { background: transparent; border-color: #ddd; color: #4b3f72; }
-  [data-theme="license"] .btn-secondary:hover { background: #f4f2fb; }
+@media (max-width: 720px) {
+  .tr-layout { flex-direction: column; }
+  .tr-sidebar { width: 100%; border-right: none; border-bottom: 2px solid var(--trionda-green); }
+  .tr-page-header, .tr-body { padding-left: 1.4rem; padding-right: 1.4rem; }
+}
 
-  /* =========================================================
-     TEMA: trionda  (archivo tipo "TPF" académico)
-     ========================================================= */
-  body[data-theme="trionda"] {
-    font-family: 'DM Sans', sans-serif;
-    background: #fdfcfb;
-    color: #11111a;
-  }
-  [data-theme="trionda"] .card {
-    background: #ffffff;
-    border-radius: 4px;
-    padding: 44px 40px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-    border-top: 4px solid #e20047;
-  }
-  [data-theme="trionda"] .badge {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    padding: 4px 12px;
-    border-radius: 2px;
-    background: rgba(226,0,71,0.1);
-    color: #e20047;
-    margin-bottom: 20px;
-  }
-  [data-theme="trionda"] .eyebrow { color: #9a9aa5; font-size: 13px; margin: 0 0 6px; letter-spacing: .05em; }
-  [data-theme="trionda"] h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 30px; margin: 0 0 14px; font-weight: 900;
-    border-bottom: 2px solid #0044ff;
-    padding-bottom: 12px;
-  }
-  [data-theme="trionda"] p.desc { color: #4a4a55; font-size: 15px; line-height: 1.7; margin: 0 0 26px; }
-  [data-theme="trionda"] .path-box {
-    display: block; font-family: monospace; font-size: 13px;
-    background: #faf9f7; border: 1px solid #eee; border-radius: 2px;
-    padding: 12px 14px; color: #0044ff; word-break: break-all; margin-bottom: 28px;
-  }
-  [data-theme="trionda"] .btn-primary { background: #e20047; color: #fff; border-radius: 2px; }
-  [data-theme="trionda"] .btn-primary:hover { background: #b8003a; }
-  [data-theme="trionda"] .btn-secondary { background: transparent; border-color: #ccc; color: #11111a; border-radius: 2px; }
-  [data-theme="trionda"] .btn-secondary:hover { background: #f5f5f5; }
+/* =============================================================
+   TEMA: spyder  (SPYidle.html)
+   Replica: grid tipo IDE con files / editor / TERMINAL real / acciones
+   ============================================================= */
+body[data-theme="spyder"] {
+  margin: 0; font-family: 'Segoe UI', sans-serif; background: #1e1e1e; color: white;
+}
+.sp-grid {
+  display: grid;
+  grid-template-columns: 220px 2fr 1fr;
+  grid-template-rows: 55vh 45vh;
+  min-height: 100vh;
+}
+.sp-files { grid-column: 1; grid-row: 1 / span 2; background: #111; padding: 10px; overflow: auto; }
+.sp-files h3 { font-size: 13px; color: #9a9a9a; margin: 4px 4px 10px; font-weight: 600; }
+.sp-file { padding: 8px 10px; cursor: default; background: #222; margin: 5px 0; border-radius: 3px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.sp-file.active { background: #0e639c; }
+.sp-file .ico { opacity: .7; }
+.sp-nav-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; margin: 4px 0; padding: 9px; background: #0e639c; color: #fff;
+  border: 1px solid #0e639c; border-radius: 3px; text-decoration: none; font-size: 13px; font-weight: 700;
+  cursor: pointer; box-sizing: border-box; transition: background .2s, color .2s;
+}
+.sp-nav-btn:hover { background: #1e1e1e; }
+.sp-dot-green { width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 8px #2ecc71; display: inline-block; }
 
-  /* =========================================================
-     TEMA: spyder  (archivo tipo "SPYidle" / IDE)
-     ========================================================= */
-  body[data-theme="spyder"] {
-    font-family: 'Segoe UI', sans-serif;
-    background: #1e1e1e;
-    color: #d4d4d4;
-  }
-  [data-theme="spyder"] .card {
-    background: #252526;
-    border: 1px solid #3c3c3c;
-    border-radius: 4px;
-    padding: 0;
-    overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-  }
-  [data-theme="spyder"] .title-bar {
-    background: #2d2d30;
-    padding: 8px 14px;
-    font-size: 12px;
-    color: #9a9a9a;
-    border-bottom: 1px solid #3c3c3c;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: Consolas, monospace;
-  }
-  [data-theme="spyder"] .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-  [data-theme="spyder"] .dot.r { background: #ff5f56; }
-  [data-theme="spyder"] .dot.y { background: #ffbd2e; }
-  [data-theme="spyder"] .dot.g { background: #27c93f; }
-  [data-theme="spyder"] .body-pad { padding: 32px 30px; }
-  [data-theme="spyder"] .badge {
-    display: inline-block;
-    font-family: Consolas, monospace;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 3px;
-    background: rgba(14,99,156,0.25);
-    color: #4fc1ff;
-    border: 1px solid #0e639c;
-    margin-bottom: 18px;
-  }
-  [data-theme="spyder"] .eyebrow { color: #6a9955; font-family: Consolas, monospace; font-size: 13px; margin: 0 0 6px; }
-  [data-theme="spyder"] h1 { font-size: 22px; margin: 0 0 12px; font-weight: 600; color: #ffffff; }
-  [data-theme="spyder"] p.desc { color: #a0a0a0; font-size: 14.5px; line-height: 1.6; margin: 0 0 22px; }
-  [data-theme="spyder"] .path-box {
-    display: block; font-family: Consolas, monospace; font-size: 13px;
-    background: #0d0d0d; border: 1px solid #3c3c3c; border-radius: 3px;
-    padding: 12px 14px; color: #4fc1ff; word-break: break-all; margin-bottom: 26px;
-  }
-  [data-theme="spyder"] .path-box::before { content: "$ "; color: #6a9955; }
-  [data-theme="spyder"] .btn-primary { background: #0e639c; color: #fff; border-radius: 3px; }
-  [data-theme="spyder"] .btn-primary:hover { background: #1177bb; }
-  [data-theme="spyder"] .btn-secondary { background: transparent; border-color: #3c3c3c; color: #d4d4d4; border-radius: 3px; }
-  [data-theme="spyder"] .btn-secondary:hover { background: #2d2d2d; }
+.sp-editor {
+  grid-column: 2; grid-row: 1; background: #1e1e1e; padding: 16px 20px;
+  overflow: auto; border-bottom: 1px solid #333;
+}
+.sp-editor-tab {
+  display: inline-flex; align-items: center; gap: 8px; background: #2d2d30; color: #ccc;
+  padding: 6px 14px; border-radius: 4px 4px 0 0; font-family: Consolas, monospace; font-size: 12.5px; margin-bottom: 10px;
+}
+.sp-code {
+  font-family: Consolas, monospace; font-size: 13.5px; line-height: 1.7; color: #d4d4d4; white-space: pre-wrap;
+}
+.sp-code .cm { color: #6a9955; }
+.sp-code .kw { color: #569cd6; }
+.sp-code .str { color: #ce9178; }
+.sp-code .fn { color: #dcdcaa; }
+
+.sp-console {
+  grid-column: 2; grid-row: 2; background: #0d0d0d; padding: 12px 16px;
+  overflow: auto; font-family: Consolas, monospace; font-size: 13px; display: flex; flex-direction: column;
+}
+.sp-console-log { flex: 1; overflow-y: auto; margin-bottom: 8px; }
+.sp-console-log div { margin-bottom: 4px; white-space: pre-wrap; word-break: break-word; }
+.sp-console-log .out { color: #d4d4d4; }
+.sp-console-log .err { color: #f14c4c; }
+.sp-console-log .hint { color: #6a9955; }
+.sp-console-log .prompt-echo { color: #4fc1ff; }
+.sp-console-input-row { display: flex; align-items: center; gap: 6px; border-top: 1px solid #2a2a2a; padding-top: 8px; }
+.sp-console-input-row .prompt { color: #6a9955; }
+.sp-console-input-row input {
+  flex: 1; background: transparent; border: none; outline: none; color: #d4d4d4;
+  font-family: Consolas, monospace; font-size: 13px;
+}
+
+.sp-plots { grid-column: 3; grid-row: 1 / span 2; background: #2d2d30; padding: 16px; overflow: auto; }
+.sp-plots h3 { margin-top: 0; font-size: 14px; color: #ccc; }
+.sp-plots .msg-box {
+  background: #1e1e1e; border: 1px solid #3c3c3c; border-radius: 4px; padding: 14px;
+  font-size: 13px; line-height: 1.6; color: #c9c9c9; margin-bottom: 14px;
+}
+.sp-plots .msg-box .badge {
+  display: inline-block; font-family: Consolas, monospace; font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 3px; background: rgba(241,76,76,.15); color: #f14c4c;
+  border: 1px solid #f14c4c; margin-bottom: 10px;
+}
+.sp-plots .path-box {
+  display: block; font-family: Consolas, monospace; font-size: 12px; word-break: break-all;
+  color: #4fc1ff; margin-top: 8px;
+}
+.sp-plots button, .sp-plots .sp-static-btn {
+  width: 100%; margin: 4px 0; padding: 9px; background: #0e639c; color: #fff; border: 1px solid #0e639c;
+  border-radius: 3px; font-size: 13px; font-weight: 700; cursor: default; opacity: .55;
+}
+
+.sp-footer { grid-column: 1 / -1; background: #111; text-align: center; padding: 10px; font-size: 11px; color: #888; }
+
+@media (max-width: 1024px) {
+  .sp-grid { grid-template-columns: 180px 1fr; grid-template-rows: 40vh 30vh auto; }
+  .sp-files { grid-row: 1 / span 3; }
+  .sp-editor { grid-column: 2; grid-row: 1; }
+  .sp-console { grid-column: 2; grid-row: 2; }
+  .sp-plots { grid-column: 2; grid-row: 3; }
+}
+@media (max-width: 768px) {
+  .sp-grid { display: flex; flex-direction: column; min-height: 100vh; }
+  .sp-files, .sp-editor, .sp-console, .sp-plots { width: 100%; }
+  .sp-editor { min-height: 220px; }
+  .sp-console { min-height: 220px; }
+}
 </style>
 </head>
 <body data-theme="trucoteca">
@@ -259,168 +342,289 @@
   (function () {
     "use strict";
 
-    // ---------------------------------------------------------
-    // 1. Ruta que falló + referrer para el botón "volver"
-    // ---------------------------------------------------------
+    /* ---------------------------------------------------------
+       1. Ruta que falló + referrer para volver
+       --------------------------------------------------------- */
     var path = window.location.pathname;
     var lowerPath = path.toLowerCase();
+    var origin = window.location.origin;
 
     var referrer = document.referrer;
-    var sameSiteReferrer =
-      referrer && referrer.indexOf(window.location.origin) === 0 ? referrer : null;
-    var backHref = sameSiteReferrer || (window.location.origin + "/");
+    var sameSiteReferrer = referrer && referrer.indexOf(origin) === 0 ? referrer : null;
+    var backHref = sameSiteReferrer || (origin + "/");
 
-    // ---------------------------------------------------------
-    // 2. Archivo vs Sección (por extensión al final de la ruta)
-    // ---------------------------------------------------------
-    var fileExtensionRegex = /\.([a-zA-Z0-9]{1,5})$/;
-    var extensionMatch = path.match(fileExtensionRegex);
-    var isFile = Boolean(extensionMatch);
-    var extension = isFile ? extensionMatch[1].toLowerCase() : null;
-
-    function escapeHtml(str) {
-      var div = document.createElement("div");
-      div.textContent = str == null ? "" : str;
-      return div.innerHTML;
+    function goBack() {
+      if (window.history.length > 1) { window.history.back(); }
+      else { window.location.href = backHref; }
     }
 
-    // ---------------------------------------------------------
-    // 3. Detección de "sitio" según la ruta (sin exponer la
-    //    carpeta real al usuario, solo se usa internamente para
-    //    decidir qué tema aplicar).
-    // ---------------------------------------------------------
-    var segments = path.split("/").filter(Boolean);
-    var lastSegment = segments.length ? segments[segments.length - 1] : "";
-    var lastSegmentLower = lastSegment.toLowerCase();
+    /* ---------------------------------------------------------
+       2. Archivo vs Sección
+       --------------------------------------------------------- */
+    var extMatch = path.match(/\.([a-zA-Z0-9]{1,5})$/);
+    var isFile = Boolean(extMatch);
+    var extension = isFile ? extMatch[1].toLowerCase() : null;
 
-    // ¿La ruta pertenece al grupo de páginas tipo "TPF"?
+    function esc(str) {
+      var d = document.createElement("div");
+      d.textContent = str == null ? "" : str;
+      return d.innerHTML;
+    }
+
+    /* ---------------------------------------------------------
+       3. Detección de tema según la ruta (no se expone al usuario)
+       --------------------------------------------------------- */
+    var segments = path.split("/").filter(Boolean);
+    var lastSegment = (segments.length ? segments[segments.length - 1] : "").toLowerCase();
     var isTpfGroup = /\/tpf\//.test(lowerPath);
 
     var themeKey;
     if (isTpfGroup) {
-      if (/spy/.test(lastSegmentLower)) {
-        themeKey = "spyder";
-      } else {
-        // Cubre tanto los archivos "tpf" como cualquier otro
-        // archivo no reconocido dentro del mismo grupo.
-        themeKey = "trionda";
-      }
+      themeKey = /spy/.test(lastSegment) ? "spyder" : "trionda";
     } else {
-      if (/gen.*lic|licencia/.test(lastSegmentLower)) {
-        themeKey = "license";
-      } else {
-        // Cubre "index" y cualquier otro archivo suelto en la raíz.
-        themeKey = "trucoteca";
-      }
+      themeKey = /gen.*lic|licencia/.test(lastSegment) ? "license" : "trucoteca";
     }
-
     document.body.setAttribute("data-theme", themeKey);
 
-    // ---------------------------------------------------------
-    // 4. Copys por tema y por tipo (archivo / sección)
-    // ---------------------------------------------------------
-    var COPY = {
-      trucoteca: {
-        eyebrow: "trucoteca page",
-        file: {
-          badge: "Archivo",
-          title: "Archivo no encontrado",
-          desc: "No pudimos encontrar el archivo <strong>." + escapeHtml(extension || "") +
-                "</strong> que buscabas. Puede que haya sido movido o eliminado."
-        },
-        dir: {
-          badge: "Sección",
-          title: "Página no encontrada",
-          desc: "Esta sección de la página no existe o fue movida. Revisa el enlace e inténtalo de nuevo."
-        }
-      },
-      license: {
-        eyebrow: "Generador de Licencias",
-        file: {
-          badge: "Documento",
-          title: "Documento no encontrado",
-          desc: "No pudimos encontrar el archivo <strong>." + escapeHtml(extension || "") +
-                "</strong> que buscabas dentro del generador de licencias."
-        },
-        dir: {
-          badge: "Sección",
-          title: "Sección no disponible",
-          desc: "Esta sección del generador de licencias no existe o cambió de dirección."
-        }
-      },
-      trionda: {
-        eyebrow: "Centro de Recursos Académicos",
-        file: {
-          badge: "Recurso",
-          title: "Recurso no encontrado",
-          desc: "El recurso <strong>." + escapeHtml(extension || "") +
-                "</strong> que buscabas no está disponible en este momento."
-        },
-        dir: {
-          badge: "Página",
-          title: "Página no encontrada",
-          desc: "Esta página no existe o fue reubicada dentro del Centro de Recursos Académicos."
-        }
-      },
-      spyder: {
-        eyebrow: "Spyder Web · workspace",
-        file: {
-          badge: "404 · file",
-          title: "Archivo no encontrado",
-          desc: "No se pudo cargar el archivo <strong>." + escapeHtml(extension || "") +
-                "</strong> en el workspace. Verifica el nombre e inténtalo de nuevo."
-        },
-        dir: {
-          badge: "404 · path",
-          title: "Ruta no encontrada",
-          desc: "Esa ruta no existe dentro del workspace de Spyder Web."
-        }
-      }
-    };
-
-    var themeCopy = COPY[themeKey];
-    var caseCopy = isFile ? themeCopy.file : themeCopy.dir;
-
-    // ---------------------------------------------------------
-    // 5. Render
-    // ---------------------------------------------------------
+    var fileWord = extension ? "." + esc(extension) : "el archivo solicitado";
     var app = document.getElementById("app");
 
-    var innerCardHtml =
-      '<span class="badge anim-1">' + caseCopy.badge + '</span>' +
-      '<p class="eyebrow anim-1">' + themeCopy.eyebrow + '</p>' +
-      '<h1 class="anim-2">' + caseCopy.title + '</h1>' +
-      '<p class="desc anim-3">' + caseCopy.desc + '</p>' +
-      '<span class="path-box anim-4">' + escapeHtml(path) + '</span>' +
-      '<div class="actions anim-5">' +
-        '<a class="btn btn-primary" id="btn-back" href="' + backHref + '">← Volver atrás</a>' +
-        '<a class="btn btn-secondary" href="' + window.location.origin + '/">Ir al inicio</a>' +
-      '</div>';
+    /* ===========================================================
+       TEMA: trucoteca
+       =========================================================== */
+    function renderTrucoteca() {
+      var title = isFile ? "Archivo no encontrado" : "Página no encontrada";
+      var desc = isFile
+        ? "No pudimos encontrar el archivo <strong>" + fileWord + "</strong> que buscabas. Puede que haya sido movido o eliminado."
+        : "Esta sección de la página no existe o fue movida. Revisa el enlace e inténtalo de nuevo.";
 
-    if (themeKey === "spyder") {
-      // La tarjeta del tema "spyder" tiene una barra de título tipo editor.
       app.innerHTML =
-        '<div class="card anim-1">' +
-          '<div class="title-bar">' +
-            '<span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>' +
-            'spyder-web — 404' +
-          '</div>' +
-          '<div class="body-pad">' + innerCardHtml + '</div>' +
+        '<div class="tc-page">' +
+          '<header class="tc-header">' +
+            '<h1>trucoteca page</h1>' +
+            '<nav><ul>' +
+              '<li><a href="' + origin + '/#presentacion">Bienvenido</a></li>' +
+              '<li><a href="' + origin + '/#trucos">Trucos</a></li>' +
+              '<li><a href="' + origin + '/#trucochat">Trucochat</a></li>' +
+              '<li><a href="' + origin + '/">Inicio</a></li>' +
+            '</ul></nav>' +
+          '</header>' +
+          '<main class="tc-main">' +
+            '<div class="tc-card">' +
+              '<span class="badge anim-1">404</span>' +
+              '<h2 class="anim-2">' + title + '</h2>' +
+              '<p class="desc anim-3">' + desc + '</p>' +
+              '<span class="path-box anim-3">' + esc(path) + '</span>' +
+              '<div class="actions anim-4">' +
+                '<a class="btn btn-primary" id="btn-back">← Volver atrás</a>' +
+                '<a class="btn btn-secondary" href="' + origin + '/">Ir al inicio</a>' +
+              '</div>' +
+            '</div>' +
+          '</main>' +
+          '<footer class="tc-footer">&copy; 2025 trucoteca page by s12. Todos los derechos reservados.</footer>' +
         '</div>';
-    } else {
-      app.innerHTML = '<div class="card">' + innerCardHtml + '</div>';
     }
 
-    // ---------------------------------------------------------
-    // 6. Botón volver: usa el historial real cuando es posible
-    // ---------------------------------------------------------
-    var backBtn = document.getElementById("btn-back");
-    backBtn.addEventListener("click", function (e) {
-      if (window.history.length > 1) {
-        e.preventDefault();
-        window.history.back();
+    /* ===========================================================
+       TEMA: license
+       =========================================================== */
+    function renderLicense() {
+      var title = isFile ? "Documento no encontrado" : "Sección no disponible";
+      var desc = isFile
+        ? "No pudimos encontrar el archivo <strong>" + fileWord + "</strong> que buscabas dentro del generador de licencias."
+        : "Esta sección del generador de licencias no existe o cambió de dirección.";
+
+      app.innerHTML =
+        '<div class="lic-container">' +
+          '<div class="lic-info">' +
+            '<span class="badge anim-1">404</span>' +
+            '<h2 class="anim-2">' + title + '</h2>' +
+            '<p class="desc anim-3">' + desc + '</p>' +
+            '<span class="path-box anim-3">' + esc(path) + '</span>' +
+            '<div class="actions anim-4">' +
+              '<a class="btn btn-primary" id="btn-back">← Volver atrás</a>' +
+              '<a class="btn btn-secondary" href="' + origin + '/">Ir al inicio</a>' +
+            '</div>' +
+          '</div>' +
+          '<div class="lic-preview anim-2">' +
+            '<div class="lic-header">LICENCIA NO ENCONTRADA</div>' +
+            '<div class="lic-photo">?</div>' +
+            '<div class="lic-row"><span class="lic-label">Nombre:</span><span class="lic-value">— — — —</span></div>' +
+            '<div class="lic-row"><span class="lic-label">Documento:</span><span class="lic-value">' + fileWord + '</span></div>' +
+            '<div class="lic-row"><span class="lic-label">Estado:</span><span class="lic-value">No disponible</span></div>' +
+            '<div class="lic-stamp">Error 404</div>' +
+            '<div class="lic-footer-note">Generador de Licencias · Vista de error</div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    /* ===========================================================
+       TEMA: trionda (TPF)
+       =========================================================== */
+    function renderTrionda() {
+      var title = isFile ? "Recurso no encontrado" : "Página no encontrada";
+      var desc = isFile
+        ? "El recurso <strong>" + fileWord + "</strong> que buscabas no está disponible en este momento."
+        : "Esta página no existe o fue reubicada dentro del Centro de Recursos Académicos.";
+
+      app.innerHTML =
+        '<div class="tr-layout">' +
+          '<aside class="tr-sidebar">' +
+            '<div class="tr-logo">' +
+              '<h1>Centro de Recursos<br>Académicos</h1>' +
+              '<p>MEX · USA · CAN &#39;26</p>' +
+            '</div>' +
+            '<nav class="tr-nav">' +
+              '<div class="tr-nav-title">Navegación</div>' +
+              '<a class="tr-nav-link active" href="#"><span class="tr-dot red"></span> Página no encontrada</a>' +
+              '<a class="tr-nav-link" href="' + origin + '/"><span class="tr-dot blue"></span> Ir al inicio</a>' +
+              '<a class="tr-nav-link" id="btn-back-tr" href="#"><span class="tr-dot green"></span> Volver atrás</a>' +
+            '</nav>' +
+          '</aside>' +
+          '<div class="tr-content">' +
+            '<div class="tr-page-header anim-1">' +
+              '<h2>' + title + '</h2>' +
+              '<p>Error 404 · Centro de Recursos Académicos</p>' +
+            '</div>' +
+            '<div class="tr-body">' +
+              '<div class="tr-card anim-2">' +
+                '<span class="tr-badge">404</span>' +
+                '<p class="desc">' + desc + '</p>' +
+                '<span class="path-box">' + esc(path) + '</span>' +
+                '<a class="tr-btn-dl" id="btn-back">← Volver atrás</a>' +
+                '<a class="tr-btn-outline" href="' + origin + '/">Ir al inicio</a>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      var trBack = document.getElementById("btn-back-tr");
+      if (trBack) trBack.addEventListener("click", function (e) { e.preventDefault(); goBack(); });
+    }
+
+    /* ===========================================================
+       TEMA: spyder (SPYidle) — con terminal interactiva real
+       =========================================================== */
+    function renderSpyder() {
+      var missingLabel = isFile ? esc(lastSegment || ("archivo." + (extension || ""))) : esc(lastSegment || "ruta");
+
+      app.innerHTML =
+        '<div class="sp-grid">' +
+          '<div class="sp-files">' +
+            '<h3>Archivos</h3>' +
+            '<div class="sp-file active"><span class="ico">&#9888;</span> 404.py</div>' +
+            '<div class="sp-file"><span class="ico">&#128196;</span> ' + missingLabel + '</div>' +
+            '<a class="sp-nav-btn" href="' + origin + '/">&#8962; Ir al inicio</a>' +
+            '<a class="sp-nav-btn" id="btn-back">&#8592; Volver atrás</a>' +
+          '</div>' +
+
+          '<div class="sp-editor">' +
+            '<div class="sp-editor-tab">404.py &nbsp;&times;</div>' +
+            '<div class="sp-code anim-1">' +
+              '<span class="cm"># No se pudo cargar el recurso solicitado</span>\n' +
+              '<span class="kw">import</span> sys\n\n' +
+              '<span class="kw">def</span> <span class="fn">buscar_recurso</span>(ruta):\n' +
+              '    <span class="kw">if not</span> ruta.existe():\n' +
+              '        <span class="kw">raise</span> <span class="fn">FileNotFoundError</span>(<span class="str">"' + esc(path) + '"</span>)\n\n' +
+              '<span class="fn">buscar_recurso</span>(<span class="str">"' + esc(path) + '"</span>)\n' +
+              '<span class="cm"># >>> FileNotFoundError: 404 - recurso no encontrado</span>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="sp-console">' +
+            '<div class="sp-console-log" id="sp-log">' +
+              '<div class="hint">Spyder Web v1.0 Beta — consola</div>' +
+              '<div class="err">FileNotFoundError: no se encontró "' + esc(path) + '"</div>' +
+              '<div class="out">Escribe <strong>help</strong> para ver comandos disponibles.</div>' +
+            '</div>' +
+            '<div class="sp-console-input-row">' +
+              '<span class="prompt">&gt;&gt;&gt;</span>' +
+              '<input type="text" id="sp-input" autocomplete="off" spellcheck="false" placeholder="escribe un comando y presiona Enter…" />' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="sp-plots">' +
+            '<h3>Acciones</h3>' +
+            '<div class="msg-box anim-2">' +
+              '<span class="badge">404</span><br>' +
+              (isFile
+                ? 'No se pudo cargar el archivo <strong>' + fileWord + '</strong> en el workspace.'
+                : 'Esa ruta no existe dentro del workspace de Spyder Web.') +
+              '<span class="path-box">' + esc(path) + '</span>' +
+            '</div>' +
+            '<button class="sp-static-btn">Ejecutar</button>' +
+            '<button class="sp-static-btn">Descargar .py</button>' +
+            '<a href="' + origin + '/" class="sp-nav-btn"><span class="sp-dot-green"></span> Centro de Archivos</a>' +
+          '</div>' +
+
+          '<footer class="sp-footer">&copy; 2026 Spyder Web Idle · Made by: S12 &amp; CS</footer>' +
+        '</div>';
+
+      setupTerminal();
+    }
+
+    function setupTerminal() {
+      var log = document.getElementById("sp-log");
+      var input = document.getElementById("sp-input");
+      if (!log || !input) return;
+
+      function print(text, cls) {
+        var line = document.createElement("div");
+        line.className = cls || "out";
+        line.textContent = text;
+        log.appendChild(line);
+        log.scrollTop = log.scrollHeight;
       }
-    });
+
+      var HELP = "Comandos: help, ls, home, back, clear";
+
+      input.addEventListener("keydown", function (e) {
+        if (e.key !== "Enter") return;
+        var raw = input.value;
+        var cmd = raw.trim();
+        input.value = "";
+        if (!cmd) return;
+
+        var echo = document.createElement("div");
+        echo.className = "prompt-echo";
+        echo.textContent = ">>> " + raw;
+        log.appendChild(echo);
+
+        var lower = cmd.toLowerCase();
+
+        if (lower === "help") {
+          print(HELP, "hint");
+        } else if (lower === "clear" || lower === "cls") {
+          log.innerHTML = "";
+        } else if (lower === "home" || lower === "cd ~" || lower === "cd") {
+          print("Redirigiendo al inicio…", "out");
+          setTimeout(function () { window.location.href = origin + "/"; }, 400);
+        } else if (lower === "back" || lower === "cd ..") {
+          print("Volviendo atrás…", "out");
+          setTimeout(goBack, 400);
+        } else if (lower === "ls" || lower.indexOf("cat ") === 0 || lower.indexOf("open ") === 0) {
+          print('bash: no se encontraron coincidencias para "' + esc(path) + '"', "err");
+        } else {
+          print('bash: ' + cmd + ': comando no encontrado (404)', "err");
+        }
+
+        log.scrollTop = log.scrollHeight;
+      });
+    }
+
+    /* ---------------------------------------------------------
+       4. Render según tema + listener genérico de "volver"
+       --------------------------------------------------------- */
+    if (themeKey === "license") renderLicense();
+    else if (themeKey === "trionda") renderTrionda();
+    else if (themeKey === "spyder") renderSpyder();
+    else renderTrucoteca();
+
+    var backBtn = document.getElementById("btn-back");
+    if (backBtn) {
+      backBtn.setAttribute("href", backHref);
+      backBtn.addEventListener("click", function (e) { e.preventDefault(); goBack(); });
+    }
   })();
   </script>
 </body>
