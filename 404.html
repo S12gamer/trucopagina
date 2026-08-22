@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 - Página no encontrada</title>
+<meta name="robots" content="noindex">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     BASE / RESET
+     ========================================================= */
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  #app { width: 100%; max-width: 640px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    font-family: inherit;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .anim-1 { animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) 0.05s both; }
+  .anim-2 { animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) 0.15s both; }
+  .anim-3 { animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) 0.25s both; }
+  .anim-4 { animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) 0.35s both; }
+  .anim-5 { animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) 0.45s both; }
+
+  @media (max-width: 480px) {
+    .actions { flex-direction: column; }
+    .actions .btn { justify-content: center; width: 100%; }
+  }
+
+  /* =========================================================
+     TEMA: trucoteca  (raíz / index y cualquier archivo raíz
+     no reconocido — default)
+     ========================================================= */
+  body[data-theme="trucoteca"] {
+    background: #0d1117;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(88,166,255,0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(63,185,80,0.06), transparent 40%);
+    color: #e6edf3;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  [data-theme="trucoteca"] .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 40px 36px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+  }
+  [data-theme="trucoteca"] .badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(88,166,255,0.12);
+    color: #58a6ff;
+    border: 1px solid rgba(88,166,255,0.3);
+    margin-bottom: 18px;
+  }
+  [data-theme="trucoteca"] .eyebrow { color: #8b949e; font-size: 14px; margin: 0 0 4px; }
+  [data-theme="trucoteca"] h1 { font-size: 26px; margin: 0 0 12px; font-weight: 700; }
+  [data-theme="trucoteca"] p.desc { color: #8b949e; font-size: 15px; line-height: 1.6; margin: 0 0 24px; }
+  [data-theme="trucoteca"] .path-box {
+    display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13.5px; background: #1c2128; border: 1px solid #30363d; border-radius: 8px;
+    padding: 12px 14px; color: #79c0ff; word-break: break-all; margin-bottom: 26px;
+  }
+  [data-theme="trucoteca"] .btn-primary { background: #58a6ff; color: #0d1117; }
+  [data-theme="trucoteca"] .btn-primary:hover { background: #79c0ff; }
+  [data-theme="trucoteca"] .btn-secondary { background: transparent; border-color: #30363d; color: #e6edf3; }
+  [data-theme="trucoteca"] .btn-secondary:hover { background: #1c2128; border-color: #8b949e; }
+
+  /* =========================================================
+     TEMA: license  (gen_lic_de_conducir.html)
+     ========================================================= */
+  body[data-theme="license"] {
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #333;
+  }
+  [data-theme="license"] .card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    padding: 40px 36px;
+  }
+  [data-theme="license"] .badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #ede9fe;
+    color: #4b3f72;
+    margin-bottom: 18px;
+  }
+  [data-theme="license"] .eyebrow { color: #8677b3; font-size: 14px; margin: 0 0 4px; }
+  [data-theme="license"] h1 { color: #4b3f72; font-size: 26px; margin: 0 0 12px; font-weight: 700; }
+  [data-theme="license"] p.desc { color: #555; font-size: 15px; line-height: 1.6; margin: 0 0 24px; }
+  [data-theme="license"] .path-box {
+    display: block; font-family: monospace; font-size: 13.5px;
+    background: #f4f2fb; border: 1.8px solid #ddd; border-radius: 6px;
+    padding: 12px 14px; color: #564abb; word-break: break-all; margin-bottom: 26px;
+  }
+  [data-theme="license"] .btn-primary { background: #667eea; color: #fff; }
+  [data-theme="license"] .btn-primary:hover { background: #564abb; }
+  [data-theme="license"] .btn-secondary { background: transparent; border-color: #ddd; color: #4b3f72; }
+  [data-theme="license"] .btn-secondary:hover { background: #f4f2fb; }
+
+  /* =========================================================
+     TEMA: trionda  (archivo tipo "TPF" académico)
+     ========================================================= */
+  body[data-theme="trionda"] {
+    font-family: 'DM Sans', sans-serif;
+    background: #fdfcfb;
+    color: #11111a;
+  }
+  [data-theme="trionda"] .card {
+    background: #ffffff;
+    border-radius: 4px;
+    padding: 44px 40px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    border-top: 4px solid #e20047;
+  }
+  [data-theme="trionda"] .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 2px;
+    background: rgba(226,0,71,0.1);
+    color: #e20047;
+    margin-bottom: 20px;
+  }
+  [data-theme="trionda"] .eyebrow { color: #9a9aa5; font-size: 13px; margin: 0 0 6px; letter-spacing: .05em; }
+  [data-theme="trionda"] h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px; margin: 0 0 14px; font-weight: 900;
+    border-bottom: 2px solid #0044ff;
+    padding-bottom: 12px;
+  }
+  [data-theme="trionda"] p.desc { color: #4a4a55; font-size: 15px; line-height: 1.7; margin: 0 0 26px; }
+  [data-theme="trionda"] .path-box {
+    display: block; font-family: monospace; font-size: 13px;
+    background: #faf9f7; border: 1px solid #eee; border-radius: 2px;
+    padding: 12px 14px; color: #0044ff; word-break: break-all; margin-bottom: 28px;
+  }
+  [data-theme="trionda"] .btn-primary { background: #e20047; color: #fff; border-radius: 2px; }
+  [data-theme="trionda"] .btn-primary:hover { background: #b8003a; }
+  [data-theme="trionda"] .btn-secondary { background: transparent; border-color: #ccc; color: #11111a; border-radius: 2px; }
+  [data-theme="trionda"] .btn-secondary:hover { background: #f5f5f5; }
+
+  /* =========================================================
+     TEMA: spyder  (archivo tipo "SPYidle" / IDE)
+     ========================================================= */
+  body[data-theme="spyder"] {
+    font-family: 'Segoe UI', sans-serif;
+    background: #1e1e1e;
+    color: #d4d4d4;
+  }
+  [data-theme="spyder"] .card {
+    background: #252526;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  [data-theme="spyder"] .title-bar {
+    background: #2d2d30;
+    padding: 8px 14px;
+    font-size: 12px;
+    color: #9a9a9a;
+    border-bottom: 1px solid #3c3c3c;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: Consolas, monospace;
+  }
+  [data-theme="spyder"] .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  [data-theme="spyder"] .dot.r { background: #ff5f56; }
+  [data-theme="spyder"] .dot.y { background: #ffbd2e; }
+  [data-theme="spyder"] .dot.g { background: #27c93f; }
+  [data-theme="spyder"] .body-pad { padding: 32px 30px; }
+  [data-theme="spyder"] .badge {
+    display: inline-block;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 3px;
+    background: rgba(14,99,156,0.25);
+    color: #4fc1ff;
+    border: 1px solid #0e639c;
+    margin-bottom: 18px;
+  }
+  [data-theme="spyder"] .eyebrow { color: #6a9955; font-family: Consolas, monospace; font-size: 13px; margin: 0 0 6px; }
+  [data-theme="spyder"] h1 { font-size: 22px; margin: 0 0 12px; font-weight: 600; color: #ffffff; }
+  [data-theme="spyder"] p.desc { color: #a0a0a0; font-size: 14.5px; line-height: 1.6; margin: 0 0 22px; }
+  [data-theme="spyder"] .path-box {
+    display: block; font-family: Consolas, monospace; font-size: 13px;
+    background: #0d0d0d; border: 1px solid #3c3c3c; border-radius: 3px;
+    padding: 12px 14px; color: #4fc1ff; word-break: break-all; margin-bottom: 26px;
+  }
+  [data-theme="spyder"] .path-box::before { content: "$ "; color: #6a9955; }
+  [data-theme="spyder"] .btn-primary { background: #0e639c; color: #fff; border-radius: 3px; }
+  [data-theme="spyder"] .btn-primary:hover { background: #1177bb; }
+  [data-theme="spyder"] .btn-secondary { background: transparent; border-color: #3c3c3c; color: #d4d4d4; border-radius: 3px; }
+  [data-theme="spyder"] .btn-secondary:hover { background: #2d2d2d; }
+</style>
+</head>
+<body data-theme="trucoteca">
+
+  <div id="app"></div>
+
+  <script>
+  (function () {
+    "use strict";
+
+    // ---------------------------------------------------------
+    // 1. Ruta que falló + referrer para el botón "volver"
+    // ---------------------------------------------------------
+    var path = window.location.pathname;
+    var lowerPath = path.toLowerCase();
+
+    var referrer = document.referrer;
+    var sameSiteReferrer =
+      referrer && referrer.indexOf(window.location.origin) === 0 ? referrer : null;
+    var backHref = sameSiteReferrer || (window.location.origin + "/");
+
+    // ---------------------------------------------------------
+    // 2. Archivo vs Sección (por extensión al final de la ruta)
+    // ---------------------------------------------------------
+    var fileExtensionRegex = /\.([a-zA-Z0-9]{1,5})$/;
+    var extensionMatch = path.match(fileExtensionRegex);
+    var isFile = Boolean(extensionMatch);
+    var extension = isFile ? extensionMatch[1].toLowerCase() : null;
+
+    function escapeHtml(str) {
+      var div = document.createElement("div");
+      div.textContent = str == null ? "" : str;
+      return div.innerHTML;
+    }
+
+    // ---------------------------------------------------------
+    // 3. Detección de "sitio" según la ruta (sin exponer la
+    //    carpeta real al usuario, solo se usa internamente para
+    //    decidir qué tema aplicar).
+    // ---------------------------------------------------------
+    var segments = path.split("/").filter(Boolean);
+    var lastSegment = segments.length ? segments[segments.length - 1] : "";
+    var lastSegmentLower = lastSegment.toLowerCase();
+
+    // ¿La ruta pertenece al grupo de páginas tipo "TPF"?
+    var isTpfGroup = /\/tpf\//.test(lowerPath);
+
+    var themeKey;
+    if (isTpfGroup) {
+      if (/spy/.test(lastSegmentLower)) {
+        themeKey = "spyder";
+      } else {
+        // Cubre tanto los archivos "tpf" como cualquier otro
+        // archivo no reconocido dentro del mismo grupo.
+        themeKey = "trionda";
+      }
+    } else {
+      if (/gen.*lic|licencia/.test(lastSegmentLower)) {
+        themeKey = "license";
+      } else {
+        // Cubre "index" y cualquier otro archivo suelto en la raíz.
+        themeKey = "trucoteca";
+      }
+    }
+
+    document.body.setAttribute("data-theme", themeKey);
+
+    // ---------------------------------------------------------
+    // 4. Copys por tema y por tipo (archivo / sección)
+    // ---------------------------------------------------------
+    var COPY = {
+      trucoteca: {
+        eyebrow: "trucoteca page",
+        file: {
+          badge: "Archivo",
+          title: "Archivo no encontrado",
+          desc: "No pudimos encontrar el archivo <strong>." + escapeHtml(extension || "") +
+                "</strong> que buscabas. Puede que haya sido movido o eliminado."
+        },
+        dir: {
+          badge: "Sección",
+          title: "Página no encontrada",
+          desc: "Esta sección de la página no existe o fue movida. Revisa el enlace e inténtalo de nuevo."
+        }
+      },
+      license: {
+        eyebrow: "Generador de Licencias",
+        file: {
+          badge: "Documento",
+          title: "Documento no encontrado",
+          desc: "No pudimos encontrar el archivo <strong>." + escapeHtml(extension || "") +
+                "</strong> que buscabas dentro del generador de licencias."
+        },
+        dir: {
+          badge: "Sección",
+          title: "Sección no disponible",
+          desc: "Esta sección del generador de licencias no existe o cambió de dirección."
+        }
+      },
+      trionda: {
+        eyebrow: "Centro de Recursos Académicos",
+        file: {
+          badge: "Recurso",
+          title: "Recurso no encontrado",
+          desc: "El recurso <strong>." + escapeHtml(extension || "") +
+                "</strong> que buscabas no está disponible en este momento."
+        },
+        dir: {
+          badge: "Página",
+          title: "Página no encontrada",
+          desc: "Esta página no existe o fue reubicada dentro del Centro de Recursos Académicos."
+        }
+      },
+      spyder: {
+        eyebrow: "Spyder Web · workspace",
+        file: {
+          badge: "404 · file",
+          title: "Archivo no encontrado",
+          desc: "No se pudo cargar el archivo <strong>." + escapeHtml(extension || "") +
+                "</strong> en el workspace. Verifica el nombre e inténtalo de nuevo."
+        },
+        dir: {
+          badge: "404 · path",
+          title: "Ruta no encontrada",
+          desc: "Esa ruta no existe dentro del workspace de Spyder Web."
+        }
+      }
+    };
+
+    var themeCopy = COPY[themeKey];
+    var caseCopy = isFile ? themeCopy.file : themeCopy.dir;
+
+    // ---------------------------------------------------------
+    // 5. Render
+    // ---------------------------------------------------------
+    var app = document.getElementById("app");
+
+    var innerCardHtml =
+      '<span class="badge anim-1">' + caseCopy.badge + '</span>' +
+      '<p class="eyebrow anim-1">' + themeCopy.eyebrow + '</p>' +
+      '<h1 class="anim-2">' + caseCopy.title + '</h1>' +
+      '<p class="desc anim-3">' + caseCopy.desc + '</p>' +
+      '<span class="path-box anim-4">' + escapeHtml(path) + '</span>' +
+      '<div class="actions anim-5">' +
+        '<a class="btn btn-primary" id="btn-back" href="' + backHref + '">← Volver atrás</a>' +
+        '<a class="btn btn-secondary" href="' + window.location.origin + '/">Ir al inicio</a>' +
+      '</div>';
+
+    if (themeKey === "spyder") {
+      // La tarjeta del tema "spyder" tiene una barra de título tipo editor.
+      app.innerHTML =
+        '<div class="card anim-1">' +
+          '<div class="title-bar">' +
+            '<span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>' +
+            'spyder-web — 404' +
+          '</div>' +
+          '<div class="body-pad">' + innerCardHtml + '</div>' +
+        '</div>';
+    } else {
+      app.innerHTML = '<div class="card">' + innerCardHtml + '</div>';
+    }
+
+    // ---------------------------------------------------------
+    // 6. Botón volver: usa el historial real cuando es posible
+    // ---------------------------------------------------------
+    var backBtn = document.getElementById("btn-back");
+    backBtn.addEventListener("click", function (e) {
+      if (window.history.length > 1) {
+        e.preventDefault();
+        window.history.back();
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
