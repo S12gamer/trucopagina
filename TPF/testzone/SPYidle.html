@@ -5,16 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Spyder Web v1.0 Beta</title>
 
+<!-- ═══ PWA: instalación y funcionamiento sin conexión ═══ -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1C1917">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CDRA App">
+<link rel="apple-touch-icon" href="CRDA icon.png">
+<link rel="icon" href="CDA icon.png">
+
 <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css"/>
 
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
-<link rel="manifest" href="manifest.json">
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CDRA App">
-<link rel="apple-touch-icon" href="icono-192.png">
 <style>
 body{
     margin:0;
@@ -289,19 +293,6 @@ button{max-width:100%;}
 }
 
 </style>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(registration => {
-          console.log('PWA: Service Worker registrado con éxito bajo el alcance:', registration.scope);
-        })
-        .catch(error => {
-          console.error('PWA: Error al registrar el Service Worker:', error);
-        });
-    });
-  }
-</script>
 </head>
 <script>
 
@@ -404,6 +395,7 @@ import numpy as np
 import sympy as sp
 import matplotlib.pyplot as plt
 import base64
+import json
 
 from js import document, navigator, Blob, URL, window
 from pyodide.ffi import create_proxy
@@ -643,7 +635,42 @@ document.getElementById("copy").addEventListener("click", create_proxy(copy_img)
 window.pythonReady = True
 if window.pythonReady == True:
     console = document.getElementById("console")
-    console.innerText = "CDE_User>> trucopagina/TPF/SPYidle/_init_.py loaded correctly"
+    
+    # 1. Intentamos leer el texto del localStorage (Cambia 'usuario' por tu clave real)
+    usuario_json = window.localStorage.getItem('fo205')
+    user_tag = "CDE_User" # Valor por defecto por si acaso
+    
+    if usuario_json:
+        try:
+            # 2. Convertimos el texto JSON a un diccionario de Python
+            datos = json.loads(usuario_json)
+            control = str(datos.get("control", ""))
+            
+            # 3. Extraemos los últimos 3 dígitos si existen
+            if len(control) >= 3:
+                ultimos_tres = control[-3:]
+                user_tag = f"CDE_{ultimos_tres}"
+            # 4. Extraemos la primera letra de cada palabra en el nombre
+            nombre = datos.get("nombre", "")
+            # split() separa por espacios; palabra[0] toma la primera letra; upper() la hace mayúscula
+            iniciales = "".join([palabra[0].upper() for palabra in nombre.split() if palabra])
+            
+            # 5. Combinamos las iniciales al lado de los números (Resultado: JGJJ286)
+            user_tag = f"CDE_{iniciales}{ultimos_tres}"
+            
+            # NOTA: Si prefieres que lleve un guion en medio (ej. JGJJ-286), cambia la línea de arriba por:
+            # user_tag = f"CDE_{iniciales}-{ultimos_tres}"
+            
+            # O si prefieres los números primero y luego las iniciales (ej. 286JGJJ):
+            # user_tag = f"CDE_{ultimos_tres}{iniciales}"
+            
+        except Exception:
+            # Si algo falla en el proceso, volvemos al valor por defecto
+            user_tag = "CDE_User"
+
+    # 6. Pintamos el resultado en la consola de tu interfaz
+    console.innerText = f"{user_tag}>> trucopagina/TPF/SPYidle/_init_.py loaded correctly"    
+
 
 </script>
 <script>
@@ -680,14 +707,7 @@ const waitForReady = setInterval(() => {
 
 let files = {
     "main.py": `import numpy as np
-import matplotlib.pyplot as plt
-x = np.linspace(0,10,100)
-y = np.sin(x)
-plt.plot(x,y)
-plt.title("Funcion seno")
-plt.show()
-print("Bienvenido al Idle Web")
-print("Centro de Archivos MEX - USA - CAN ´26")`
+import matplotlib.pyplot as plt`
 };
 
 let currentFile = "main.py";
@@ -782,7 +802,6 @@ require(["vs/editor/editor.main"], function () {
             theme: "vs-dark",
             automaticLayout: true,
             acceptSuggestionOnEnter: "off",
-
         minimap:{
             enabled:window.innerWidth > 768
         },
@@ -856,123 +875,68 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(finalizarIntro, 6000); 
 });
 </script>
-<div id="pwa-install-banner" style="
-    display: none; 
-    position: fixed; 
-    bottom: 24px; 
-    left: 50%; 
-    transform: translateX(-50%); 
-    background-color: #1C1917; 
-    color: #EDE8DF; 
-    padding: 16px 20px; 
-    border-radius: 12px; 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4); 
-    z-index: 99999; 
-    font-family: 'DM Sans', sans-serif; 
-    width: 90%; 
-    max-width: 420px; 
-    border: 1px solid rgba(200, 137, 58, 0.3);
-    box-sizing: border-box;
-">
-  <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
-    <p id="pwa-text" style="margin: 0; font-size: 13px; line-height: 1.4; font-family: 'DM Sans', sans-serif;">
-      </p>
-    
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <button id="pwa-btn-install" style="
-          display: none; 
-          background-color: #C8893A; 
-          color: #1C1917; 
-          border: none; 
-          padding: 8px 14px; 
-          border-radius: 6px; 
-          font-weight: 600; 
-          font-size: 12px; 
-          cursor: pointer; 
-          white-space: nowrap;
-          font-family: 'DM Sans', sans-serif;
-          transition: background 0.2s;
-      " onmouseover="this.style.backgroundColor='#b0742f'" onmouseout="this.style.backgroundColor='#C8893A'">
-        Instalar
-      </button>
-      
-      <button id="pwa-btn-close" style="
-          background: transparent; 
-          color: #9A9490; 
-          border: none; 
-          font-size: 18px; 
-          cursor: pointer; 
-          padding: 4px;
-          line-height: 1;
-      " onmouseover="this.style.color='#EDE8DF'" onmouseout="this.style.color='#9A9490'">
-        &times;
-      </button>
-    </div>
-  </div>
+
+<!-- ═══════════════ PWA: banner de instalación (quitable) + Service Worker ═══════════════ -->
+<style>
+#pwa-install-banner{position:fixed;left:50%;bottom:16px;transform:translateX(-50%) translateY(160%);
+  max-width:440px;width:calc(100% - 32px);background:#2a2a2a;color:#f0f0f0;border-radius:14px;
+  padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.45);display:flex;align-items:center;gap:12px;
+  font-family:'Segoe UI',sans-serif;z-index:99999;transition:transform .35s ease;}
+#pwa-install-banner.show{transform:translateX(-50%) translateY(0);}
+#pwa-install-banner p{margin:0;font-size:.85rem;line-height:1.35;flex:1;}
+#pwa-install-banner button{border:none;border-radius:8px;padding:8px 14px;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+#pwa-install-btn{background:#4ea1ff;color:#111;}
+#pwa-dismiss-btn{background:transparent;color:#f0f0f0;opacity:.6;padding:8px;font-size:1rem;line-height:1;}
+#pwa-dismiss-btn:hover{opacity:1;}
+</style>
+<div id="pwa-install-banner" role="dialog" aria-label="Instalar aplicación">
+  <p>📲 Puedes instalar Spyder Web en tu dispositivo y usarlo sin conexión.</p>
+  <button id="pwa-install-btn" type="button">Instalar</button>
+  <button id="pwa-dismiss-btn" type="button" aria-label="Cerrar aviso">✕</button>
 </div>
-
 <script>
-  (function() {
-    let deferredPrompt;
-    const banner = document.getElementById('pwa-install-banner');
-    const pwaText = document.getElementById('pwa-text');
-    const btnInstall = document.getElementById('pwa-btn-install');
-    const btnClose = document.getElementById('pwa-btn-close');
-
-    // 1. Validaciones de entorno y dispositivo
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    // Detecta si ya se está ejecutando como app instalada (standalone)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-    // Verifica si el usuario ya cerró el banner en esta sesión de navegación
-    const isDismissed = sessionStorage.getItem('pwa-prompt-dismissed');
-
-    // Si ya está instalada o el usuario ya lo cerró, no hacemos nada
-    if (isStandalone || isDismissed) return;
-
-    // 2. COMPORTAMIENTO PARA ANDROID / WINDOWS (Navegadores basados en Chromium)
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // Evita que Chrome muestre su mini-infobar automático abajo
-      e.preventDefault();
-      // Guarda el evento para activarlo cuando el usuario dé clic
-      deferredPrompt = e;
-
-      // Configura el banner para Android
-      pwaText.innerHTML = "✨ ¡Instala esta plataforma en tu pantalla de inicio para acceso rápido!";
-      btnInstall.style.display = 'inline-block';
-      banner.style.display = 'block';
+(function(){
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch((err) => console.warn('SW no registrado:', err));
     });
+  }
 
-    // Acción al presionar el botón "Instalar" en Android
-    btnInstall.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      
-      // Muestra la ventana nativa de confirmación de instalación
-      deferredPrompt.prompt();
-      
-      // Espera la respuesta del usuario
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`PWA: El usuario eligió guardar la app: ${outcome}`);
-      
-      // Limpia la variable, ya no se puede reutilizar el mismo evento
-      deferredPrompt = null;
-      banner.style.display = 'none';
-    });
+  const DISMISS_KEY = 'pwa_install_dismissed';
+  let deferredPrompt = null;
+  const banner = document.getElementById('pwa-install-banner');
+  const installBtn = document.getElementById('pwa-install-btn');
+  const dismissBtn = document.getElementById('pwa-dismiss-btn');
 
-    // 3. COMPORTAMIENTO ESPECIAL PARA IPHONE / IPAD (iOS Safari)
-    if (isIOS) {
-      // Modifica el texto con instrucciones específicas de Apple
-      pwaText.innerHTML = "📱 Añade esta app a tu iPhone: toca el botón de <strong>Compartir</strong> <span style='font-size: 15px;'>⎋</span> y luego selecciona <strong>'Agregar al inicio'</strong>.";
-      btnInstall.style.display = 'none'; // iOS no soporta instalación por clic de script
-      banner.style.display = 'block';
-    }
+  function yaFueRechazado(){
+    try { return localStorage.getItem(DISMISS_KEY) === '1'; } catch(e){ return false; }
+  }
+  function estaInstalada(){
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
 
-    // 4. LOGICA PARA CERRAR EL BANNER
-    btnClose.addEventListener('click', () => {
-      banner.style.display = 'none';
-      // Guarda en la memoria del navegador que el usuario lo cerró para no enfadarlo en esta sesión
-      sessionStorage.setItem('pwa-prompt-dismissed', 'true');
-    });
-  })();
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!yaFueRechazado() && !estaInstalada()) banner.classList.add('show');
+  });
+
+  installBtn && installBtn.addEventListener('click', async () => {
+    banner.classList.remove('show');
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  });
+
+  dismissBtn && dismissBtn.addEventListener('click', () => {
+    banner.classList.remove('show');
+    try { localStorage.setItem(DISMISS_KEY, '1'); } catch(e){}
+  });
+
+  window.addEventListener('appinstalled', () => banner.classList.remove('show'));
+})();
 </script>
+
 </body>
 </html>

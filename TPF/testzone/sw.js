@@ -1,67 +1,207 @@
-const CACHE_NAME = 'tpftest-cache-v3';
-const ASSETS = [
-  '/trucopagina/TPF/testzone/TPF.html',
-  '/trucopagina/TPF/testzone/genformevs.html',
-  '/trucopagina/TPF/testzone/SPYidle.html',
-  '/trucopagina/TPF/testzone/manifest.json'
+/* ════════════════════════════════════════════════════════════════
+   SERVICE WORKER — Centro de Recursos Académicos (CDRA App)
+   Objetivo: que la PWA funcione lo más completo posible sin conexión:
+     1) El "app shell" (TPF.html, genformevs.html, SPYidle.html, manifest, íconos)
+     2) El motor de Python de SPYidle (PyScript + Pyodide + paquetes numpy/matplotlib/sympy)
+     3) El editor de código Monaco (SPYidle) y el editor de texto Quill (genformevs)
+     4) El motor de generación/vista previa de .docx (PizZip, JSZip, FileSaver)
+     5) La plantilla .docx que normalmente se descarga de GitHub en cada generación
+     6) Las tipografías de Google Fonts
+   ════════════════════════════════════════════════════════════════ */
+
+const CACHE_VERSION   = 'v4';
+const APP_SHELL_CACHE = `tpf-app-shell-${CACHE_VERSION}`;
+const CDN_CACHE       = `tpf-cdn-libs-${CACHE_VERSION}`;
+const TEMPLATE_CACHE  = `tpf-plantillas-${CACHE_VERSION}`;
+const RUNTIME_CACHE   = `tpf-runtime-${CACHE_VERSION}`;
+
+const TODAS_LAS_CACHES = [APP_SHELL_CACHE, CDN_CACHE, TEMPLATE_CACHE, RUNTIME_CACHE];
+
+// Carpeta donde vive la app (debe coincidir con "scope" del manifest.json)
+const BASE = '/trucopagina/TPF/testzone/';
+
+// 1) Archivos propios de la app. Se guardan uno por uno: si falta un ícono
+//    (por ejemplo porque aún no lo subiste al servidor) NO debe romper la
+//    instalación de todo el Service Worker.
+const APP_SHELL = [
+  BASE,
+  BASE + 'TPF.html',
+  BASE + 'genformevs.html',
+  BASE + 'SPYidle.html',
+  BASE + 'manifest.json',
+  BASE + 'CDA icon.png',
+  BASE + 'CRDA icon.png'
 ];
 
-// Instalar el Service Worker y almacenar los archivos en la caché local
+// 2) Plantilla(s) .docx que normalmente se piden a GitHub en cada clic de
+//    "Generar documento". Al precachearlas, la primera vez que el usuario
+//    abre la app (con internet) quedan guardadas para siempre offline.
+const PLANTILLAS_DOCX = [
+  'https://raw.githubusercontent.com/s12gamer/gxdasnz/main/Formato%20vacio%20form2.docx'
+];
+
+// 3) Hosts de CDN de los que dependen los "motores" de la app:
+//    - pyscript.net              → motor de Python (PyScript) usado en SPYidle
+//    - cdn.jsdelivr.net          → Pyodide/paquetes de Python, Monaco Editor, Quill
+//    - unpkg.com                 → PizZip (motor del generador de .docx)
+//    - cdnjs.cloudflare.com      → JSZip y FileSaver (motor del generador de .docx)
+//    - fonts.googleapis.com/gstatic.com → tipografías
+//    - pypi.org / files.pythonhosted.org → por si Pyodide/PyScript llegan a
+//      resolver paquetes de Python desde ahí
+const CDN_HOSTS = [
+  'pyscript.net',
+  'pyscript.com',
+  'cdn.jsdelivr.net',
+  'unpkg.com',
+  'cdnjs.cloudflare.com',
+  'fonts.googleapis.com',
+  'fonts.gstatic.com',
+  'pypi.org',
+  'files.pythonhosted.org'
+];
+
+/* ────────────────────────────────────────────
+   INSTALACIÓN: precachea todo lo anterior
+──────────────────────────────────────────── */
 self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    }).then(() => self.skipWaiting())
-  );
+  e.waitUntil((async () => {
+    const shellCache = await caches.open(APP_SHELL_CACHE);
+    await Promise.all(APP_SHELL.map(async (url) => {
+      try { await shellCache.add(new Request(url, { cache: 'reload' })); }
+      catch (err) { console.warn('[SW] No se pudo precachear (app shell):', url, err); }
+    }));
+
+    const templateCache = await caches.open(TEMPLATE_CACHE);
+    await Promise.all(PLANTILLAS_DOCX.map(async (url) => {
+      try { await templateCache.add(new Request(url, { mode: 'cors' })); }
+      catch (err) { console.warn('[SW] No se pudo precachear plantilla:', url, err); }
+    }));
+
+    self.skipWaiting();
+  })());
 });
 
-// Activar y remover versiones antiguas de la caché
+/* ────────────────────────────────────────────
+   ACTIVACIÓN: limpia cachés viejas y toma control
+──────────────────────────────────────────── */
 self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
-  );
+  e.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(
+      keys.filter((k) => !TODAS_LAS_CACHES.includes(k)).map((k) => caches.delete(k))
+    );
+    await self.clients.claim();
+  })());
 });
 
-// Estrategia Network-First: Intenta cargar desde internet para ver cambios; si no hay red, usa la caché
-// 3. Intercepción Inteligente (Aquí ocurre la magia para PyScript y Monaco)
-self.addEventListener('fetch', (e) => {
-  const url = e.request.url;
+/* ────────────────────────────────────────────
+   Utilidades
+──────────────────────────────────────────── */
+function esPlantillaDocx(url) {
+  return url.includes('raw.githubusercontent.com');
+}
 
-  // Si la petición va hacia PyScript o el CDN de Monaco Editor
-  if (url.includes('pyscript.net') || url.includes('jsdelivr.net')) {
-    e.respondWith(
-      caches.match(e.request).then((cachedResponse) => {
-        // Si ya lo tenemos guardado en el teléfono, lo entrega al instante sin usar internet
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        
-        // Si no lo tiene, lo descarga de internet, lo clona y lo guarda en la caché para la próxima vez
-        return fetch(e.request).then((networkResponse) => {
-          return caches.open('tpf-external-libs').then((cache) => {
-            cache.put(e.request, networkResponse.clone());
-            return networkResponse;
-          });
-        }).catch(() => {
-          // Si falla internet y no está en caché, devuelve un error limpio
-          return new Response('Error de red offline', { status: 503 });
-        });
-      })
-    );
-  } else {
-    // Para tus archivos locales normales (Estrategia habitual)
-    e.respondWith(
-      fetch(e.request).catch(() => {
-        return caches.match(e.request);
-      })
-    );
+function esCDN(url) {
+  try {
+    const host = new URL(url).host;
+    return CDN_HOSTS.some((h) => host.includes(h));
+  } catch (_) {
+    return false;
   }
+}
+
+// Cache-first + actualización en segundo plano (stale-while-revalidate).
+// Ideal para recursos versionados que casi nunca cambian (librerías, plantilla, fuentes):
+// si ya está en caché se entrega al instante y funciona 100% offline.
+async function cacheFirstConActualizacion(req, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cacheado = await cache.match(req, { ignoreVary: true });
+
+  const actualizarEnSegundoPlano = fetch(req)
+    .then((res) => {
+      if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
+      return res;
+    })
+    .catch(() => null);
+
+  if (cacheado) {
+    actualizarEnSegundoPlano; // no se espera, se actualiza en segundo plano
+    return cacheado;
+  }
+
+  const red = await actualizarEnSegundoPlano;
+  if (red) return red;
+
+  return new Response('Recurso no disponible sin conexión.', {
+    status: 503,
+    statusText: 'Offline',
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+  });
+}
+
+// Network-first con respaldo en caché. Ideal para los .html propios de la app:
+// si hay internet, siempre se ve la versión más reciente; si no hay internet,
+// se sirve la última copia guardada (y se refresca la caché cuando sí hay red).
+async function networkFirstConRespaldo(req, cacheName) {
+  const cache = await caches.open(cacheName);
+  try {
+    const res = await fetch(req);
+    if (res && res.ok) cache.put(req, res.clone());
+    return res;
+  } catch (err) {
+    const cacheado = await cache.match(req, { ignoreSearch: true });
+    if (cacheado) return cacheado;
+
+    // Si es una navegación (el usuario abrió/recargó una página) y no hay nada
+    // en caché para esa URL exacta, al menos abrimos la app por su entrada principal.
+    if (req.mode === 'navigate') {
+      const inicio = await cache.match(BASE + 'TPF.html');
+      if (inicio) return inicio;
+    }
+
+    return new Response('Sin conexión y sin copia guardada de este archivo.', {
+      status: 503,
+      statusText: 'Offline',
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+    });
+  }
+}
+
+/* ────────────────────────────────────────────
+   INTERCEPCIÓN DE PETICIONES
+──────────────────────────────────────────── */
+self.addEventListener('fetch', (e) => {
+  const req = e.request;
+
+  // Solo interceptamos lecturas (GET). Todo lo demás (POST, etc.) va directo a la red.
+  if (req.method !== 'GET') return;
+
+  const url = req.url;
+
+  // 1) Plantilla(s) .docx de GitHub → cache-first: si ya la tenemos guardada,
+  //    NUNCA se vuelve a pedir a GitHub salvo para refrescarla en segundo plano.
+  if (esPlantillaDocx(url)) {
+    e.respondWith(cacheFirstConActualizacion(req, TEMPLATE_CACHE));
+    return;
+  }
+
+  // 2) Motores/librerías externas: PyScript, Pyodide y sus paquetes de Python,
+  //    Monaco Editor, Quill, PizZip, JSZip, FileSaver, Google Fonts.
+  if (esCDN(url)) {
+    e.respondWith(cacheFirstConActualizacion(req, CDN_CACHE));
+    return;
+  }
+
+  // 3) Archivos propios de la app (TPF.html, genformevs.html, SPYidle.html, manifest, íconos...)
+  const esMismoOrigen = url.startsWith(self.location.origin);
+  if (esMismoOrigen) {
+    e.respondWith(networkFirstConRespaldo(req, APP_SHELL_CACHE));
+    return;
+  }
+
+  // 4) Cualquier otro recurso externo (por ejemplo, imágenes o archivos sueltos
+  //    que la app llegue a pedir): se intenta guardar también para que, si el
+  //    usuario ya lo abrió una vez con internet, quede disponible después.
+  e.respondWith(cacheFirstConActualizacion(req, RUNTIME_CACHE));
+  
 });

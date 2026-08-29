@@ -1,6 +1,9 @@
 {
+  "id": "/trucopagina/TPF/testzone/TPF.html",
   "name": "Centro de Recursos Académicos",
   "short_name": "CDRA App",
+  "description": "Centro de Recursos Académicos: generador de formatos, editor de código Python (SPYidle) y generador de documentos, disponible sin conexión.",
+  "lang": "es-MX",
   "start_url": "/trucopagina/TPF/testzone/TPF.html",
   "scope": "/trucopagina/TPF/testzone/",
   "display": "standalone",
@@ -11,12 +14,26 @@
     {
       "src": "CDA icon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "CDA icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "CRDA icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "CRDA icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
