@@ -11,8 +11,23 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CDRA App">
-<link rel="apple-touch-icon" href="CRDA icon.png">
-<link rel="icon" href="CDA icon.png">
+<link rel="apple-touch-icon" href="CRDA ICO.png">
+<link rel="icon" href="CDA ICO.png">
+
+<!-- ═══ OneSignal: SDK de notificaciones push (mismo App ID que TPF.html) ═══ -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function (OneSignal) {
+    await OneSignal.init({
+      appId: '387e44d8-7f65-4180-9faa-ed312429932a',
+      serviceWorkerPath: 'sw.js',
+      serviceWorkerParam: { scope: '/trucopagina/TPF/testzone/' },
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true
+    });
+  });
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

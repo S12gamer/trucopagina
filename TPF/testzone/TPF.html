@@ -11,8 +11,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="CDRA App"/>
-  <link rel="apple-touch-icon" href="CRDA icon.png"/>
-  <link rel="icon" href="CDA icon.png"/>
+  <link rel="apple-touch-icon" href="CRDA ICO.png"/>
+  <link rel="icon" href="CDA ICO.png"/>
+
+  <!-- ═══ OneSignal: SDK de notificaciones push ═══ -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
   <style>
@@ -2249,12 +2252,16 @@ function refreshBackground(pageId){
 #pwa-install-btn{background:#C8893A;color:#1C1917;}
 #pwa-dismiss-btn{background:transparent;color:#EDE8DF;opacity:.6;padding:8px;font-size:1rem;line-height:1;}
 #pwa-dismiss-btn:hover{opacity:1;}
+#pwa-notify-btn{position:fixed;right:18px;bottom:18px;z-index:99998;width:52px;height:52px;border-radius:50%;
+  border:none;background:#1C1917;color:#EDE8DF;font-size:1.3rem;box-shadow:0 6px 18px rgba(0,0,0,.35);cursor:pointer;}
+#pwa-notify-btn.activo{background:#2A6545;}
 </style>
 <div id="pwa-install-banner" role="dialog" aria-label="Instalar aplicación">
   <p>📲 Puedes instalar el Centro de Recursos Académicos en tu dispositivo y usarlo sin conexión.</p>
   <button id="pwa-install-btn" type="button">Instalar</button>
   <button id="pwa-dismiss-btn" type="button" aria-label="Cerrar aviso">✕</button>
 </div>
+<button id="pwa-notify-btn" type="button" title="Activar notificaciones">🔔</button>
 <script>
 (function(){
   if ('serviceWorker' in navigator) {
@@ -2297,6 +2304,51 @@ function refreshBackground(pageId){
 
   window.addEventListener('appinstalled', () => banner.classList.remove('show'));
 })();
+</script>
+
+<!-- ═══════════════ PUSH NOTIFICATIONS: OneSignal ═══════════════
+     Sistema activo por ahora (fácil de usar con pocos usuarios).
+     El sistema propio con VAPID queda listo pero DESACTIVADO en
+     /backend (ver README.md) para cuando decidas migrar más adelante. -->
+<script>
+  // ⚠️ Reemplaza esto con tu App ID real (Settings → Keys & IDs en OneSignal)
+  const ONESIGNAL_APP_ID = '387e44d8-7f65-4180-9faa-ed312429932a';
+
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function (OneSignal) {
+    await OneSignal.init({
+      appId: ONESIGNAL_APP_ID,
+      serviceWorkerPath: 'sw.js',
+      serviceWorkerParam: { scope: '/trucopagina/TPF/testzone/' },
+      notifyButton: { enable: false }, // usamos nuestro propio botón 🔔
+      allowLocalhostAsSecureOrigin: true // útil si pruebas en localhost
+    });
+
+    const btn = document.getElementById('pwa-notify-btn');
+    if (!btn) return;
+
+    function actualizarBoton() {
+      const activo = OneSignal.User.PushSubscription.optedIn;
+      btn.classList.toggle('activo', !!activo);
+      btn.title = activo ? 'Notificaciones activadas (clic para desactivar)' : 'Activar notificaciones';
+    }
+
+    actualizarBoton();
+    OneSignal.User.PushSubscription.addEventListener('change', actualizarBoton);
+
+    btn.addEventListener('click', async () => {
+      try {
+        if (OneSignal.User.PushSubscription.optedIn) {
+          await OneSignal.User.PushSubscription.optOut();
+        } else {
+          await OneSignal.Notifications.requestPermission();
+          await OneSignal.User.PushSubscription.optIn();
+        }
+      } catch (err) {
+        console.warn('No se pudo cambiar el estado de la suscripción:', err);
+      }
+    });
+  });
 </script>
 
 </body>
