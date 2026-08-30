@@ -2321,7 +2321,7 @@ function refreshBackground(pageId){
       serviceWorkerPath: 'sw.js',
       serviceWorkerParam: { scope: '/trucopagina/TPF/testzone/' },
       notifyButton: { enable: false }, // usamos nuestro propio botón 🔔
-      allowLocalhostAsSecureOrigin: true // útil si pruebas en localhost
+      allowLocalhostAsSecureOrigin: false // útil si pruebas en localhost
     });
 
     const btn = document.getElementById('pwa-notify-btn');

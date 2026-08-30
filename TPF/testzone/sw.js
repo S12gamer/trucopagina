@@ -1,3 +1,9 @@
+/* ═══ OneSignal: combinamos su Service Worker con el nuestro ═══
+   Esto hace que OneSignal maneje sus propios eventos push/notificationclick
+   dentro de este mismo archivo, sin necesidad de un segundo Service Worker
+   (que causaría conflicto de "scope" con el nuestro). */
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
+
 /* ════════════════════════════════════════════════════════════════
    SERVICE WORKER — Centro de Recursos Académicos (CDRA App)
    Objetivo: que la PWA funcione lo más completo posible sin conexión:
@@ -203,5 +209,89 @@ self.addEventListener('fetch', (e) => {
   //    que la app llegue a pedir): se intenta guardar también para que, si el
   //    usuario ya lo abrió una vez con internet, quede disponible después.
   e.respondWith(cacheFirstConActualizacion(req, RUNTIME_CACHE));
-  
 });
+
+/* ════════════════════════════════════════════════════════════════
+   PUSH NOTIFICATIONS — SISTEMA PROPIO (VAPID) — DESACTIVADO
+   ─────────────────────────────────────────────────────────────
+   Mientras uses OneSignal (ver /backend/README.md para cuándo migrar),
+   este bloque debe quedar COMENTADO: OneSignal ya registra sus propios
+   listeners "push" y "notificationclick" (los trae el importScripts de
+   arriba). Si activas ambos a la vez, cada notificación push se mostraría
+   DOBLE (una vez por cada listener) y con formatos distintos.
+
+   Para migrar de OneSignal a tu propio backend VAPID más adelante:
+     1) Quita la línea "importScripts(...OneSignalSDK.sw.js...)" de arriba.
+     2) Descomenta todo este bloque.
+     3) Sigue /backend/README.md para desplegar tu backend propio.
+     4) En cada HTML, quita el <script> de OneSignal y usa de nuevo el
+        bloque "PUSH NOTIFICATIONS: suscripción del navegador" con VAPID.
+   ════════════════════════════════════════════════════════════════
+
+// Endpoint de tu backend para re-registrar la suscripción si el navegador
+// la invalida (poco frecuente, pero es buena práctica manejarlo).
+// Reemplaza esta URL por la de tu backend cuando lo despliegues.
+const NOTIFY_BACKEND_URL = 'https://TU-BACKEND.vercel.app';
+
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (err) {
+    data = { title: 'Centro de Recursos Académicos', body: event.data ? event.data.text() : '' };
+  }
+
+  const titulo = data.title || 'Centro de Recursos Académicos';
+  const opciones = {
+    body: data.body || '',
+    icon: data.icon || (BASE + 'CDA icon.png'),
+    badge: data.badge || (BASE + 'CDA icon.png'),
+    image: data.image || undefined,
+    tag: data.tag || 'cdra-notificacion',
+    renotify: !!data.tag,
+    data: { url: data.url || (BASE + 'TPF.html') },
+    actions: Array.isArray(data.actions) ? data.actions : []
+  };
+
+  event.waitUntil(self.registration.showNotification(titulo, opciones));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  const accion = event.action; // '' si se hizo clic en el cuerpo, o el id del botón
+  event.notification.close();
+
+  if (accion === 'cerrar') return; // el usuario solo quería descartarla
+
+  const destino = (event.notification.data && event.notification.data.url) || (BASE + 'TPF.html');
+
+  event.waitUntil((async () => {
+    const clientesAbiertos = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of clientesAbiertos) {
+      if (c.url.startsWith(self.location.origin) && 'focus' in c) {
+        await c.focus();
+        if ('navigate' in c) return c.navigate(destino);
+        return;
+      }
+    }
+    return clients.openWindow(destino);
+  })());
+});
+
+// Si el navegador invalida la suscripción (raro, pero ocurre), se re-suscribe
+// automáticamente y avisa al backend para que actualice sus datos.
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil((async () => {
+    try {
+      const nuevaSub = await self.registration.pushManager.subscribe(event.oldSubscription.options);
+      await fetch(NOTIFY_BACKEND_URL + '/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevaSub)
+      });
+    } catch (err) {
+      console.warn('[SW] No se pudo renovar la suscripción push:', err);
+    }
+  })());
+});
+
+════════════════════════════════════════════════════════════════ */
