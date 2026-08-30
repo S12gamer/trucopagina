@@ -12,25 +12,25 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "CDA icon.png",
+      "src": "CDA ICO.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "CDA icon.png",
+      "src": "CDA ICO.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "CRDA icon.png",
+      "src": "CRDA ICO.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "CRDA icon.png",
+      "src": "CRDA ICO.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
