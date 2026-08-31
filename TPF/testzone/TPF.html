@@ -2318,10 +2318,10 @@ function refreshBackground(pageId){
   OneSignalDeferred.push(async function (OneSignal) {
     await OneSignal.init({
       appId: ONESIGNAL_APP_ID,
-      serviceWorkerPath: 'sw.js',
+      serviceWorkerPath: 'trucopagina/TPF/testzone/sw.js',
       serviceWorkerParam: { scope: '/trucopagina/TPF/testzone/' },
       notifyButton: { enable: false }, // usamos nuestro propio botón 🔔
-      allowLocalhostAsSecureOrigin: false // útil si pruebas en localhost
+      allowLocalhostAsSecureOrigin: true // útil si pruebas en localhost
     });
 
     const btn = document.getElementById('pwa-notify-btn');
