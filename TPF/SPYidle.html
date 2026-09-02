@@ -5,6 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Spyder Web v1.0 Beta</title>
 
+<!-- ═══ PWA: instalación y funcionamiento sin conexión ═══ -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1C1917">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CDRA App">
+<link rel="apple-touch-icon" href="CRDA ICO.png">
+<link rel="icon" href="CDA ICO.png">
+
+<!-- ═══ OneSignal: SDK de notificaciones push (mismo App ID que TPF.html) ═══ -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function (OneSignal) {
+    await OneSignal.init({
+      appId: '387e44d8-7f65-4180-9faa-ed312429932a',
+      serviceWorkerPath: 'trucopagina/TPF/testzone/sw.js',
+      serviceWorkerParam: { scope: '/trucopagina/TPF/testzone/' },
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true
+    });
+  });
+</script>
+
 <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css"/>
 
@@ -360,7 +384,7 @@ function hideLoader(){
 <button id="save">PNG</button>
 <button id="copy">Copiar</button>
 <button onclick="savePy()">Descargar .py</button>
-<a href="https://s12gamer.github.io/trucopagina/TPF/TPF.html" target="_blank" class="nav-link-btn">
+<a href="TPF.html" class="nav-link-btn">
     <span class="dot dot-green"></span> Centro de Archivos
 </a>
 <h3>Gráficas</h3>
@@ -865,6 +889,68 @@ document.addEventListener("DOMContentLoaded", () => {
   // Mecanismo de seguridad por si falla el video
   setTimeout(finalizarIntro, 6000); 
 });
+</script>
+
+<!-- ═══════════════ PWA: banner de instalación (quitable) + Service Worker ═══════════════ -->
+<style>
+#pwa-install-banner{position:fixed;left:50%;bottom:16px;transform:translateX(-50%) translateY(160%);
+  max-width:440px;width:calc(100% - 32px);background:#2a2a2a;color:#f0f0f0;border-radius:14px;
+  padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.45);display:flex;align-items:center;gap:12px;
+  font-family:'Segoe UI',sans-serif;z-index:99999;transition:transform .35s ease;}
+#pwa-install-banner.show{transform:translateX(-50%) translateY(0);}
+#pwa-install-banner p{margin:0;font-size:.85rem;line-height:1.35;flex:1;}
+#pwa-install-banner button{border:none;border-radius:8px;padding:8px 14px;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+#pwa-install-btn{background:#4ea1ff;color:#111;}
+#pwa-dismiss-btn{background:transparent;color:#f0f0f0;opacity:.6;padding:8px;font-size:1rem;line-height:1;}
+#pwa-dismiss-btn:hover{opacity:1;}
+</style>
+<div id="pwa-install-banner" role="dialog" aria-label="Instalar aplicación">
+  <p>📲 Puedes instalar Spyder Web en tu dispositivo y usarlo sin conexión.</p>
+  <button id="pwa-install-btn" type="button">Instalar</button>
+  <button id="pwa-dismiss-btn" type="button" aria-label="Cerrar aviso">✕</button>
+</div>
+<script>
+(function(){
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch((err) => console.warn('SW no registrado:', err));
+    });
+  }
+
+  const DISMISS_KEY = 'pwa_install_dismissed';
+  let deferredPrompt = null;
+  const banner = document.getElementById('pwa-install-banner');
+  const installBtn = document.getElementById('pwa-install-btn');
+  const dismissBtn = document.getElementById('pwa-dismiss-btn');
+
+  function yaFueRechazado(){
+    try { return localStorage.getItem(DISMISS_KEY) === '1'; } catch(e){ return false; }
+  }
+  function estaInstalada(){
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!yaFueRechazado() && !estaInstalada()) banner.classList.add('show');
+  });
+
+  installBtn && installBtn.addEventListener('click', async () => {
+    banner.classList.remove('show');
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  });
+
+  dismissBtn && dismissBtn.addEventListener('click', () => {
+    banner.classList.remove('show');
+    try { localStorage.setItem(DISMISS_KEY, '1'); } catch(e){}
+  });
+
+  window.addEventListener('appinstalled', () => banner.classList.remove('show'));
+})();
 </script>
 
 </body>

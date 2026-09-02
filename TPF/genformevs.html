@@ -3,670 +3,2682 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generador · FO-205P11000-14</title>
+<title>Generador · Personalizado</title>
+
+<!-- ═══ PWA: instalación y funcionamiento sin conexión ═══ -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1C1917">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CDRA App">
+<link rel="apple-touch-icon" href="CRDA ICO.png">
+<link rel="icon" href="CDA ICO.png">
+
+<!-- ═══ OneSignal: SDK de notificaciones push (mismo App ID que TPF.html) ═══ -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function (OneSignal) {
+    await OneSignal.init({
+      appId: '387e44d8-7f65-4180-9faa-ed312429932a',
+      serviceWorkerPath: 'trucopagina/TPF/testzone/sw.js',
+      serviceWorkerParam: { scope: '/trucopagina/TPF/testzone/' },
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true
+    });
+  });
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Quill Editor Assets (Importados del Word Complex Test) -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --ink:#0f0e0c;
-  --paper:#f7f4ee;
-  --cream:#ede9df;
-  --warm:#d4c9a8;
-  --accent:#b85c20;
-  --accent2:#1d4e4a;
-  --accent2-light:#e8f0ef;
-  --gold:#c9972a;
-  --border:#c8c0a8;
-  --text2:#5a5446;
-  --text3:#9a9080;
-  --success:#1d4e4a;
-  --success-bg:#e8f0ef;
-  --error:#8b2020;
-  --error-bg:#fdf0f0;
-  --r:6px;
-  --r2:12px;
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════ */
+:root {
+  --bg: #EDE8DF; 
+  --surface: #FAF8F4; 
+  --surface-2: #F4F0E8;
+  --ink: #1C1917; 
+  --ink-m: #5C5751; 
+  --ink-faint: #9A9490;
+  --sidebar: #1C1917;
+  
+  --amber: #C8893A; --amber-l: rgba(200,137,58,.14);
+  --teal: #1B7A6E;   --teal-l: rgba(27,122,110,.12);
+  --rust: #923A28;   --rust-l: rgba(146,58,40,.12);
+  --green: #2A6545;  --green-l: rgba(42,101,69,.12);
+  --purple: #5B3E8F; --purple-l: rgba(91,62,143,.12);
+  
+  --sh-s: 0 2px 8px rgba(28,25,23,.07);
+  --sh-m: 0 8px 28px rgba(28,25,23,.12);
+  --sh-l: 0 24px 56px rgba(28,25,23,.18);
+  
+  --r-s: 8px; --r-m: 14px; --r-l: 20px;
+  
+  --spring: cubic-bezier(.34,1.56,.64,1);
+  --smooth: cubic-bezier(.4,0,.2,1);
 }
-/* ── INTRO DE VIDEO EN PANTALLA COMPLETA ── */
-    #video-intro {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: #000000; /* Fondo negro absoluto mientras carga o se reproduce */
-      z-index: 999999; /* Se sitúa por encima de barras de navegación, fondos y pop-ups */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.8s ease-out, visibility 0.8s ease-out; /* Transición suave de fundido */
-      opacity: 1;
-      visibility: visible;
-    }
 
-    #intro-video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover; /* El video llena la pantalla de forma fluida sin estirarse */
-      pointer-events: none; /* Bloquea clics, doble clics y clic derecho (así no se puede pausar) */
-    }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Clase que activará el JavaScript para hacer el fundido hacia la web */
-    #video-intro.fade-out {
-      opacity: 0;
-      visibility: hidden;
-    }
-    /* Contenedor del fondo aleatorio */
-    #worldcup-bg {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      z-index: 0; /* Cambiado a 0 para que no se esconda detrás del body */
-      pointer-events: none; overflow: hidden;
-    }
-html{font-size:16px;overscroll-behavior-y: none; /* Bloquea el rebote elástico en el eje vertical */}
-body{
-  font-family:'Fraunces',Georgia,serif;
-  background:var(--paper);
-  color:var(--ink);
-  min-height:100vh;
-  padding-bottom:4rem;
+html, body {
+  overscroll-behavior-y: none;
 }
-.Layout {
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-bottom: 4rem;
+}
+
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: .45;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  overscroll-behavior-y: none;
+}
+
+/* ── HEADER SUPERIOR ── */
+.site-header {
+  background: var(--sidebar);
+  color: #fff;
+  padding: 2.5rem 2rem 2rem;
   position: relative;
-  z-index: 1; /* Al ser mayor que 0, se posiciona por encima de las figuras animadas */
+  overflow: hidden;
+  border-bottom: 3px solid var(--amber);
 }
-/* ── HEADER ── */
-.site-header{
-  background:var(--ink);
-  color:var(--paper);
-  padding:1.5rem 1.25rem 1.25rem;
-  position:relative;
-  overflow:hidden;
+.site-header::after {
+  content: ''; position: absolute; top: 0; right: 0; width: 30%; height: 100%;
+  background: radial-gradient(circle at top right, rgba(200,137,58,.15), transparent 70%);
+  pointer-events: none;
 }
-.site-header::before{
-  content:'';
-  position:absolute;inset:0;
-  background:repeating-linear-gradient(
-    45deg,
-    transparent,transparent 20px,
-    rgba(255,255,255,.025) 20px,rgba(255,255,255,.025) 21px
-  );
-  pointer-events:none;
+.header-badge {
+  display: inline-block;
+  font-size: .65rem; font-weight: 700; letter-spacing: .12em;
+  color: var(--amber); text-transform: uppercase;
+  background: var(--amber-l); padding: 4px 12px; border-radius: 20px;
+  margin-bottom: 1rem;
 }
-.header-badge{
-  display:inline-block;
-  font-family:'DM Mono',monospace;
-  font-size:10px;letter-spacing:.12em;
-  color:var(--gold);border:1px solid var(--gold);
-  padding:3px 10px;border-radius:99px;margin-bottom:.75rem;
-  text-transform:uppercase;
+.site-header h1 {
+  font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; line-height: 1.2;
 }
-.site-header h1{
-  font-size:clamp(1.4rem,5vw,2rem);
-  font-weight:600;line-height:1.15;
-  font-style:italic;
-  color:#fff;
-}
-.site-header p{
-  font-family:'DM Mono',monospace;
-  font-size:11px;color:rgba(255,255,255,.45);
-  margin-top:.5rem;letter-spacing:.04em;
+.site-header p {
+  font-size: .9rem; color: rgba(255,255,255,.6); margin-top: .5rem; font-weight: 300;
 }
 
-/* ── LAYOUT ── */
-.wrap{max-width:620px;margin:0 auto;padding:0 1rem}
+/* ── LAYOUT PRINCIPAL ── */
+.layout-wrapper {
+  max-width: 1100px;
+  margin: -2rem auto 0;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2rem;
+  align-items: start;
+  position: relative;
+  z-index: 10;
+}
 
 /* ── STEPPER ── */
-.steps{
-  display:flex;gap:0;
-  margin:1.5rem 0 .5rem;
-  border:1px solid var(--border);
-  border-radius:var(--r2);
-  overflow:hidden;
-  background:var(--cream);
+.steps {
+  display: flex; gap: 8px;
+  margin-bottom: 2rem;
+  background: var(--surface); padding: 8px; border-radius: var(--r-m);
+  box-shadow: var(--sh-s); border: 1px solid rgba(200,137,58,.1);
 }
-.step{
-  flex:1;padding:.55rem .25rem;text-align:center;
-  font-family:'DM Mono',monospace;font-size:10px;
-  letter-spacing:.06em;color:var(--text3);
-  border-right:1px solid var(--border);
-  transition:all .2s;cursor:default;
-  position:relative;
+.step {
+  flex: 1; padding: .6rem .25rem; text-align: center;
+  font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-faint); background: transparent; border-radius: var(--r-s);
+  transition: all .3s var(--spring);
 }
-.step:last-child{border-right:none}
-.step.active{background:var(--ink);color:#fff}
-.step.done{background:var(--accent2);color:#fff}
-.step span{display:block;font-size:16px;margin-bottom:1px}
+.step.active { background: var(--amber-l); color: var(--amber); }
+.step.done { background: var(--teal-l); color: var(--teal); }
+.step span { display: block; font-size: 1.1rem; margin-bottom: 4px; font-weight: 700; }
 
-/* ── CARD ── */
-.card{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:var(--r2);
-  padding:1.25rem;
-  margin-bottom:1rem;
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1.5px solid rgba(200,137,58,.1);
+  border-radius: var(--r-m);
+  padding: 1.8rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--sh-s);
+  transition: box-shadow .3s, border-color .3s;
 }
-.card-title{
-  font-family:'DM Mono',monospace;
-  font-size:10px;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--text3);
-  margin-bottom:1rem;
-  display:flex;align-items:center;gap:8px;
+.card:hover { box-shadow: var(--sh-m); border-color: rgba(200,137,58,.2); }
+.card-title {
+  font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700;
+  color: var(--ink); margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 12px;
 }
-.card-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.card-title::after { content: ''; flex: 1; height: 1px; background: rgba(200,137,58,.15); }
 
-/* ── FIELDS ── */
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.grid1{display:grid;grid-template-columns:1fr;gap:10px}
-.field{display:flex;flex-direction:column;gap:5px}
-.field label{
-  font-family:'DM Mono',monospace;
-  font-size:11px;letter-spacing:.05em;
-  color:var(--text2);
+/* ── INPUTS Y CAMPOS ── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid1 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-m);
 }
-.field input,.field select,.field textarea{
-  padding:10px 12px;
-  border:1px solid var(--border);
-  border-radius:var(--r);
-  font-size:14px;font-family:'Fraunces',serif;
-  color:var(--ink);background:var(--paper);
-  outline:none;transition:border-color .15s,box-shadow .15s;
-  appearance:none;-webkit-appearance:none;
+.field input, .field select, .field textarea {
+  padding: 12px 14px;
+  border: 1.5px solid rgba(28,25,23,.1);
+  border-radius: var(--r-s);
+  font-family: 'DM Sans', sans-serif; font-size: .9rem;
+  color: var(--ink); background: var(--surface-2);
+  outline: none; transition: border-color .2s, box-shadow .2s, background .2s;
+  width: 100%;
 }
-.field input:focus,.field select:focus,.field textarea:focus{
-  border-color:var(--accent2);
-  box-shadow:0 0 0 3px rgba(29,78,74,.12);
-  background:#fff;
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--amber); background: #fff;
+  box-shadow: 0 0 0 4px var(--amber-l);
 }
-.field textarea{resize:vertical;min-height:72px;line-height:1.55}
-.field select{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 12px center;
-  padding-right:36px;cursor:pointer;
+.field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9080' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  padding-right: 40px; cursor: pointer; font-weight: 500;
+}
+
+/* ── EDITOR DE TEXTO (QUILL) ── */
+#editor_wrapper {
+  margin-top: 1rem;
+}
+#editor-container {
+  height: 250px;
+  background: #fff;
+  border-radius: 0 0 var(--r-s) var(--r-s);
+  border: 1.5px solid rgba(28,25,23,.1);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+}
+.ql-toolbar.ql-snow {
+  border: 1.5px solid rgba(28,25,23,.1) !important;
+  border-bottom: none !important;
+  border-radius: var(--r-s) var(--r-s) 0 0;
+  background: var(--surface-2);
+}
+.ql-container.ql-snow {
+  border: 1.5px solid rgba(28,25,23,.1) !important;
+  border-radius: 0 0 var(--r-s) var(--r-s);
+}
+/* Estilos específicos para el contenido dentro de Quill */
+.ql-editor {
+    font-family: 'DM Sans', sans-serif; /* O Gotham Book, la que prefieras */
+    font-size: 14px; /* Tamaño del texto normal (párrafos) */
+    line-height: 1.6;
+}
+
+/* Hacer que los títulos h3 destaquen visualmente */
+.ql-editor h3 {
+    font-size: 18px !important; /* Tamaño más grande para distinguir el título */
+    font-weight: bold !important;
+    color: var(--ink, #000); /* Usa tu variable de color oscuro */
+    margin-top: 16px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(0,0,0,0.1); /* Opcional: una línea sutil abajo */
+}
+
+/* Asegurar que las negritas se vean gruesas */
+.ql-editor strong, .ql-editor b {
+    font-weight: 700 !important;
+}
+
+/* Dar espacio a las listas */
+.ql-editor ul, .ql-editor ol {
+    margin-bottom: 12px;
 }
 
 /* ── COMPETENCIA GRID ── */
-.comp-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(64px,1fr));
-  gap:8px;
-  margin-top:4px;
+.comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 10px; }
+.comp-btn {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 700;
+  border: 1.5px solid rgba(28,25,23,.1); border-radius: var(--r-s);
+  background: var(--surface-2); color: var(--ink-m);
+  cursor: pointer; transition: all .2s var(--spring); user-select: none;
 }
-.comp-btn{
-  aspect-ratio:1;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Fraunces',serif;font-size:1.3rem;font-weight:600;
-  border:1.5px solid var(--border);border-radius:var(--r);
-  background:var(--paper);color:var(--text2);
-  cursor:pointer;transition:all .15s;
-  user-select:none;
-}
-.comp-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--cream)}
-.comp-btn.active{
-  background:var(--accent);color:#fff;
-  border-color:var(--accent);
-  box-shadow:0 3px 12px rgba(184,92,32,.3);
+.comp-btn:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-l); transform: translateY(-2px); }
+.comp-btn.active {
+  background: var(--amber); color: #fff; border-color: var(--amber);
+  box-shadow: 0 4px 12px rgba(200,137,58,.35); transform: translateY(-2px) scale(1.05);
 }
 
 /* ── INDICADORES ── */
-.ind-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.ind-btn{
-  padding:10px 0;
-  min-width:48px;flex:1;
-  font-family:'Fraunces',serif;font-size:1rem;font-weight:600;
-  border:1.5px solid var(--border);border-radius:var(--r);
-  background:var(--paper);color:var(--text2);
-  cursor:pointer;transition:all .15s;text-align:center;
-  user-select:none;
+.ind-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.ind-btn {
+  flex: 1; min-width: 45px; padding: 12px 0;
+  font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 700;
+  border: 1.5px solid rgba(28,25,23,.1); border-radius: var(--r-s);
+  background: var(--surface-2); color: var(--ink-m);
+  cursor: pointer; transition: all .2s var(--spring); text-align: center; user-select: none;
 }
-.ind-btn:hover{border-color:var(--accent2);color:var(--accent2);background:var(--accent2-light)}
-.ind-btn.active{
-  background:var(--accent2);color:#fff;
-  border-color:var(--accent2);
-  box-shadow:0 3px 10px rgba(29,78,74,.25);
+.ind-btn:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-l); transform: translateY(-2px); }
+.ind-btn.active {
+  background: var(--teal); color: #fff; border-color: var(--teal);
+  box-shadow: 0 4px 12px rgba(27,122,110,.35); transform: translateY(-2px) scale(1.05);
 }
 
-/* ── DESCRIPCION PREVIEW ── */
-.desc-preview{
-  margin-top:10px;padding:12px 14px;
-  background:var(--cream);border-left:3px solid var(--accent);
-  border-radius:0 var(--r) var(--r) 0;
-  font-size:13px;line-height:1.6;color:var(--text2);
-  display:none;
+.desc-preview {
+  margin-top: 1rem; padding: 1rem 1.2rem;
+  background: var(--amber-l); border-left: 4px solid var(--amber);
+  border-radius: 0 var(--r-s) var(--r-s) 0;
+  font-size: .9rem; line-height: 1.6; color: var(--ink); font-weight: 500;
+  display: none; animation: fadeIn .4s var(--smooth);
 }
-.desc-preview.show{display:block}
+.desc-preview.show { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
 
-/* ── GENERATE BTN ── */
-.generate-btn{
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  width:100%;max-width:620px;margin:0 auto;
-  padding:16px;
-  background:var(--ink);color:var(--paper);
-  border:none;border-radius:var(--r2);
-  font-family:'Fraunces',serif;font-size:1.05rem;font-style:italic;font-weight:600;
-  cursor:pointer;transition:opacity .15s,transform .1s;
-  letter-spacing:.01em;
+/* ── COLUMNA LATERAL (Sidebar Herramientas) ── */
+.sidebar-tools { display: flex; flex-direction: column; gap: 1.5rem; }
+
+/* ── PANEL GESTOR DE MATERIAS ── */
+.custom-mat-panel {
+  background: var(--surface); border: 1.5px solid rgba(91,62,143,.25);
+  border-radius: var(--r-m); box-shadow: var(--sh-m); overflow: hidden;
+  transition: box-shadow .3s;
 }
-.generate-btn:hover{opacity:.85}
-.generate-btn:active{transform:scale(.985)}
-.generate-btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-icon{font-style:normal;font-size:1.2rem}
+.custom-mat-panel:hover { box-shadow: var(--sh-l); }
+.custom-mat-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 1.2rem; background: linear-gradient(135deg, var(--purple), #7B52C4);
+  color: #fff; cursor: pointer; user-select: none;
+}
+.custom-mat-header .cm-icon { font-size: 1.3rem; }
+.custom-mat-header h3 { font-size: .9rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin:0; }
+.custom-mat-header .cm-arrow { margin-left: auto; font-size: 1.2rem; transition: transform .3s var(--spring); }
+.custom-mat-panel.open .cm-arrow { transform: rotate(180deg); }
+
+.custom-mat-body { display: none; padding: 1.2rem; background: var(--surface); }
+.custom-mat-panel.open .custom-mat-body { display: block; animation: fadeIn .3s ease-out; }
+
+.saved-materias-grid { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 10px; 
+  margin-bottom: 1rem; 
+  max-height: 220px;          
+  overflow-y: auto;           
+  padding-right: 6px;         
+}
+.saved-materias-grid::-webkit-scrollbar { width: 4px; }
+.saved-materias-grid::-webkit-scrollbar-thumb { background: rgba(91,62,143,.2); border-radius: 4px; }
+
+.saved-materia-card {
+  background: #fff; border: 1px solid rgba(28,25,23,.1);
+  border-radius: var(--r-s); padding: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  box-shadow: var(--sh-s);
+}
+.saved-materia-card:hover {
+  border-color: var(--purple);
+  background: var(--purple-l);
+  box-shadow: var(--sh-m);
+}
+.saved-materia-card h4 { font-size: .9rem; color: var(--ink); font-weight: 700; margin: 0; }
+.smc-actions { display: flex; gap: 6px; }
+.smc-btn {
+  flex: 1; padding: 6px; border-radius: 4px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: .75rem; font-weight: 600; cursor: pointer;
+  transition: all .2s; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.smc-btn.edit { background: var(--teal-l); color: var(--teal); }
+.smc-btn.edit:hover { background: var(--teal); color: #fff; }
+.smc-btn.export { background: var(--amber-l); color: var(--amber); }
+.smc-btn.export:hover { background: var(--amber); color: #fff; }
+.smc-btn.delete { background: var(--rust-l); color: var(--rust); }
+.smc-btn.delete:hover { background: var(--rust); color: #fff; }
+
+.cm-actions { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid rgba(28,25,23,.1); padding-top: 1rem; }
+.cm-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 14px; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  border-radius: var(--r-s); border: 1.5px solid transparent; cursor: pointer; transition: all .2s; text-align: center;
+}
+.cm-btn.secondary { background: var(--surface-2); color: var(--ink-m); border-color: rgba(28,25,23,.1); }
+.cm-btn.secondary:hover { background: #fff; border-color: var(--ink-faint); transform: translateY(-1px); }
+.cm-btn.primary { background: var(--purple-l); color: var(--purple); border-color: var(--purple); }
+.cm-btn.primary:hover { background: var(--purple); color: #fff; box-shadow: 0 4px 12px rgba(91,62,143,.3); transform: translateY(-2px); }
+
+/* ── MODAL CREAR/EDITAR MATERIA ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(28,25,23,.6); backdrop-filter: blur(4px);
+  z-index: 10000; display: none; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .3s;
+}
+.modal-overlay.active { display: flex; opacity: 1; }
+.modal-content {
+  background: var(--surface); width: 90%; max-width: 600px; max-height: 90vh;
+  border-radius: var(--r-m); box-shadow: var(--sh-l); display: flex; flex-direction: column;
+  transform: translateY(20px); transition: transform .3s var(--spring); overflow: hidden;
+}
+.modal-overlay.active .modal-content { transform: translateY(0); }
+.modal-header {
+  padding: 1.2rem 1.5rem; background: var(--purple); color: #fff;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin: 0; }
+.modal-close {
+  background: transparent; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;
+  transition: transform .2s;
+}
+.modal-close:hover { transform: scale(1.2); }
+.modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+.modal-footer { padding: 1.2rem 1.5rem; border-top: 1px solid rgba(28,25,23,.1); display: flex; justify-content: flex-end; gap: 10px; background: #fff; }
+.dynamic-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.dynamic-item { display: flex; gap: 8px; }
+.dynamic-item input, .dynamic-item textarea { flex: 1; }
+.btn-remove { background: var(--rust-l); color: var(--rust); border: none; border-radius: 6px; padding: 0 12px; cursor: pointer; font-weight: bold; }
+.btn-remove:hover { background: var(--rust); color: #fff; }
+
+/* ── BOTÓN GENERAR PRINCIPAL ── */
+.generate-btn {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  width: 100%; padding: 1.2rem; margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--amber), #E8A44A);
+  color: #fff; border: none; border-radius: var(--r-m);
+  font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; font-style: italic;
+  cursor: pointer; transition: all .3s var(--spring); box-shadow: var(--sh-m);
+}
+.generate-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(200,137,58,.4); }
+.generate-btn:active { transform: translateY(0) scale(.98); }
+.generate-btn:disabled { opacity: .5; cursor: not-allowed; filter: grayscale(1); transform: none; box-shadow: none; }
+
+/* ── VISTA PREVIA PANEL ── */
+.preview-toggle-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 14px; background: transparent; color: var(--ink);
+  border: 2px dashed rgba(28,25,23,.2); border-radius: var(--r-m);
+  font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; cursor: pointer; transition: all .3s;
+  margin-bottom: 1.5rem;
+}
+.preview-toggle-btn:hover { border-color: var(--ink); background: rgba(28,25,23,.03); }
+.preview-toggle-btn.active { background: var(--ink); color: #fff; border-style: solid; }
+
+.preview-panel { display: none; margin-bottom: 1.5rem; animation: fadeIn .4s var(--smooth); }
+.preview-panel.show { display: block; }
+.preview-doc {
+  background: #fff; border-radius: var(--r-m); box-shadow: var(--sh-l);
+  width: 100%; max-width: 100%; overflow: hidden; 
+  box-sizing: border-box; font-family: 'Arial', sans-serif; border: 1px solid rgba(0,0,0,.08);
+}
+.preview-doc-header {
+  background: var(--sidebar); color: #fff; text-align: center; padding: 16px 20px 12px;
+}
+.preview-doc-header .ph-sub { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 4px; }
+.preview-doc-header .ph-title { font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 2px; }
+.preview-doc-header .ph-code { font-size: 10px; color: rgba(255,255,255,.6); font-family: 'DM Mono', monospace; }
+
+/* ── TABLA ESTRICTAMENTE RESPONSIVA ── */
+.preview-tbl { 
+  width: 100%; 
+  table-layout: fixed; 
+  border-collapse: collapse; 
+  font-size: 11px; 
+}
+.preview-tbl td { 
+  border: 1px solid #ddd; 
+  padding: 8px 10px; 
+  vertical-align: top; 
+  line-height: 1.5; 
+  color: #111;
+  word-wrap: break-word; 
+  overflow-wrap: break-word;
+}
+.preview-tbl .lbl { background: #f8f9fa; font-weight: bold; color: #444; width: 30%; font-size: 10px; text-transform: uppercase; }
+.preview-tbl .val.empty { color: #aaa; font-style: italic; }
+.preview-tbl .ind-row td { background: var(--teal-l); }
+.preview-tbl .ind-row .lbl { color: var(--teal); }
+.preview-tbl .ind-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.preview-tbl .ind-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 4px; background: var(--teal); color: #fff;
+  font-weight: bold; font-size: 10px;
+}
+.preview-watermark {
+  text-align: center; padding: 10px; font-size: 10px; color: #999;
+  background: #fafafa; border-top: 1px solid #eee; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.preview-live-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+  animation: pulse-dot 1.5s infinite;
+}
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
 
 /* ── BANNERS ── */
-.banner{
-  display:none;max-width:620px;margin:1rem auto 0;
-  padding:14px 16px;border-radius:var(--r2);
-  font-family:'DM Mono',monospace;font-size:12px;
-  letter-spacing:.03em;text-align:center;
+.banner {
+  position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+  padding: 14px 20px; border-radius: var(--r-s); box-shadow: var(--sh-l);
+  font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600;
+  display: flex; align-items: center; gap: 10px;
+  transform: translateY(100px); opacity: 0; transition: all .4s var(--spring); pointer-events: none;
 }
-.banner.show{display:block}
-.banner-success{background:var(--success-bg);color:var(--success);border:1px solid #b2cfcd}
-.banner-error{background:var(--error-bg);color:var(--error);border:1px solid #e8b2b2}
-.banner-loading{background:#fffbf0;color:var(--gold);border:1px solid #e0cf94}
+.banner.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.banner-success { background: var(--green); color: #fff; }
+.banner-error { background: var(--rust); color: #fff; }
+.banner-loading { background: var(--surface); border: 2px solid var(--amber); color: var(--amber); }
 
-/* ── NOTICE ── */
-.notice{
-  background:var(--cream);border:1px solid var(--border);
-  border-radius:var(--r);padding:10px 12px;
-  font-family:'DM Mono',monospace;font-size:11px;
-  color:var(--text3);line-height:1.6;margin-top:8px;
+/* ── MEDIA QUERIES (DESKTOP) ── */
+@media(min-width: 900px) {
+  .sidebar-tools {
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+  .sidebar-tools::-webkit-scrollbar { width: 6px; }
+  .sidebar-tools::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
 }
 
-/* ── DIVIDER ── */
-hr{border:none;border-top:1px solid var(--border);margin:.75rem 0}
+/* ── MEDIA QUERIES (MÓVIL - RESPONSIVE) ── */
+@media(max-width: 899px) {
+  .layout-wrapper { grid-template-columns: 1fr; margin-top: 1.5rem; padding: 0 1rem; }
+  .grid2 { grid-template-columns: 1fr; }
+  
+  .banner {
+    bottom: auto; top: 15px; left: 15px; right: 15px; width: auto;
+    transform: translateY(-100px); justify-content: center; text-align: center;
+  }
+  
+  .sidebar-tools {
+    position: fixed;
+    bottom: 15px; right: 15px;
+    z-index: 9990;
+    display: flex; flex-direction: column-reverse; gap: 15px;
+    pointer-events: none;
+  }
+  
+  .sidebar-tools > * {
+    pointer-events: auto;
+  }
 
-@media(max-width:440px){
-  .grid2{grid-template-columns:1fr}
-  .comp-btn{aspect-ratio:auto;padding:14px 8px}
+  .generate-btn {
+    width: 60px; height: 60px; border-radius: 50%;
+    padding: 0; margin: 0;
+    box-shadow: 0 6px 20px rgba(200,137,58,0.4);
+    align-self: flex-end;
+  }
+  .generate-btn .btn-text { display: none; }
+  .generate-btn .btn-icon { font-size: 1.8rem; margin: 0; }
+
+  .custom-mat-panel {
+    background: transparent; border: none; box-shadow: none;
+    position: relative; 
+    align-self: flex-end;
+    overflow: visible !important; 
+  }
+  
+  .custom-mat-header {
+    width: 60px; height: 60px; border-radius: 50%;
+    padding: 0; justify-content: center;
+    box-shadow: 0 6px 20px rgba(91,62,143,0.4);
+    margin-left: auto;
+  }
+  .custom-mat-header .cm-text, .custom-mat-header .cm-arrow { display: none; }
+  .custom-mat-header .cm-icon { font-size: 1.6rem; margin: 0; }
+  
+  .custom-mat-body {
+    position: fixed; 
+    bottom: 85px; 
+    right: 15px;
+    width: calc(100vw - 30px);
+    max-width: 320px;
+    box-sizing: border-box;
+    border: 1.5px solid rgba(91,62,143,.25);
+    border-radius: var(--r-m);
+    box-shadow: var(--sh-l);
+    background: var(--surface);
+    max-height: 65vh;
+    overflow-y: auto;
+    z-index: 10001;
+  }
 }
-/* ── Animaciones para las figuras del fondo del Mundial ── */
-    .bg-shape {
-      position: absolute;
-      pointer-events: none;
-    }
 
-    @keyframes floatRandom1 {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      33% { transform: translate(120px, -150px) rotate(120deg); }
-      66% { transform: translate(-80px, -250px) rotate(240deg); }
-      100% { transform: translate(0, 0) rotate(360deg); }
-    }
+/* ── MEDIA QUERIES (PANTALLAS MUY PEQUEÑAS) ── */
+@media(max-width: 600px) {
+  .site-header { padding: 1.5rem 1rem; }
+  .site-header h1 { font-size: 1.8rem; }
+  .step { font-size: 0.65rem; padding: 0.4rem 0.2rem; }
+  .step span { font-size: 0.9rem; }
+  .card { padding: 1.2rem; }
+  .card-title { font-size: 1.1rem; }
+  .modal-content { width: 95%; max-height: 85vh; border-radius: 12px; }
+  .modal-header, .modal-body, .modal-footer { padding: 1.2rem; }
+  
+  .preview-tbl { font-size: 9.5px; }
+  .preview-tbl td { padding: 5px 6px; }
+  .preview-tbl .lbl { font-size: 8.5px; }
+}
 
-    @keyframes floatRandom2 {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      33% { transform: translate(-150px, 120px) rotate(-90deg); }
-      66% { transform: translate(-250px, -50px) rotate(-180deg); }
-      100% { transform: translate(0, 0) rotate(-360deg); }
-    }
+/* ══════════════════════════════════════════════════════
+   VISOR DOCX EMBEBIDO (motor Canvas) — estilos con ámbito
+   propio, todo prefijado con --dv- / dv- para no chocar
+   con los tokens y clases del generador.
+══════════════════════════════════════════════════════ */
+.dv-shell{
+  --dv-toolbar-h: 52px;
+  --dv-bg: #f0f2f5;
+  --dv-toolbar-bg: #ffffff;
+  --dv-border: #dadce0;
+  --dv-text: #202124;
+  --dv-text-dim: #5f6368;
+  --dv-accent: #1a73e8;
+  --dv-accent-dark: #1558b3;
 
-    @keyframes floatRandom3 {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      33% { transform: translate(200px, 100px) rotate(45deg); }
-      66% { transform: translate(100px, 200px) rotate(90deg); }
-      100% { transform: translate(0, 0) rotate(0deg); }
-    }
+  position: relative;
+  width: 100%;
+  height: 640px;
+  max-height: 75vh;
+  border-radius: var(--r-m);
+  overflow: hidden;
+  background: var(--dv-bg);
+  box-shadow: var(--sh-l);
+  border: 1px solid rgba(0,0,0,.08);
+}
+.dv-shell *{ box-sizing: border-box; }
+#dv_toolbar{
+  position: absolute; top:0; left:0; right:0; height: var(--dv-toolbar-h);
+  background: var(--dv-toolbar-bg);
+  border-bottom: 1px solid var(--dv-border);
+  display:flex; align-items:center;
+  padding: 0 14px;
+  gap: 12px;
+  z-index: 50;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+#dv_toolbar .dv-brand{
+  display:flex; align-items:center; gap:8px;
+  font-weight:700; font-size:13px; color: var(--dv-text);
+  white-space: nowrap;
+}
+#dv_toolbar .dv-brand .dv-dot{
+  width:9px;height:9px;border-radius:3px;
+  background: linear-gradient(135deg, var(--dv-accent), #34a853);
+  display:inline-block;
+}
+.dv-divider{ width:1px; height:24px; background: var(--dv-border); flex-shrink:0; }
+.dv-btn{
+  display:inline-flex; align-items:center; gap:6px;
+  background: var(--dv-accent); color:#fff; border:none;
+  padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight:500;
+  cursor:pointer; transition: background .15s ease;
+  white-space:nowrap; font-family: inherit;
+}
+.dv-btn:hover{ background: var(--dv-accent-dark); }
+.dv-btn:disabled{ background:#c8c8c8; cursor:not-allowed; }
+.dv-btn.dv-secondary{
+  background:#fff; color: var(--dv-text); border:1px solid var(--dv-border);
+}
+.dv-btn.dv-secondary:hover{ background:#f1f3f4; }
+.dv-icon-btn{
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:transparent; border:none; cursor:pointer; color: var(--dv-text-dim);
+  font-size:15px; font-weight:600; font-family: inherit;
+}
+.dv-icon-btn:hover{ background:#f1f3f4; }
+.dv-icon-btn:disabled{ opacity:.35; cursor:not-allowed; }
+#dv_zoomGroup{ display:flex; align-items:center; gap:2px; }
+#dv_zoomLabel{
+  min-width:48px; text-align:center; font-size:12px; color: var(--dv-text-dim);
+  user-select:none; cursor:pointer;
+}
+#dv_statusText{
+  font-size:12px; color: var(--dv-text-dim); flex:1; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+#dv_statusText.error{ color:#d93025; }
+#dv_statusText.ok{ color:#188038; }
+#dv_fileNameLabel{ font-size:12px; color:var(--dv-text-dim); white-space:nowrap; max-width:200px; overflow:hidden; text-overflow:ellipsis; }
+.dv-shell input[type=file]{ display:none; }
+.dv-spinner{
+  width:13px; height:13px; border-radius:50%;
+  border: 2px solid #cfe0fb; border-top-color: var(--dv-accent);
+  animation: dv-spin .8s linear infinite;
+  display:inline-block; vertical-align:middle;
+}
+@keyframes dv-spin{ to{ transform: rotate(360deg); } }
+
+#dv_viewport{
+  position: absolute; top: var(--dv-toolbar-h); left:0; right:0; bottom:0;
+  overflow: auto;
+  background: var(--dv-bg);
+}
+#dv_canvasHost{
+  display:flex; flex-direction:column; align-items:center;
+  padding: 24px 0 60px 0;
+  min-height: 100%;
+}
+#dv_renderCanvas{
+  background: transparent;
+  display:block;
+}
+#dv_emptyState{
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  color: var(--dv-text-dim); text-align:center; gap:12px; padding: 0 20px;
+  font-family: 'DM Sans', sans-serif;
+}
+#dv_emptyState svg{ opacity:.55; }
+#dv_emptyState h2{ font-size:16px; font-weight:600; color:var(--dv-text); margin:0; font-family: 'DM Sans', sans-serif; }
+#dv_emptyState p{ font-size:12px; margin:0; max-width:320px; line-height:1.5; }
+#dv_dropHint{
+  font-size:11px; color:#9aa0a6;
+}
+.dv-hidden{ display:none !important; }
+
+#dv_pageIndicator{
+  font-size:12px; color: var(--dv-text-dim); white-space:nowrap; user-select:none;
+}
+
 </style>
 </head>
 <body>
-<div id="worldcup-bg"></div>
-<div id="video-intro">
-    <script>if(localStorage.getItem("intro_video_visto1") === "true"){ document.getElementById("video-intro").style.display = "none"; }</script>
-    <video id="intro-video" autoplay muted playsinline>
-      <source src="introvidm.mp4" type="video/mp4">
-      Tu navegador no soporta videos.
-    </video>
-  </div>
-  <div class="Layout">
-    <header class="site-header">
-    <div class="wrap">
-        <div class="header-badge">S12dev/trucoteca · Centro de archivos</div>
-        <h1>Programa</h1>
-        <p>FO-205P11000-14 · Generador automático de formato de evidencias (version Beta) 0.1.1</p>
-    </div>
-    <a href="https://s12gamer.github.io/trucopagina/TPF/TPF.html" style="
-        text-decoration: none; 
-        color: var(--gold); 
-        border: 1px solid var(--gold); 
-        padding: 8px 15px; 
-        border-radius: var(--r); 
-        font-family: 'DM Mono', monospace; 
-        font-size: 11px; 
-        text-transform: uppercase; 
-        margin-top: 10px;
-        transition: all 0.2s;
-        " onmouseover="this.style.background='var(--gold)'; this.style.color='var(--ink)'" 
-        onmouseout="this.style.background='transparent'; this.style.color='var(--gold)'">
-        ⬅ Volver al Centro
-        </a>
-        
-    </header>
-    <div class="wrap">
 
+<header class="site-header">
+  <div class="header-badge">Centro de Archivos TESCI</div>
+  <h1>Generador de Formatos</h1>
+  <p>Formatos de Evidencia FO-205P11000-14 Ver 0.1.0</p>
+  <p><a href="TPF.html" style="color:inherit;text-decoration:underline;font-size:.8rem">← Volver al Centro de Recursos Académicos</a></p>
+</header>
+
+<main class="layout-wrapper">
+  
+  <div class="column-form">
+    
     <div class="steps" id="stepper">
-        <div class="step active" id="step1"><span>①</span>ALUMNO</div>
-        <div class="step" id="step2"><span>②</span>MATERIA</div>
-        <div class="step" id="step3"><span>③</span>COMP.</div>
-        <div class="step" id="step4"><span>④</span>GENERAR</div>
+      <div class="step active" id="step1"><span>1</span>Alumno</div>
+      <div class="step" id="step2"><span>2</span>Materia</div>
+      <div class="step" id="step3"><span>3</span>Comp.</div>
+      <div class="step" id="step4"><span>4</span>Generar</div>
     </div>
 
-    <!-- ① DATOS DEL ALUMNO -->
     <div class="card" id="sec_alumno">
-        <div class="card-title">① Datos del alumno</div>
-        <div class="grid2" style="margin-bottom:10px">
+      <div class="card-title">① Datos del Alumno</div>
+      <div class="grid2" style="margin-bottom:16px">
         <div class="field">
-            <label>Nombre completo</label>
-            <input type="text" id="nombre" placeholder="Ej. Juan Pérez López">
-        </div>
-        <div class="field">
-            <label>No. de Control</label>
-            <input type="text" id="control" placeholder="Ej. 23060001" maxlength="20">
-        </div>
-        </div>
-        <div class="grid2">
-        <div class="field">
-            <label>División / Carrera</label>
-            <input type="text" id="division" placeholder="Ej. Ing. en Sistemas">
+          <label>Nombre completo</label>
+          <input type="text" id="nombre" placeholder="Ej. Juan Pérez López">
         </div>
         <div class="field">
-            <label>Grupo</label>
-            <input type="text" id="grupo" placeholder="Ej. 2S-A">
+          <label>No. de Control</label>
+          <input type="text" id="control" placeholder="Ej. 23060001" maxlength="20">
         </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>División / Carrera</label>
+          <input type="text" id="division" placeholder="Ej. Ing. en Sistemas">
         </div>
+        <div class="field">
+          <label>Grupo</label>
+          <input type="text" id="grupo" placeholder="Ej. 2S-A">
+        </div>
+      </div>
     </div>
 
-    <!-- FECHA -->
     <div class="card">
-        <div class="card-title">Fecha de entrega</div>
-        <div class="grid2">
+      <div class="card-title">Fecha de Entrega</div>
+      <div class="grid2">
         <div class="field">
-            <label>Fecha</label>
-            <input type="date" id="fecha">
+          <label>Fecha</label>
+          <input type="date" id="fecha">
         </div>
-        </div>
+      </div>
     </div>
 
-    <!-- ② ASIGNATURA -->
     <div class="card" id="sec_asignatura">
-        <div class="card-title">② Asignatura</div>
-        <div class="field grid1" style="margin-bottom:12px">
+      <div class="card-title">② Asignatura</div>
+      <div class="field grid1" style="margin-bottom:16px">
         <label>Materia</label>
         <select id="asignatura_select">
-            <option value="">— Selecciona una materia —</option>
-            <!--<option value="__vacio__">✏️  Formato vacío (ingresar todo manualmente proximo a arreglar)</option> --> 
-            <option value="Programación Orientada a Objetos">Programación Orientada a Objetos</option>
-            <option value="Probabilidad y Estadística">Probabilidad y Estadística</option>
-            <option value="Física General">Física General</option>
-            <option value="Cálculo Integral">Cálculo Integral</option>
-            <option value="Contabilidad Financiera">Contabilidad Financiera</option>
-            <option value="Algebra Lineal">Algebra Lineal</option>
-        </select>
-        </div>
+          </select>
+      </div>
 
-        <!-- Modo vacío -->
-        <div id="modo_vacio" style="display:none">
-        <div class="grid1" style="gap:10px">
-            <div class="field">
+      <div id="modo_vacio" style="display:none">
+        <div class="grid1" style="gap:16px">
+          <div class="field">
             <label>Nombre de la asignatura</label>
             <input type="text" id="materia_manual" placeholder="Nombre completo de la materia">
-            </div>
-            <div class="field">
+          </div>
+          <div class="field">
             <label>Docente</label>
             <input type="text" id="docente_manual" placeholder="Nombre completo del docente">
-            </div>
+          </div>
         </div>
-        </div>
+      </div>
 
-        <!-- Docente autocompletado -->
-        <div id="docente_auto_wrap" style="display:none">
+      <div id="docente_auto_wrap" style="display:none; margin-top:16px;">
         <div class="field">
-            <label>Docente</label>
-            <input type="text" id="docente_auto" readonly style="color:var(--text2);background:var(--cream)">
+          <label>Docente Asignado</label>
+          <input type="text" id="docente_auto" readonly style="color:var(--ink-m); font-weight:600; cursor:not-allowed;">
         </div>
-        </div>
+      </div>
     </div>
 
-    <!-- ③ COMPETENCIA -->
     <div class="card" id="card_competencia" style="display:none">
-        <div class="card-title">③ Competencia No.</div>
-        <div class="comp-grid" id="comp_grid"></div>
-        <div class="desc-preview" id="desc_preview"></div>
+      <div class="card-title">③ Competencia No.</div>
+      <div class="comp-grid" id="comp_grid"></div>
+      <div class="desc-preview" id="desc_preview"></div>
     </div>
 
-    <!-- Competencia manual -->
     <div class="card" id="card_comp_manual" style="display:none">
-        <div class="card-title">③ Competencia (manual)</div>
-        <div class="grid2" style="margin-bottom:10px">
+      <div class="card-title">③ Competencia (Manual)</div>
+      <div class="grid2" style="margin-bottom:16px">
         <div class="field">
-            <label>Número de competencia</label>
-            <input type="number" id="comp_manual_num" min="1" max="20" placeholder="Ej. 3">
+          <label>Número de competencia</label>
+          <input type="number" id="comp_manual_num" min="1" max="20" placeholder="Ej. 3">
         </div>
-        </div>
-        <div class="field">
+      </div>
+      <div class="field">
         <label>Descripción de la competencia</label>
         <textarea id="comp_manual_desc" placeholder="Describe la competencia a evaluar..."></textarea>
-        </div>
+      </div>
     </div>
 
-    <!-- ④ INDICADORES -->
     <div class="card">
-        <div class="card-title">④ Indicadores de desempeño alcanzados</div>
-        <div class="ind-grid" id="ind_grid">
+      <div class="card-title">④ Indicadores Alcanzados</div>
+      <div class="ind-grid" id="ind_grid">
         <button class="ind-btn" data-ind="A">A</button>
         <button class="ind-btn" data-ind="B">B</button>
         <button class="ind-btn" data-ind="C">C</button>
         <button class="ind-btn" data-ind="D">D</button>
         <button class="ind-btn" data-ind="E">E</button>
         <button class="ind-btn" data-ind="F">F</button>
-        </div>
+      </div>
     </div>
 
-    <!-- EVIDENCIA -->
     <div class="card">
-        <div class="card-title">Evidencia de aprendizaje</div>
-        <div class="field">
+      <div class="card-title">Evidencia de Aprendizaje</div>
+      <div class="field">
         <label>Descripción de la evidencia</label>
-        <textarea id="evidencia" placeholder="Ej. Reporte escrito, práctica de laboratorio, proyecto integrador..."></textarea>
+        <textarea id="evidencia" placeholder="Ej. Reporte de Investigación, práctica de laboratorio, proyecto integrador..."></textarea>
+      </div>
+    </div>
+    
+    <!-- ── SECCIÓN: TEXTO ENRIQUECIDO ADICIONAL ── -->
+    <div class="card">
+      <div class="card-title">⑤ Texto Adicional (Opcional)</div>
+      <div class="field" style="margin-bottom: 12px;">
+        <label style="display:flex; align-items:center; gap:8px; text-transform:none; cursor:pointer; font-weight:600;">
+          <input type="checkbox" id="insertar_texto_adicional" style="width:auto; margin:0; cursor:pointer;">
+          <span>¿Insertar texto adicional como desarrollo del trabajo debajo del cuadro?</span>
+        </label>
+      </div>
+      <!-- NUEVO: Controles de IA -->
+      <div id="ai_controls" style="display:none; gap:10px; margin-bottom: 12px; animation:fadeIn .3s var(--smooth)">
+        <select id="ai_template_select" style="flex:1; padding:10px; border: 1.5px solid rgba(28,25,23,.1); border-radius: var(--r-s); font-family: 'DM Sans', sans-serif;">
+          <option value="ensayo">Ensayo Académico</option>
+          <option value="reporte">Reporte Técnico</option>
+          <option value="arquitectura">Arquitectura de Software</option>
+          <option value="libre">Redacción Libre</option>
+        </select>
+        <button id="btn_ai_generate" type="button" style="padding:10px 16px; background:var(--purple); color:#fff; border:none; border-radius:var(--r-s); cursor:pointer; font-weight:bold; font-family: 'DM Sans', sans-serif;">
+          ✨ Auto-redactar
+        </button>
+        <button type="button" onclick="resetearApiKey()" style="background:transparent; border:none; color:var(--ink-faint); font-size:12px; cursor:pointer; text-decoration:underline;" title="Cambiar API Key de Gemini">
+          🔑 Reset Key
+        </button>
+      </div>
+      <div id="editor_wrapper" style="display:none; animation:fadeIn .3s var(--smooth)">
+        <div id="editor-container">
+          <p>Escribe aquí el contenido adicional que se insertará al como desarrollo del contenido</p>
         </div>
+      </div>
     </div>
 
-    </div><!-- /.wrap -->
-
-
-    <div style="max-width:620px;margin:0 auto;padding:0 1rem">
-    <button class="generate-btn" id="generar_btn" onclick="generarDocumento()">
-        <span class="btn-icon">⬇</span>
-        Descargar Formato
+    <button class="preview-toggle-btn" id="preview_toggle_btn" onclick="toggleVistaPrvia()">
+      <span>👁</span> Vista Previa en Vivo <span id="ptb_arrow">▾</span>
     </button>
+
+    <div class="preview-panel" id="preview_panel">
+      <div class="dv-shell">
+        <div id="dv_toolbar">
+          <div class="dv-brand"><span class="dv-dot"></span>Vista Previa</div>
+          <div class="dv-divider"></div>
+          <button class="dv-btn dv-secondary" id="dv_refreshBtn" type="button">↻ Actualizar</button>
+          <span id="dv_fileNameLabel"></span>
+          <div class="dv-divider"></div>
+          <div id="dv_zoomGroup">
+            <button class="dv-icon-btn" id="dv_zoomOutBtn" title="Alejar" type="button">−</button>
+            <span id="dv_zoomLabel" title="Restablecer zoom">100%</span>
+            <button class="dv-icon-btn" id="dv_zoomInBtn" title="Acercar" type="button">+</button>
+            <button class="dv-btn dv-secondary" id="dv_fitBtn" style="margin-left:6px;" type="button">Ajustar</button>
+          </div>
+          <div class="dv-divider"></div>
+          <span id="dv_pageIndicator"></span>
+          <span id="dv_statusText"></span>
+        </div>
+
+        <div id="dv_viewport">
+          <div id="dv_canvasHost">
+            <canvas id="dv_renderCanvas"></canvas>
+          </div>
+          <div id="dv_emptyState">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="1.4">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <path d="M14 2v6h6"></path>
+              <line x1="8" y1="13" x2="16" y2="13"></line>
+              <line x1="8" y1="17" x2="16" y2="17"></line>
+              <line x1="8" y1="9" x2="10" y2="9"></line>
+            </svg>
+            <h2>Vista previa del documento</h2>
+            <p>Completa el formulario (al menos nombre, No. de control y materia) y la vista previa del .docx real, generado a partir de la plantilla, aparecerá aquí automáticamente.</p>
+            <span id="dv_dropHint"></span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="banner banner-loading" id="loading_banner">Descargando plantilla y procesando documento...</div>
-    <div class="banner banner-success" id="success_banner">✓ Documento generado y descargado correctamente</div>
-    <div class="banner banner-error" id="error_banner"></div>
+  </div> 
+
+  <div class="sidebar-tools">
+    
+    <div class="custom-mat-panel open" id="custom_mat_panel">
+      <div class="custom-mat-header" onclick="toggleCustomPanel()">
+        <span class="cm-icon">⚙️</span>
+        <h3 class="cm-text">Gestor de Mis Materias</h3>
+        <span class="cm-arrow">▾</span>
+      </div>
+      <div class="custom-mat-body">
+        
+        <div id="saved_materias_grid" class="saved-materias-grid">
+          </div>
+
+        <div class="cm-actions">
+          <button class="cm-btn primary" onclick="openMateriaModal()">
+            + Crear Nueva Materia
+          </button>
+          <label class="cm-btn secondary" style="cursor:pointer; margin:0;">
+            ⬆ Importar archivo JSON
+            <input type="file" id="cm_file_input" accept=".json" style="display:none" onchange="cargarMateriaDesdeArchivo(this)">
+          </label>
+          <button class="cm-btn secondary" onclick="descargarPlantillaJSON()" style="margin:0; border:none; background:transparent; font-size:10px; text-decoration:underline;">
+            Descargar Plantilla Base
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button class="generate-btn" id="generar_btn" onclick="generarDocumento()">
+      <span class="btn-icon">⬇</span> <span class="btn-text">Generar Documento</span>
+    </button>
+
+  </div> 
+</main>
+
+<div class="modal-overlay" id="materia_modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modal_mat_title">Crear Materia</h3>
+      <button class="modal-close" onclick="closeMateriaModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Nombre de la Materia</label>
+        <input type="text" id="modal_mat_name" placeholder="Ej. Arquitectura de Computadoras">
+      </div>
+      <div class="field">
+        <label>Docente</label>
+        <input type="text" id="modal_mat_docente" placeholder="Nombre completo del docente">
+      </div>
+      
+      <div class="field">
+        <label style="display:flex; justify-content:space-between; align-items:center;">
+          Competencias
+          <button class="cm-btn secondary" style="padding:4px 8px; font-size:10px;" onclick="addModalField('modal_comps', '', true)">+ Añadir</button>
+        </label>
+        <div id="modal_comps" class="dynamic-list"></div>
+      </div>
+
+      <div class="field">
+        <label style="display:flex; justify-content:space-between; align-items:center;">
+          Indicadores de Desempeño
+          <button class="cm-btn secondary" style="padding:4px 8px; font-size:10px;" onclick="addModalField('modal_inds', '', false)">+ Añadir</button>
+        </label>
+        <div id="modal_inds" class="dynamic-list"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="cm-btn secondary" onclick="closeMateriaModal()">Cancelar</button>
+      <button class="cm-btn primary" onclick="saveMateriaModal()">Guardar Materia</button>
+    </div>
   </div>
+</div>
+
+<div class="banner banner-loading" id="loading_banner">⏳ Procesando documento...</div>
+<div class="banner banner-success" id="success_banner">✓ ¡Documento generado con éxito!</div>
+<div class="banner banner-error" id="error_banner">⚠ Hubo un error</div>
+
+<script src="ai-module.js"></script>
+<script>
+(function(){
+
+"use strict";
+
+/* =========================================================================
+   CONSTANTES DE MAQUETACIÓN
+   ========================================================================= */
+const EMU_PER_PX = 9525;          
+const TWIPS_PER_PX = 15;          
+const HALFPT_TO_PX = (hp) => (hp / 2) * (96 / 72); 
+const PT_TO_PX = (pt) => pt * (96 / 72);
+
+const DEFAULT_PAGE_W_PX = 794;    
+const DEFAULT_PAGE_H_PX = 1123;   
+const DEFAULT_MARGIN_PX = 96;     
+const PAGE_GAP = 28;              
+
+/* =========================================================================
+   ESTADO GLOBAL
+   ========================================================================= */
+let state = {
+  zip: null,
+  mediaCache: {},      
+  activeMediaCache: null, 
+  relsMap: {},          
+  styles: {},            
+  docDefaults: {},       
+  numbering: {},         
+  abstractNum: {},       
+  numCounters: {},       
+  page: { w: DEFAULT_PAGE_W_PX, h: DEFAULT_PAGE_H_PX, mL: DEFAULT_MARGIN_PX, mR: DEFAULT_MARGIN_PX, mT: DEFAULT_MARGIN_PX, mB: DEFAULT_MARGIN_PX, headerDistPx: 48, footerDistPx: 48, titlePg: false },
+  blocks: [],            
+  pages: [],             
+  headerRefs: {},         
+  footerRefs: {},         
+  headers: {},             
+  footers: {},             
+  headerLayout: {},        
+  footerLayout: {},        
+  zoom: 1,
+  images: {}             
+};
+
+const canvas = document.getElementById('dv_renderCanvas');
+const ctx = canvas.getContext('2d');
+const viewport = document.getElementById('dv_viewport');
+const canvasHost = document.getElementById('dv_canvasHost');
+const emptyState = document.getElementById('dv_emptyState');
+const statusText = document.getElementById('dv_statusText');
+const fileNameLabel = document.getElementById('dv_fileNameLabel');
+const pageIndicator = document.getElementById('dv_pageIndicator');
+const zoomLabel = document.getElementById('dv_zoomLabel');
+
+function setStatus(msg, kind){
+  statusText.textContent = msg || '';
+  statusText.className = kind ? kind : '';
+}
+
+/* =========================================================================
+   CARGA DE ARCHIVO (adaptado: recibe un Blob ya generado en memoria,
+   en vez de un <input type=file>, para alimentar la vista previa en vivo)
+   ========================================================================= */
+async function handleFile(blobOrFile, displayName){
+  try{
+    fileNameLabel.textContent = displayName || (blobOrFile && blobOrFile.name) || 'vista_previa.docx';
+    setStatus('Procesando plantilla… ', 'ok');
+    emptyState.classList.add('dv-hidden');
+    canvas.classList.remove('dv-hidden');
+
+    const arrayBuffer = await blobOrFile.arrayBuffer();
+    const zip = await JSZip.loadAsync(arrayBuffer);
+    state.zip = zip;
+    state.mediaCache = {};
+    state.activeMediaCache = null;
+    state.relsMap = {};
+    state.styles = {};
+    state.numbering = {};
+    state.abstractNum = {};
+    state.numCounters = {};
+    state.blocks = [];
+    state.pages = [];
+    state.headerRefs = {};
+    state.footerRefs = {};
+    state.headers = {};
+    state.footers = {};
+    state.headerLayout = {};
+    state.footerLayout = {};
+
+    setStatus('Leyendo relaciones (rels)…', 'ok');
+    await loadRelationships(zip);
+
+    setStatus('Extrayendo imágenes multimedia…', 'ok');
+    await loadMedia(zip);
+
+    setStatus('Procesando estilos (styles.xml)…', 'ok');
+    await loadStyles(zip);
+
+    setStatus('Procesando listas (numbering.xml)…', 'ok');
+    await loadNumbering(zip);
+
+    setStatus('Procesando document.xml…', 'ok');
+    await loadDocument(zip);
+
+    setStatus('Procesando encabezados y pies de página…', 'ok');
+    await loadHeadersFooters(zip);
+
+    setStatus('Calculando maquetación (layout engine)…', 'ok');
+    await computeLayout();
+    await layoutHeadersFooters();
+
+    setStatus('Renderizando en Canvas…', 'ok');
+    await renderAllPages();
+
+    setStatus(`Listo — ${state.pages.length} página(s)`, 'ok');
+  }catch(err){
+    console.error(err);
+    setStatus('Error al procesar el documento: ' + err.message, 'error');
+  }
+}
+
+/* =========================================================================
+   UTILIDADES XML
+   ========================================================================= */
+const parser = new DOMParser();
+
+function parseXML(text){
+  return parser.parseFromString(text, 'application/xml');
+}
+
+function children(el, localName){
+  if (!el) return [];
+  const out = [];
+  for (const c of el.children){
+    if (c.localName === localName) out.push(c);
+  }
+  return out;
+}
+function child(el, localName){
+  if (!el) return null;
+  for (const c of el.children){
+    if (c.localName === localName) return c;
+  }
+  return null;
+}
+function attr(el, name){
+  if (!el) return null;
+  return el.getAttribute(name) || el.getAttribute('w:' + name) || el.getAttributeNS(null, name);
+}
+function findAll(el, localName){
+  if (!el) return [];
+  return Array.from(el.getElementsByTagName('*')).filter(n => n.localName === localName);
+}
+
+/* =========================================================================
+   1) RELACIONES (document.xml.rels)
+   ========================================================================= */
+async function loadRelationships(zip){
+  const relsFile = zip.file('word/_rels/document.xml.rels');
+  if (!relsFile) return;
+  const text = await relsFile.async('string');
+  const xml = parseXML(text);
+  const rels = xml.getElementsByTagName('Relationship');
+  for (const rel of rels){
+    const id = rel.getAttribute('Id');
+    const target = rel.getAttribute('Target');
+    state.relsMap[id] = target;
+  }
+}
+
+/* =========================================================================
+   2) MEDIA (imágenes -> DataURL base64)
+   ========================================================================= */
+const MIME_BY_EXT = {
+  png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg',
+  gif: 'image/gif', bmp: 'image/bmp', svg: 'image/svg+xml',
+  emf: 'image/x-emf', wmf: 'image/x-wmf', tif: 'image/tiff', tiff: 'image/tiff'
+};
+
+async function buildMediaCache(zip, relsMap){
+  const cache = {};
+  for (const rId in relsMap){
+    const target = relsMap[rId];
+    if (!target || !/media\//.test(target)) continue;
+    let path = target.replace(/^\.?\/?/, '');
+    if (!path.startsWith('word/')) path = 'word/' + path;
+    const f = zip.file(path);
+    if (!f) continue;
+    const ext = (path.split('.').pop() || '').toLowerCase();
+    const mime = MIME_BY_EXT[ext] || 'application/octet-stream';
+    if (mime === 'image/x-emf' || mime === 'image/x-wmf') continue;
+    try{
+      const base64 = await f.async('base64');
+      cache[rId] = `data:${mime};base64,${base64}`;
+    }catch(e){ }
+  }
+  return cache;
+}
+
+async function loadMedia(zip){
+  state.mediaCache = await buildMediaCache(zip, state.relsMap);
+  state.activeMediaCache = state.mediaCache;
+}
+
+function preloadImage(dataUrl){
+  return new Promise((resolve) => {
+    if (state.images[dataUrl]) { resolve(state.images[dataUrl]); return; }
+    const img = new Image();
+    img.onload = () => { state.images[dataUrl] = img; resolve(img); };
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
+/* =========================================================================
+   3) ESTILOS (styles.xml)
+   ========================================================================= */
+function parseRunProps(rPrEl){
+  if (!rPrEl) return {};
+  const p = {};
+  const b = child(rPrEl, 'b');
+  if (b) p.bold = attr(b,'val') !== 'false' && attr(b,'val') !== '0';
+  const i = child(rPrEl, 'i');
+  if (i) p.italic = attr(i,'val') !== 'false' && attr(i,'val') !== '0';
+  const u = child(rPrEl, 'u');
+  if (u && attr(u,'val') && attr(u,'val') !== 'none') p.underline = true;
+  const strike = child(rPrEl, 'strike');
+  if (strike) p.strike = attr(strike,'val') !== 'false';
+  const color = child(rPrEl, 'color');
+  if (color){
+    const v = attr(color,'val');
+    if (v && v !== 'auto') p.color = '#' + v;
+  }
+  const sz = child(rPrEl, 'sz');
+  if (sz) p.sizePx = HALFPT_TO_PX(parseFloat(attr(sz,'val')) || 24);
+  const fonts = child(rPrEl, 'rFonts');
+  if (fonts){
+    const f = attr(fonts,'ascii') || attr(fonts,'hAnsi') || attr(fonts,'cs');
+    if (f) p.font = f;
+  }
+  const highlight = child(rPrEl, 'highlight');
+  if (highlight){
+    const v = attr(highlight,'val');
+    if (v && v !== 'none') p.highlight = v;
+  }
+  const vertAlign = child(rPrEl, 'vertAlign');
+  if (vertAlign) p.vertAlign = attr(vertAlign,'val');
+  return p;
+}
+
+function parseParaProps(pPrEl){
+  if (!pPrEl) return {};
+  const p = {};
+  const jc = child(pPrEl, 'jc');
+  if (jc) p.align = attr(jc,'val'); 
+  const ind = child(pPrEl, 'ind');
+  if (ind){
+    p.indent = {};
+    const left = attr(ind,'left') || attr(ind,'start');
+    const right = attr(ind,'right') || attr(ind,'end');
+    const first = attr(ind,'firstLine');
+    const hang = attr(ind,'hanging');
+    if (left) p.indent.left = parseFloat(left) / TWIPS_PER_PX;
+    if (right) p.indent.right = parseFloat(right) / TWIPS_PER_PX;
+    if (first) p.indent.firstLine = parseFloat(first) / TWIPS_PER_PX;
+    if (hang) p.indent.hanging = -parseFloat(hang) / TWIPS_PER_PX;
+  }
+  const spacing = child(pPrEl, 'spacing');
+  if (spacing){
+    p.spacing = {};
+    const before = attr(spacing,'before');
+    const after = attr(spacing,'after');
+    const line = attr(spacing,'line');
+    if (before) p.spacing.before = parseFloat(before) / TWIPS_PER_PX;
+    if (after) p.spacing.after = parseFloat(after) / TWIPS_PER_PX;
+    if (line) p.spacing.line = parseFloat(line) / 240;
+  }
+  const pStyle = child(pPrEl, 'pStyle');
+  if (pStyle) p.styleId = attr(pStyle,'val');
+  const numPr = child(pPrEl, 'numPr');
+  if (numPr){
+    const ilvl = child(numPr,'ilvl');
+    const numId = child(numPr,'numId');
+    p.numPr = {
+      ilvl: ilvl ? parseInt(attr(ilvl,'val')||'0',10) : 0,
+      numId: numId ? attr(numId,'val') : null
+    };
+  }
+  const pageBreakBefore = child(pPrEl, 'pageBreakBefore');
+  if (pageBreakBefore) p.pageBreakBefore = true;
+  const keepNext = child(pPrEl, 'keepNext');
+  if (keepNext) p.keepNext = true;
+  return p;
+}
+
+async function loadStyles(zip){
+  const f = zip.file('word/styles.xml');
+  if (!f){
+    state.docDefaults = { run: { font: 'Calibri', sizePx: HALFPT_TO_PX(22), color:'#000000' }, para: {} };
+    return;
+  }
+  const text = await f.async('string');
+  const xml = parseXML(text);
+  const root = xml.documentElement;
+
+  const docDefaultsEl = child(root, 'docDefaults');
+  let defaultRun = { font: 'Calibri', sizePx: HALFPT_TO_PX(22), color: '#000000' };
+  let defaultPara = {};
+  if (docDefaultsEl){
+    const rpd = child(docDefaultsEl, 'rPrDefault');
+    if (rpd) Object.assign(defaultRun, parseRunProps(child(rpd,'rPr')));
+    const ppd = child(docDefaultsEl, 'pPrDefault');
+    if (ppd) Object.assign(defaultPara, parseParaProps(child(ppd,'pPr')));
+  }
+  state.docDefaults = { run: defaultRun, para: defaultPara };
+
+  const styleEls = children(root, 'style');
+  const rawStyles = {};
+  for (const s of styleEls){
+    const id = attr(s,'styleId');
+    const type = attr(s,'type');
+    const nameEl = child(s,'name');
+    const basedOnEl = child(s,'basedOn');
+    rawStyles[id] = {
+      id, type,
+      name: nameEl ? attr(nameEl,'val') : id,
+      basedOn: basedOnEl ? attr(basedOnEl,'val') : null,
+      run: parseRunProps(child(s,'rPr')),
+      para: parseParaProps(child(s,'pPr')),
+      isDefault: attr(s,'default') === '1'
+    };
+  }
+
+  const resolved = {};
+  function resolveStyle(id, seen){
+    if (!id || !rawStyles[id]) return { run:{}, para:{} };
+    if (resolved[id]) return resolved[id];
+    seen = seen || new Set();
+    if (seen.has(id)) return { run:{}, para:{} };
+    seen.add(id);
+    const raw = rawStyles[id];
+    const parent = raw.basedOn ? resolveStyle(raw.basedOn, seen) : { run:{}, para:{} };
+    const merged = {
+      run: Object.assign({}, parent.run, raw.run),
+      para: Object.assign({}, parent.para, raw.para, {
+        indent: Object.assign({}, parent.para.indent, raw.para.indent),
+        spacing: Object.assign({}, parent.para.spacing, raw.para.spacing)
+      })
+    };
+    resolved[id] = merged;
+    return merged;
+  }
+  for (const id in rawStyles) resolveStyle(id);
+  state.styles = resolved;
+  state.rawStylesMeta = rawStyles;
+}
+
+function getEffectiveStyleForParagraph(styleId){
+  if (styleId && state.styles[styleId]) return state.styles[styleId];
+  return { run:{}, para:{} };
+}
+
+/* =========================================================================
+   4) NUMBERING (listas) numbering.xml
+   ========================================================================= */
+async function loadNumbering(zip){
+  const f = zip.file('word/numbering.xml');
+  if (!f) return;
+  const text = await f.async('string');
+  const xml = parseXML(text);
+  const root = xml.documentElement;
+
+  const abstractNums = children(root, 'abstractNum');
+  for (const an of abstractNums){
+    const id = attr(an, 'abstractNumId');
+    const levels = {};
+    for (const lvl of children(an, 'lvl')){
+      const ilvl = parseInt(attr(lvl,'ilvl') || '0', 10);
+      const numFmtEl = child(lvl,'numFmt');
+      const lvlTextEl = child(lvl,'lvlText');
+      const startEl = child(lvl,'start');
+      const indEl = child(lvl, 'pPr') ? child(child(lvl,'pPr'),'ind') : null;
+      levels[ilvl] = {
+        numFmt: numFmtEl ? attr(numFmtEl,'val') : 'decimal',
+        lvlText: lvlTextEl ? attr(lvlTextEl,'val') : '%1.',
+        start: startEl ? parseInt(attr(startEl,'val')||'1',10) : 1,
+        indentLeft: indEl && attr(indEl,'left') ? parseFloat(attr(indEl,'left'))/TWIPS_PER_PX : (18 + ilvl*24)
+      };
+    }
+    state.abstractNum[id] = { levels };
+  }
+  const nums = children(root, 'num');
+  for (const n of nums){
+    const numId = attr(n, 'numId');
+    const abstractIdEl = child(n, 'abstractNumId');
+    state.numbering[numId] = { abstractId: abstractIdEl ? attr(abstractIdEl,'val') : null };
+  }
+}
+
+function getListLevelInfo(numId, ilvl){
+  const numDef = state.numbering[numId];
+  if (!numDef) return null;
+  const abs = state.abstractNum[numDef.abstractId];
+  if (!abs) return null;
+  return abs.levels[ilvl] || abs.levels[0] || null;
+}
+
+function nextListLabel(numId, ilvl, numFmt, lvlText){
+  if (!state.numCounters[numId]) state.numCounters[numId] = {};
+  const counters = state.numCounters[numId];
+  if (counters[ilvl] === undefined){
+    const info = getListLevelInfo(numId, ilvl);
+    counters[ilvl] = (info && info.start) ? info.start : 1;
+  } else {
+    counters[ilvl]++;
+  }
+  for (const k in counters){
+    if (parseInt(k,10) > ilvl) delete counters[k];
+  }
+  const n = counters[ilvl];
+  if (numFmt === 'bullet'){
+    return lvlText || '•';
+  }
+  let label = toFormattedNumber(n, numFmt);
+  if (lvlText){
+    label = lvlText.replace(/%\d/g, label);
+  }
+  return label;
+}
+
+function toFormattedNumber(n, fmt){
+  switch(fmt){
+    case 'decimal': return String(n);
+    case 'lowerLetter': return numberToLetters(n).toLowerCase();
+    case 'upperLetter': return numberToLetters(n).toUpperCase();
+    case 'lowerRoman': return toRoman(n).toLowerCase();
+    case 'upperRoman': return toRoman(n).toUpperCase();
+    default: return String(n);
+  }
+}
+function numberToLetters(n){
+  let s = '';
+  while (n > 0){
+    const rem = (n - 1) % 26;
+    s = String.fromCharCode(65 + rem) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+}
+function toRoman(n){
+  const map = [[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],
+    [50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+  let out = '';
+  for (const [val, sym] of map){
+    while (n >= val){ out += sym; n -= val; }
+  }
+  return out;
+}
+
+/* =========================================================================
+   5) DOCUMENT.XML  -> árbol de bloques (párrafos / tablas)
+   ========================================================================= */
+async function loadDocument(zip){
+  const f = zip.file('word/document.xml');
+  if (!f) throw new Error('word/document.xml no encontrado — el archivo no es un .docx válido.');
+  const text = await f.async('string');
+  const xml = parseXML(text);
+  const root = xml.documentElement;
+  const body = child(root, 'body');
+  if (!body) throw new Error('No se encontró <w:body> en el documento.');
+
+  const sectPr = child(body, 'sectPr');
+  if (sectPr){
+    const pgSz = child(sectPr, 'pgSz');
+    const pgMar = child(sectPr, 'pgMar');
+    if (pgSz){
+      const w = attr(pgSz,'w'), h = attr(pgSz,'h');
+      if (w) state.page.w = Math.round(parseFloat(w) / TWIPS_PER_PX);
+      if (h) state.page.h = Math.round(parseFloat(h) / TWIPS_PER_PX);
+    }
+    if (pgMar){
+      const mL = attr(pgMar,'left'), mR = attr(pgMar,'right'),
+            mT = attr(pgMar,'top'), mB = attr(pgMar,'bottom');
+      if (mL) state.page.mL = parseFloat(mL) / TWIPS_PER_PX;
+      if (mR) state.page.mR = parseFloat(mR) / TWIPS_PER_PX;
+      if (mT) state.page.mT = parseFloat(mT) / TWIPS_PER_PX;
+      if (mB) state.page.mB = parseFloat(mB) / TWIPS_PER_PX;
+      const headerD = attr(pgMar,'header');
+      const footerD = attr(pgMar,'footer');
+      if (headerD) state.page.headerDistPx = parseFloat(headerD) / TWIPS_PER_PX - 5;
+      if (footerD) state.page.footerDistPx = parseFloat(footerD) / TWIPS_PER_PX;
+    }
+    state.page.titlePg = !!child(sectPr, 'titlePg');
+
+    for (const hRef of children(sectPr, 'headerReference')){
+      const type = attr(hRef, 'type') || 'default';
+      const rId = hRef.getAttribute('r:id') || hRef.getAttribute('id');
+      if (rId) state.headerRefs[type] = rId;
+    }
+    for (const fRef of children(sectPr, 'footerReference')){
+      const type = attr(fRef, 'type') || 'default';
+      const rId = fRef.getAttribute('r:id') || fRef.getAttribute('id');
+      if (rId) state.footerRefs[type] = rId;
+    }
+  }
+
+  state.blocks = parseBodyChildren(body);
+}
+
+async function loadHeadersFooters(zip){
+  for (const type in state.headerRefs){
+    const rId = state.headerRefs[type];
+    const target = state.relsMap[rId];
+    if (!target) continue;
+    let path = target.replace(/^\.?\/?/, '');
+    if (!path.startsWith('word/')) path = 'word/' + path;
+    const blocks = await parseHeaderFooterPart(zip, path);
+    if (blocks) state.headers[type] = blocks;
+  }
+  for (const type in state.footerRefs){
+    const rId = state.footerRefs[type];
+    const target = state.relsMap[rId];
+    if (!target) continue;
+    let path = target.replace(/^\.?\/?/, '');
+    if (!path.startsWith('word/')) path = 'word/' + path;
+    const blocks = await parseHeaderFooterPart(zip, path);
+    if (blocks) state.footers[type] = blocks;
+  }
+}
+
+async function parseHeaderFooterPart(zip, path){
+  const f = zip.file(path);
+  if (!f) return null;
+  const text = await f.async('string');
+  const xml = parseXML(text);
+  const root = xml.documentElement; 
+  if (!root) return null;
+
+  const dirEnd = path.lastIndexOf('/');
+  const dir = dirEnd >= 0 ? path.slice(0, dirEnd + 1) : '';
+  const fileName = dirEnd >= 0 ? path.slice(dirEnd + 1) : path;
+  const relsPath = `${dir}_rels/${fileName}.rels`;
+  const relsFile = zip.file(relsPath);
+  let localRels = {};
+  if (relsFile){
+    const relsText = await relsFile.async('string');
+    const relsXml = parseXML(relsText);
+    for (const rel of relsXml.getElementsByTagName('Relationship')){
+      localRels[rel.getAttribute('Id')] = rel.getAttribute('Target');
+    }
+  }
+  const localMediaCache = await buildMediaCache(zip, localRels);
+
+  const previousCache = state.activeMediaCache;
+  state.activeMediaCache = localMediaCache;
+  const blocks = parseBodyChildren(root);
+  state.activeMediaCache = previousCache;
+
+  return blocks;
+}
+
+function parseBodyChildren(container){
+  const blocks = [];
+  for (const el of container.children){
+    if (el.localName === 'p'){
+      blocks.push(parseParagraph(el));
+    } else if (el.localName === 'tbl'){
+      blocks.push(parseTable(el));
+    }
+  }
+  return blocks;
+}
+
+function parseParagraph(pEl){
+  const pPr = child(pEl, 'pPr');
+  const directPara = parseParaProps(pPr);
+  const styleId = directPara.styleId;
+  const styleDef = getEffectiveStyleForParagraph(styleId);
+
+  const effectivePara = Object.assign({}, state.docDefaults.para, styleDef.para, directPara, {
+    indent: Object.assign({}, state.docDefaults.para.indent, styleDef.para.indent, directPara.indent),
+    spacing: Object.assign({}, state.docDefaults.para.spacing, styleDef.para.spacing, directPara.spacing)
+  });
+
+  const runs = [];
+  for (const child_ of pEl.children){
+    if (child_.localName === 'r'){
+      runs.push(...parseRun(child_, styleDef.run));
+    } else if (child_.localName === 'hyperlink'){
+      for (const r of children(child_, 'r')){
+        runs.push(...parseRun(r, styleDef.run));
+      }
+    } else if (child_.localName === 'fldSimple'){
+      for (const r of children(child_, 'r')){
+        runs.push(...parseRun(r, styleDef.run));
+      }
+    }
+  }
+
+  return {
+    type: 'paragraph',
+    para: effectivePara,
+    runs,
+    isEmpty: runs.length === 0
+  };
+}
+
+function parseRun(rEl, baseStyleRun){
+  const rPr = child(rEl, 'rPr');
+  const directRun = parseRunProps(rPr);
+  const effectiveRun = Object.assign({}, state.docDefaults.run, baseStyleRun, directRun);
+
+  const items = [];
+  for (const node of rEl.children){
+    switch(node.localName){
+      case 't': {
+        const text = node.textContent || '';
+        items.push({ kind:'text', text, style: effectiveRun });
+        break;
+      }
+      case 'tab': {
+        items.push({ kind:'tab', style: effectiveRun });
+        break;
+      }
+      case 'br': {
+        const brType = attr(node,'type');
+        items.push({ kind: brType === 'page' ? 'pageBreak' : 'lineBreak', style: effectiveRun });
+        break;
+      }
+      case 'drawing': {
+        const img = extractDrawingImage(node);
+        if (img){
+          items.push({ kind: img.isFloating ? 'floatingImage' : 'image', image: img, style: effectiveRun });
+        }
+        break;
+      }
+      case 'pict': {
+        const img = extractDrawingImage(node);
+        if (img) items.push({ kind: img.isFloating ? 'floatingImage' : 'image', image: img, style: effectiveRun });
+        break;
+      }
+      default: break;
+    }
+  }
+  return items;
+}
+
+function parsePosition(posEl){
+  if (!posEl) return { relativeFrom: 'column', offset: 0, align: null };
+  const relativeFrom = posEl.getAttribute('relativeFrom') || 'column';
+  let offset = 0;
+  const offsetEl = child(posEl, 'posOffset');
+  if (offsetEl){
+    const emu = parseFloat(offsetEl.textContent);
+    if (!isNaN(emu)) offset = emu / EMU_PER_PX;
+  }
+  let align = null;
+  const alignEl = child(posEl, 'align');
+  if (alignEl) align = (alignEl.textContent || '').trim();
+  return { relativeFrom, offset, align };
+}
+
+function extractDrawingImage(drawingEl){
+  const anchorEl = child(drawingEl, 'anchor');
+  const inlineEl = child(drawingEl, 'inline');
+  const containerEl = anchorEl || inlineEl;
+  if (!containerEl) return null;
+
+  const blips = findAll(drawingEl, 'blip');
+  if (blips.length === 0) return null;
+  const blip = blips[0];
+  const rEmbed = blip.getAttribute('r:embed') || blip.getAttribute('embed');
+  if (!rEmbed) return null;
+  const activeCache = state.activeMediaCache || state.mediaCache;
+  const dataUrl = activeCache[rEmbed];
+  if (!dataUrl) return null;
+
+  let widthPx = 200, heightPx = 150;
+  const extEl = child(containerEl, 'extent');
+  if (extEl){
+    const cx = parseFloat(extEl.getAttribute('cx'));
+    const cy = parseFloat(extEl.getAttribute('cy'));
+    if (cx && cy){
+      widthPx = cx / EMU_PER_PX;
+      heightPx = cy / EMU_PER_PX;
+    }
+  }
+
+  let opacity = 1;
+  const alphaModEls = findAll(drawingEl, 'alphaModFix');
+  if (alphaModEls.length){
+    const amt = alphaModEls[0].getAttribute('amt');
+    if (amt !== null) opacity = Math.max(0, Math.min(1, parseFloat(amt) / 100000));
+  } else {
+    const alphaEls = findAll(drawingEl, 'alpha');
+    if (alphaEls.length){
+      const amt = alphaEls[0].getAttribute('val') || alphaEls[0].getAttribute('amt');
+      if (amt !== null) opacity = Math.max(0, Math.min(1, parseFloat(amt) / 100000));
+    }
+  }
+
+  let rotation = 0;
+  const xfrmEls = findAll(drawingEl, 'xfrm');
+  if (xfrmEls.length){
+    const rot = xfrmEls[0].getAttribute('rot');
+    if (rot) rotation = (parseFloat(rot) / 60000) * Math.PI / 180;
+  }
+
+  const result = { dataUrl, widthPx, heightPx, opacity, rotation, isFloating: false };
+
+  if (anchorEl){
+    result.isFloating = true;
+    result.behindDoc = anchorEl.getAttribute('behindDoc') === '1';
+    result.relativeHeight = parseInt(anchorEl.getAttribute('relativeHeight') || '0', 10);
+    const posH = child(anchorEl, 'positionH');
+    const posV = child(anchorEl, 'positionV');
+    result.posH = parsePosition(posH);
+    result.posV = parsePosition(posV);
+  }
+
+  return result;
+}
+
+function parseTable(tblEl){
+  const tblGrid = child(tblEl, 'tblGrid');
+  const colWidths = [];
+  if (tblGrid){
+    for (const gridCol of children(tblGrid, 'gridCol')){
+      const w = attr(gridCol, 'w');
+      colWidths.push(w ? parseFloat(w) / TWIPS_PER_PX : 100);
+    }
+  }
+  const rows = [];
+  for (const tr of children(tblEl, 'tr')){
+    const cells = [];
+    for (const tc of children(tr, 'tc')){
+      const tcPr = child(tc, 'tcPr');
+      let gridSpan = 1;
+      if (tcPr){
+        const gs = child(tcPr, 'gridSpan');
+        if (gs) gridSpan = parseInt(attr(gs,'val') || '1', 10);
+      }
+      const cellBlocks = parseBodyChildren(tc);
+      cells.push({ blocks: cellBlocks, gridSpan });
+    }
+    rows.push({ cells });
+  }
+  return { type:'table', colWidths, rows };
+}
+
+/* =========================================================================
+   6) MOTOR DE LAYOUT
+   ========================================================================= */
+
+function fontString(style, scale){
+  scale = scale || 1;
+  const sizePx = (style.sizePx || 16) * scale;
+  const weight = style.bold ? 'bold' : 'normal';
+  const styleAttr = style.italic ? 'italic' : 'normal';
+  const family = mapFontFamily(style.font);
+  return `${styleAttr} ${weight} ${sizePx}px ${family}`;
+}
+function mapFontFamily(f){
+  if (!f) return 'Calibri, Arial, sans-serif';
+  return `"${f}", Calibri, Arial, sans-serif`;
+}
+
+function newPageLayout(){
+  return {
+    w: state.page.w, h: state.page.h,
+    ops: [],
+    floatingBehind: [],  
+    floatingFront: [],   
+    cursorY: state.page.mT
+  };
+}
+
+async function computeLayout(){
+  const measureCtx = ctx;
+  const pages = [];
+  function createBodyPage() {
+    const headerH = (state.headerLayout && state.headerLayout.default) ? state.headerLayout.default.height : 0;
+    const startY = Math.max(state.page.mT, state.page.headerDistPx + headerH);
+    return { w: state.page.w, h: state.page.h, ops: [], floatingBehind: [], floatingFront: [], cursorY: startY };
+  }
+  let current = newPageLayout();
+  pages.push(current);
+
+  const contentLeft = state.page.mL;
+  const contentWidth = state.page.w - state.page.mL - state.page.mR;
+
+  function ensureSpace(neededHeight, forcePageBreak){
+    if (forcePageBreak || current.cursorY + neededHeight > state.page.h - state.page.mB){
+      current = newPageLayout();
+      pages.push(current);
+    }
+  }
+
+  for (const block of state.blocks){
+    if (block.type === 'paragraph'){
+      await layoutParagraph(block, contentLeft, contentWidth, pages, () => current, (p) => { current = p; }, ensureSpace);
+    } else if (block.type === 'table'){
+      await layoutTable(block, contentLeft, contentWidth, pages, () => current, (p) => { current = p; }, ensureSpace);
+    }
+  }
+
+  state.pages = pages;
+}
+
+async function layoutHeaderFooterBlocks(blocks, width){
+  if (!blocks || blocks.length === 0) return { ops: [], floatingBehind: [], floatingFront: [], height: 0 };
+  let bufferPage = { w: width, h: 999999, ops: [], floatingBehind: [], floatingFront: [], cursorY: 0 };
+  const pagesBuf = [bufferPage];
+  const noPaginate = () => { };
+  for (const block of blocks){
+    if (block.type === 'paragraph'){
+      await layoutParagraph(block, 0, width, pagesBuf, () => bufferPage, (p) => { bufferPage = p; }, noPaginate);
+    } else if (block.type === 'table'){
+      await layoutTable(block, 0, width, pagesBuf, () => bufferPage, (p) => { bufferPage = p; }, noPaginate);
+    }
+  }
+  return {
+    ops: bufferPage.ops,
+    floatingBehind: bufferPage.floatingBehind,
+    floatingFront: bufferPage.floatingFront,
+    height: bufferPage.cursorY
+  };
+}
+
+async function layoutHeadersFooters(){
+  const contentWidth = state.page.w - state.page.mL - state.page.mR;
+  state.headerLayout = {};
+  state.footerLayout = {};
+  for (const type in state.headers){
+    state.headerLayout[type] = await layoutHeaderFooterBlocks(state.headers[type], contentWidth);
+  }
+  for (const type in state.footers){
+    state.footerLayout[type] = await layoutHeaderFooterBlocks(state.footers[type], contentWidth);
+  }
+}
+
+async function layoutParagraph(block, contentLeft, contentWidth, pages, getCurrent, setCurrent, ensureSpace){
+  const para = block.para;
+  const lineHeightMultiplier = (para.spacing && para.spacing.line) ? para.spacing.line : 1.15;
+  const spaceBefore = (para.spacing && para.spacing.before) || 0;
+  const spaceAfter = (para.spacing && para.spacing.after) || 0;
+
+  let indentLeft = (para.indent && para.indent.left) || 0;
+  const indentRight = (para.indent && para.indent.right) || 0;
+  let firstLineExtra = 0;
+  if (para.indent){
+    if (para.indent.firstLine) firstLineExtra = para.indent.firstLine;
+    if (para.indent.hanging) firstLineExtra = para.indent.hanging;
+  }
+
+  let listLabel = null;
+  if (para.numPr && para.numPr.numId && para.numPr.numId !== '0'){
+    const info = getListLevelInfo(para.numPr.numId, para.numPr.ilvl || 0);
+    if (info){
+      listLabel = nextListLabel(para.numPr.numId, para.numPr.ilvl || 0, info.numFmt, info.lvlText);
+      indentLeft = Math.max(indentLeft, info.indentLeft || (18 + (para.numPr.ilvl||0)*24));
+    }
+  }
+
+  if (para.pageBreakBefore){
+    let cur = getCurrent();
+    const np = newPageLayout();
+    pages.push(np);
+    setCurrent(np);
+  }
+
+  spaceIfNeeded(spaceBefore, getCurrent, setCurrent, pages);
+
+  const floatItems = block.runs.filter(it => it.kind === 'floatingImage');
+  if (floatItems.length){
+    const cur = getCurrent();
+    for (const fi of floatItems){
+      const posH = fi.image.posH || { relativeFrom: 'column', offset: 0, align: null };
+      const posV = fi.image.posV || { relativeFrom: 'paragraph', offset: 0, align: null };
+
+      let x = 0, y = 0;
+      let isAbsX = false, isAbsY = false;
+
+      const relH = posH.relativeFrom;
+      if (relH === 'page'){
+        if (posH.align === 'center') x = (state.page.w - fi.image.widthPx)/2;
+        else if (posH.align === 'right') x = state.page.w - fi.image.widthPx;
+        else x = posH.offset;
+        isAbsX = true;
+      } else if (relH === 'margin' || relH === 'leftMargin' || relH === 'rightMargin'){
+        const avail = state.page.w - state.page.mL - state.page.mR;
+        if (posH.align === 'center') x = state.page.mL + (avail - fi.image.widthPx)/2;
+        else if (posH.align === 'right') x = state.page.mL + avail - fi.image.widthPx;
+        else x = state.page.mL + posH.offset;
+        isAbsX = true;
+      } else {
+        const avail = contentWidth;
+        if (posH.align === 'center') x = contentLeft + (avail - fi.image.widthPx)/2;
+        else if (posH.align === 'right') x = contentLeft + avail - fi.image.widthPx;
+        else x = contentLeft + posH.offset;
+        isAbsX = false;
+      }
+
+      const relV = posV.relativeFrom;
+      if (relV === 'page'){
+        if (posV.align === 'center') y = (state.page.h - fi.image.heightPx)/2;
+        else if (posV.align === 'bottom') y = state.page.h - fi.image.heightPx;
+        else y = posV.offset;
+        isAbsY = true;
+      } else if (relV === 'margin' || relV === 'topMargin' || relV === 'bottomMargin'){
+        const avail = state.page.h - state.page.mT - state.page.mB;
+        if (posV.align === 'center') y = state.page.mT + (avail - fi.image.heightPx)/2;
+        else if (posV.align === 'bottom') y = state.page.mT + avail - fi.image.heightPx;
+        else y = state.page.mT + posV.offset;
+        isAbsY = true;
+      } else {
+        y = cur.cursorY + posV.offset;
+        isAbsY = false;
+      }
+
+      const op = {
+        op: 'image',
+        x: x, y: y,
+        w: fi.image.widthPx, h: fi.image.heightPx,
+        dataUrl: fi.image.dataUrl,
+        opacity: fi.image.opacity,
+        rotation: fi.image.rotation,
+        relativeHeight: fi.image.relativeHeight || 0,
+        isAbsoluteX: isAbsX,
+        isAbsoluteY: isAbsY
+      };
+      if (fi.image.behindDoc) cur.floatingBehind.push(op);
+      else cur.floatingFront.push(op);
+    }
+  }
+
+  if (block.isEmpty){
+    const emptyStyle = Object.assign({}, state.docDefaults.run);
+    const h = (emptyStyle.sizePx || 16) * lineHeightMultiplier;
+    ensureSpace(h, false);
+    let cur = getCurrent();
+    cur.cursorY += h;
+    spaceIfNeeded(spaceAfter, getCurrent, setCurrent, pages);
+    return;
+  }
+
+  const tokens = []; 
+  for (const item of block.runs){
+    if (item.kind === 'text'){
+      const parts = item.text.split(/(\s+)/).filter(s => s.length > 0);
+      for (const part of parts){
+        tokens.push({ text: part, style: item.style, isSpace: /^\s+$/.test(part) });
+      }
+    } else if (item.kind === 'tab'){
+      tokens.push({ text: '\t', style: item.style, isTab: true });
+    } else if (item.kind === 'lineBreak'){
+      tokens.push({ forceBreak: true, style: item.style });
+    } else if (item.kind === 'pageBreak'){
+      tokens.push({ forceBreak: true, forcePage: true, style: item.style });
+    } else if (item.kind === 'image'){
+      tokens.push({ image: item.image, style: item.style });
+    }
+  }
+
+  let firstLineOfPara = true;
+  let lineTokens = [];
+  let lineWidth = 0;
+
+  function availableWidth(){
+    const extra = firstLineOfPara ? Math.max(firstLineExtra,0) : 0;
+    const hang = (!firstLineOfPara && firstLineExtra < 0) ? -firstLineExtra : 0;
+    return contentWidth - indentLeft - indentRight - extra - (firstLineOfPara ? 0 : hang);
+  }
+
+  function flushLine(){
+    if (lineTokens.length === 0 && firstLineOfPara === false) { }
+    let maxTokenHeight = 0;
+    for (const t of lineTokens){
+      const h = t.image ? t.image.heightPx : (t.style.sizePx || 16) * lineHeightMultiplier;
+      if (h > maxTokenHeight) maxTokenHeight = h;
+    }
+    if (maxTokenHeight === 0) maxTokenHeight = 16 * lineHeightMultiplier;
+
+    ensureSpace(maxTokenHeight, false);
+    let cur = getCurrent();
+
+    const lineIndent = indentLeft + (firstLineOfPara ? Math.max(firstLineExtra,0) : (firstLineExtra < 0 ? -firstLineExtra : 0));
+    const lineY = cur.cursorY;
+    const lineAvailWidth = availableWidth();
+
+    let trimmed = lineTokens.slice();
+    while (trimmed.length && trimmed[trimmed.length-1].isSpace) trimmed.pop();
+
+    let naturalWidth = 0;
+    for (const t of trimmed){
+      naturalWidth += tokenWidth(t);
+    }
+
+    let startX = contentLeft + lineIndent;
+    let extraSpacePerGap = 0;
+    if (para.align === 'center'){
+      startX += Math.max(0,(lineAvailWidth - naturalWidth)/2);
+    } else if (para.align === 'right'){
+      startX += Math.max(0,(lineAvailWidth - naturalWidth));
+    } else if (para.align === 'both' && !isLastLineOfParaFlag){
+      const gaps = trimmed.filter(t=>t.isSpace).length;
+      if (gaps > 0){
+        extraSpacePerGap = Math.max(0,(lineAvailWidth - naturalWidth)) / gaps;
+      }
+    }
+
+    if (listLabel && firstLineOfPara){
+      const labelStyle = (block.runs[0] && block.runs[0].style) ? block.runs[0].style : state.docDefaults.run;
+      cur.ops.push({
+        op:'text', text: listLabel, x: contentLeft + Math.max(indentLeft - 22,0), y: lineY,
+        style: labelStyle, baseline: maxTokenHeight
+      });
+    }
+
+    let x = startX;
+    for (const t of trimmed){
+      if (t.image){
+        cur.ops.push({ op:'image', x, y: lineY, w: t.image.widthPx, h: t.image.heightPx, dataUrl: t.image.dataUrl, opacity: t.image.opacity, rotation: t.image.rotation });
+        x += t.image.widthPx;
+        continue;
+      }
+      if (t.isTab){
+        x += 36; 
+        continue;
+      }
+      const w = tokenWidth(t);
+      cur.ops.push({ op:'text', text: t.text, x, y: lineY, style: t.style, baseline: maxTokenHeight });
+      x += w;
+      if (t.isSpace) x += extraSpacePerGap;
+    }
+
+    cur.cursorY += maxTokenHeight;
+    firstLineOfPara = false;
+    lineTokens = [];
+    lineWidth = 0;
+  }
+
+  let isLastLineOfParaFlag = false;
+
+  function tokenWidth(t){
+    if (t.image) return t.image.widthPx;
+    if (t.isTab) return 36;
+    ctx.font = fontString(t.style);
+    return ctx.measureText(t.text).width;
+  }
+
+  for (let idx = 0; idx < tokens.length; idx++){
+    const t = tokens[idx];
+    if (t.forceBreak){
+      flushLine();
+      if (t.forcePage){
+        const np = newPageLayout();
+        pages.push(np);
+        setCurrent(np);
+      }
+      continue;
+    }
+    const w = tokenWidth(t);
+    const limit = availableWidth();
+    if (lineWidth + w > limit && lineTokens.length > 0 && !t.isSpace){
+      flushLine();
+    }
+    lineTokens.push(t);
+    lineWidth += w;
+  }
+  isLastLineOfParaFlag = true;
+  if (lineTokens.length > 0 || firstLineOfPara){
+    flushLine();
+  }
+
+  spaceIfNeeded(spaceAfter, getCurrent, setCurrent, pages);
+}
+
+function spaceIfNeeded(amount, getCurrent, setCurrent, pages){
+  if (!amount) return;
+  let cur = getCurrent();
+  cur.cursorY += amount;
+}
+
+async function layoutTable(tbl, contentLeft, contentWidth, pages, getCurrent, setCurrent, ensureSpace){
+  const totalDefinedWidth = tbl.colWidths.reduce((a,b)=>a+b,0) || contentWidth;
+  const scale = contentWidth / totalDefinedWidth;
+  const colWidths = tbl.colWidths.length ? tbl.colWidths.map(w => w*scale) : [contentWidth];
+
+  for (const row of tbl.rows){
+    const cellRenders = [];
+    let colIndex = 0;
+    let rowHeight = 24;
+    for (const cell of row.cells){
+      const cellWidth = sumColWidths(colWidths, colIndex, cell.gridSpan);
+      const cellPages = [ { w: cellWidth, h: 999999, ops: [], floatingBehind: [], floatingFront: [], cursorY: 4 } ];
+      let curCellPage = cellPages[0];
+      const cellEnsure = (needed) => { };
+      for (const b of cell.blocks){
+        if (b.type === 'paragraph'){
+          await layoutParagraph(b, 0, cellWidth - 8, cellPages, () => curCellPage, (p)=>{curCellPage=p;}, cellEnsure);
+        }
+      }
+      const h = Math.max(24, curCellPage.cursorY + 6);
+      rowHeight = Math.max(rowHeight, h);
+      cellRenders.push({ ops: curCellPage.ops, width: cellWidth, colIndex, gridSpan: cell.gridSpan });
+      if (curCellPage.floatingBehind.length) getCurrent().floatingBehind.push(...curCellPage.floatingBehind);
+      if (curCellPage.floatingFront.length) getCurrent().floatingFront.push(...curCellPage.floatingFront);
+      colIndex += cell.gridSpan;
+    }
+
+    ensureSpace(rowHeight, false);
+    let cur = getCurrent();
+    const rowY = cur.cursorY;
+    let x = contentLeft;
+    colIndex = 0;
+    for (const cr of cellRenders){
+      const cellX = contentLeft + sumColWidths(colWidths, 0, cr.colIndex);
+      cur.ops.push({ op:'rect', x: cellX, y: rowY, w: cr.width, h: rowHeight, stroke:'#000000', lineWidth: 1 });
+      for (const o of cr.ops){
+        const shifted = Object.assign({}, o, { x: o.x + cellX + 4, y: o.y + rowY });
+        cur.ops.push(shifted);
+      }
+    }
+    cur.cursorY += rowHeight;
+  }
+}
+function sumColWidths(colWidths, from, span){
+  let s = 0;
+  for (let i=from; i<from+span && i<colWidths.length; i++) s += colWidths[i];
+  return s;
+}
+
+/* =========================================================================
+   7) RENDERIZADO EN CANVAS
+   ========================================================================= */
+async function renderAllPages(){
+  const pagesData = state.pages;
+  const zoom = state.zoom;
+
+  const dataUrls = new Set();
+  for (const p of pagesData){
+    for (const op of p.ops){ if (op.op === 'image') dataUrls.add(op.dataUrl); }
+    for (const op of p.floatingBehind){ dataUrls.add(op.dataUrl); }
+    for (const op of p.floatingFront){ dataUrls.add(op.dataUrl); }
+  }
+  for (const layoutMap of [state.headerLayout, state.footerLayout]){
+    for (const type in layoutMap){
+      const data = layoutMap[type];
+      for (const op of data.ops){ if (op.op === 'image') dataUrls.add(op.dataUrl); }
+      for (const op of data.floatingBehind){ dataUrls.add(op.dataUrl); }
+      for (const op of data.floatingFront){ dataUrls.add(op.dataUrl); }
+    }
+  }
+  await Promise.all(Array.from(dataUrls).map(preloadImage));
+
+  const pageW = state.page.w;
+  const totalHeight = pagesData.reduce((acc,p) => acc + p.h + PAGE_GAP, 0);
+
+  canvas.width = Math.round(pageW * zoom);
+  canvas.height = Math.round((totalHeight) * zoom);
+  canvas.style.width = Math.round(pageW * zoom) + 'px';
+  canvas.style.height = Math.round(totalHeight * zoom) + 'px';
+
+  ctx.setTransform(zoom, 0, 0, zoom, 0, 0);
+  ctx.clearRect(0,0, canvas.width/zoom, canvas.height/zoom);
+
+  let offsetY = 0;
+  for (let i = 0; i < pagesData.length; i++){
+    const page = pagesData[i];
+    drawPageSheet(offsetY, pageW, page.h);
+
+    const useFirst = (i === 0) && state.page.titlePg;
+    const headerData = (useFirst && state.headerLayout.first) || state.headerLayout.default;
+    const footerData = (useFirst && state.footerLayout.first) || state.footerLayout.default;
+
+    // FIX: Declare footerTopY here so it exists for the entire page loop
+    let footerTopY = 0; 
+    if (footerData) {
+      footerTopY = state.page.h - state.page.footerDistPx - footerData.height;
+    }
+
+    drawFloatingLayer(sortByRelativeHeight(page.floatingBehind), offsetY);
+    
+    if (headerData){
+      drawFloatingLayerShifted(sortByRelativeHeight(headerData.floatingBehind), state.page.mL, state.page.headerDistPx, offsetY);
+      drawOpsShifted(headerData.ops, state.page.mL, state.page.headerDistPx, offsetY);
+    }
+    
+    if (footerData){
+      drawFloatingLayerShifted(sortByRelativeHeight(footerData.floatingBehind), state.page.mL, footerTopY, offsetY);
+      drawOpsShifted(footerData.ops, state.page.mL, footerTopY, offsetY);
+    }
+
+    drawOps(page.ops, offsetY);
+
+    if (headerData) drawFloatingLayerShifted(sortByRelativeHeight(headerData.floatingFront), state.page.mL, state.page.headerDistPx, offsetY);
+    
+    // footerTopY is now perfectly accessible here!
+    if (footerData) drawFloatingLayerShifted(sortByRelativeHeight(footerData.floatingFront), state.page.mL, footerTopY, offsetY);
+    
+    drawFloatingLayer(sortByRelativeHeight(page.floatingFront), offsetY);
+
+    offsetY += page.h + PAGE_GAP;
+  }
+
+  pageIndicator.textContent = `${pagesData.length} página${pagesData.length===1?'':'s'}`;
+}
+
+function sortByRelativeHeight(list){
+  return list.slice().sort((a,b) => (a.relativeHeight||0) - (b.relativeHeight||0));
+}
+
+function drawFloatingLayerShifted(ops, shiftX, shiftY, offsetY){
+  for (const op of ops){
+    const img = state.images[op.dataUrl];
+    if (img) {
+      const finalX = op.isAbsoluteX ? op.x : op.x + shiftX;
+      const finalY = op.isAbsoluteY ? op.y : op.y + shiftY;
+      drawImageOp(Object.assign({}, op, { x: finalX, y: finalY }), offsetY, img);
+    }
+  }
+}
+
+function drawFloatingLayer(ops, offsetY){
+  for (const op of ops){
+    const img = state.images[op.dataUrl];
+    if (img) drawImageOp(op, offsetY, img);
+  }
+}
+
+function drawPageSheet(offsetY, w, h){
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.18)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 3;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, offsetY, w, h);
+  ctx.restore();
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0.5, offsetY + 0.5, w-1, h-1);
+}
+
+function drawOps(ops, offsetY){
+  for (const op of ops){
+    if (op.op === 'text'){
+      drawText(op, offsetY);
+    } else if (op.op === 'image'){
+      const img = state.images[op.dataUrl];
+      if (img) drawImageOp(op, offsetY, img);
+    } else if (op.op === 'rect'){
+      ctx.save();
+      ctx.strokeStyle = op.stroke || '#000';
+      ctx.lineWidth = op.lineWidth || 1;
+      ctx.strokeRect(op.x + 0.5, offsetY + op.y + 0.5, op.w - 1, op.h - 1);
+      ctx.restore();
+    }
+  }
+}
+
+function drawOpsShifted(ops, shiftX, shiftY, offsetY){
+  const shiftedOps = ops.map(op => {
+    return Object.assign({}, op, {
+      x: op.x + shiftX,
+      y: op.y + shiftY
+    });
+  });
+  drawOps(shiftedOps, offsetY);
+}
+
+function drawImageOp(op, offsetY, img){
+  ctx.save();
+  if (typeof op.opacity === 'number' && op.opacity < 1){
+    ctx.globalAlpha = op.opacity;
+  }
+  if (op.rotation){
+    const cx = op.x + op.w / 2;
+    const cy = offsetY + op.y + op.h / 2;
+    ctx.translate(cx, cy);
+    ctx.rotate(op.rotation);
+    ctx.drawImage(img, -op.w / 2, -op.h / 2, op.w, op.h);
+  } else {
+    ctx.drawImage(img, op.x, offsetY + op.y, op.w, op.h);
+  }
+  ctx.restore();
+}
+
+function drawText(op, offsetY){
+  const style = op.style || {};
+  ctx.save();
+  ctx.font = fontString(style);
+  ctx.fillStyle = style.color || '#000000';
+  ctx.textBaseline = 'alphabetic';
+  const ascent = (style.sizePx || 16) * 0.8;
+  const y = offsetY + op.y + ascent;
+  let text = op.text;
+  let xPos = op.x;
+  if (style.vertAlign === 'superscript'){
+    ctx.font = fontString(Object.assign({}, style, { sizePx: (style.sizePx||16)*0.7 }));
+    ctx.fillText(text, xPos, y - (style.sizePx||16)*0.25);
+  } else if (style.vertAlign === 'subscript'){
+    ctx.font = fontString(Object.assign({}, style, { sizePx: (style.sizePx||16)*0.7 }));
+    ctx.fillText(text, xPos, y + (style.sizePx||16)*0.15);
+  } else {
+    if (style.highlight){
+      const w = ctx.measureText(text).width;
+      ctx.save();
+      ctx.fillStyle = highlightColor(style.highlight);
+      ctx.fillRect(xPos, y - ascent, w, (style.sizePx||16)*1.2);
+      ctx.restore();
+      ctx.fillStyle = style.color || '#000000';
+    }
+    ctx.fillText(text, xPos, y);
+    if (style.underline || style.strike){
+      const w = ctx.measureText(text).width;
+      ctx.strokeStyle = style.color || '#000000';
+      ctx.lineWidth = Math.max(1, (style.sizePx||16)*0.06);
+      ctx.beginPath();
+      const lineY = style.strike ? y - (style.sizePx||16)*0.3 : y + 2;
+      ctx.moveTo(xPos, lineY);
+      ctx.lineTo(xPos + w, lineY);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+function highlightColor(name){
+  const map = { yellow:'#fff59d', green:'#a5d6a7', cyan:'#80deea', magenta:'#f48fb1',
+    blue:'#90caf9', red:'#ef9a9a', darkYellow:'#ffe082', darkGray:'#bdbdbd', lightGray:'#eeeeee' };
+  return map[name] || '#fff59d';
+}
+
+/* =========================================================================
+   8) CONTROLES DE ZOOM
+   ========================================================================= */
+function applyZoom(newZoom, refit){
+  state.zoom = Math.min(3, Math.max(0.25, newZoom));
+  zoomLabel.textContent = Math.round(state.zoom*100) + '%';
+  if (state.pages.length){
+    renderAllPages();
+  }
+}
+document.getElementById('dv_zoomInBtn').addEventListener('click', () => applyZoom(state.zoom + 0.1));
+document.getElementById('dv_zoomOutBtn').addEventListener('click', () => applyZoom(state.zoom - 0.1));
+zoomLabel.addEventListener('click', () => applyZoom(1));
+document.getElementById('dv_fitBtn').addEventListener('click', () => {
+  const availW = viewport.clientWidth - 64;
+  const newZoom = Math.max(0.25, Math.min(3, availW / state.page.w));
+  applyZoom(newZoom);
+});
+
+window.addEventListener('resize', () => {
+});
+
+
+/* =========================================================================
+   9) EXPOSICIÓN PÚBLICA PARA EL GENERADOR (GFEWTB)
+   ========================================================================= */
+document.getElementById('dv_refreshBtn').addEventListener('click', () => {
+  if (typeof window.dvOnRefreshRequested === 'function') window.dvOnRefreshRequested();
+});
+
+window.DocxViewerEngine = {
+  loadBlob: handleFile,
+  setStatus: setStatus
+};
+
+})();
+</script>
+
 <script>
 /* ════════════════════════════════════════
-   BASE DE DATOS DE ASIGNATURAS
+   BASE DE DATOS DE ASIGNATURAS (VACÍA)
 ════════════════════════════════════════ */
-const asignaturasData = {
-  "Programación Orientada a Objetos": {
-    docente: "Terán Gómez David",
-    total_comp: 6,
-    competencias: [
-      "conoce y comprende los conceptos básicos de base de datos y los fundamentos de la programación orientada a objetos.",
-      "aplica los conceptos de clases y objetos en el diseño y desarrollo de software.",
-      "identifica y aplica relaciones de herencia entre clases.",
-      "aplica el concepto de polimorfismo en la resolución de problemas de software.",
-      "comprende y aplica el manejo de excepciones en programas orientados a objetos.",
-      "aplica el uso de archivos e interfaces gráficas de usuario."
-    ],
-    indicadores: [
+const asignaturasData = {};
+
+/* ════════════════════════════════════════
+   MATERIA PERSONALIZADA Y LOCALSTORAGE
+════════════════════════════════════════ */
+let customMateriaData = null; 
+let quill; 
+
+
+function toggleCustomPanel() {
+  const panel = document.getElementById('custom_mat_panel');
+  panel.classList.toggle('open');
+}
+
+function renderizarSelectorMaterias() {
+  const select = document.getElementById('asignatura_select');
+  const valorActual = select.value;
+  select.innerHTML = ''; 
+
+  select.add(new Option('— Selecciona una materia —', ''));
+  select.add(new Option('✏️ Formato vacío (ingresar todo manualmente)', '__vacio__'));
+
+  try {
+    const stored = localStorage.getItem('custom_materias');
+    if (stored) {
+      const custom = JSON.parse(stored);
+      const keys = Object.keys(custom);
+      
+      if (keys.length > 0) {
+        const optCustom = document.createElement('option');
+        optCustom.disabled = true;
+        optCustom.text = '─── MIS MATERIAS ───';
+        select.add(optCustom);
+
+        for (const key in custom) {
+          select.add(new Option('⭐ ' + key, key));
+          asignaturasData[key] = custom[key]; 
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Error leyendo localStorage:", e);
+  }
+
+  if (Array.from(select.options).some(opt => opt.value === valorActual)) {
+    select.value = valorActual;
+  }
+  
+  renderSavedMaterias();
+}
+
+function renderSavedMaterias() {
+  const grid = document.getElementById('saved_materias_grid');
+  let custom = {};
+  try { custom = JSON.parse(localStorage.getItem('custom_materias') || '{}'); } catch(e){}
+  
+  const keys = Object.keys(custom);
+  grid.innerHTML = '';
+
+  if(keys.length === 0) {
+    grid.innerHTML = '<div style="font-size:12px; color:var(--ink-faint); text-align:center; padding:10px;">No hay materias guardadas.</div>';
+    return;
+  }
+
+  /* ════════════════════════════════════════
+    onclick="seleccionarMateriaCard('${escHtml(key)}')""
+    ════════════════════════════════════════ */
+  keys.forEach(key => {
+    grid.innerHTML += `
+      <div class="saved-materia-card"> 
+        <h4>⭐ ${escHtml(key)}</h4>
+        <div class="smc-actions">
+          <button class="smc-btn edit" onclick="openMateriaModal('${escHtml(key)}')">✏️ Editar</button>
+          <button class="smc-btn export" onclick="exportarMateriaPersonalizada('${escHtml(key)}')">⬇ Exportar</button>
+          <button class="smc-btn delete" onclick="borrarMateriaPersonalizada('${escHtml(key)}')">🗑 Borrar</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function borrarMateriaPersonalizada(nombre) {
+  if (confirm(`¿Estás seguro de borrar permanentemente la materia "${nombre}"?`)) {
+    let custom = JSON.parse(localStorage.getItem('custom_materias') || '{}');
+    delete custom[nombre];
+    localStorage.setItem('custom_materias', JSON.stringify(custom));
+    delete asignaturasData[nombre];
+    
+    renderizarSelectorMaterias();
+    document.getElementById('asignatura_select').value = '__vacio__';
+    document.getElementById('asignatura_select').dispatchEvent(new Event('change'));
+    showSuccess(`Materia "${nombre}" eliminada correctamente.`);
+  }
+}
+
+function exportarMateriaPersonalizada(nombre) {
+  let custom = JSON.parse(localStorage.getItem('custom_materias') || '{}');
+  if(!custom[nombre]) return;
+  
+  const exportData = { [nombre]: custom[nombre] };
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  saveAs(blob, `${nombre.replace(/\s+/g,'_')}.json`);
+}
+
+function descargarPlantillaJSON() {
+  const plantilla = {
+    "Nombre de la Materia": {
+      docente: "Apellido Nombre del Docente",
+      total_comp: 4,
+      competencias: [
+        "descripción de la competencia 1.",
+        "descripción de la competencia 2.",
+        "descripción de la competencia 3.",
+        "descripción de la competencia 4."
+      ],
+      indicadores: [
+        "A. Se adapta a situaciones y contextos complejos.",
+        "B. Hace aportaciones a las actividades académicas desarrolladas.",
+        "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+        "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+        "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+        "F. Realiza su trabajo de manera autónoma y autorregulada."
+      ]
+    }
+  };
+  const blob = new Blob([JSON.stringify(plantilla, null, 2)], { type: 'application/json' });
+  saveAs(blob, 'plantilla_materia.json');
+}
+
+function cargarMateriaDesdeArchivo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const raw = JSON.parse(e.target.result);
+      const keys = Object.keys(raw);
+      if (keys.length === 0) throw new Error('El archivo está vacío.');
+      const nombre = keys[0];
+      const d = raw[nombre];
+      
+      if (!d.docente || !Array.isArray(d.competencias) || !Array.isArray(d.indicadores))
+        throw new Error('Formato inválido. Asegúrate de usar la plantilla descargada.');
+      if (d.competencias.length === 0) throw new Error('La materia debe tener al menos una competencia.');
+
+      let custom = {};
+      try { custom = JSON.parse(localStorage.getItem('custom_materias') || '{}'); } catch(e){}
+      
+      custom[nombre] = {
+        docente: d.docente,
+        total_comp: d.total_comp || d.competencias.length,
+        competencias: d.competencias,
+        indicadores: d.indicadores
+      };
+      localStorage.setItem('custom_materias', JSON.stringify(custom));
+
+      renderizarSelectorMaterias();
+      document.getElementById('asignatura_select').value = nombre;
+      
+      document.getElementById('asignatura_select').dispatchEvent(new Event('change'));
+      showSuccess(`✓ Materia "${nombre}" guardada e integrada al sistema.`);
+
+    } catch(err) {
+      showError('Error al leer el archivo: ' + err.message);
+    }
+    input.value = ''; 
+  };
+  reader.readAsText(file);
+}
+
+/* ════════════════════════════════════════
+   LÓGICA DEL FORMULARIO MODAL
+════════════════════════════════════════ */
+let editandoMateriaOldName = null;
+
+function openMateriaModal(nombre = null) {
+  editandoMateriaOldName = nombre;
+  document.getElementById('modal_comps').innerHTML = '';
+  document.getElementById('modal_inds').innerHTML = '';
+  
+  if(nombre) {
+    document.getElementById('modal_mat_title').textContent = 'Editar Materia';
+    let custom = JSON.parse(localStorage.getItem('custom_materias') || '{}');
+    const data = custom[nombre];
+    
+    document.getElementById('modal_mat_name').value = nombre;
+    document.getElementById('modal_mat_docente').value = data.docente;
+    data.competencias.forEach(c => addModalField('modal_comps', c, true));
+    data.indicadores.forEach(i => addModalField('modal_inds', i, false));
+  } else {
+    document.getElementById('modal_mat_title').textContent = 'Crear Nueva Materia';
+    document.getElementById('modal_mat_name').value = '';
+    document.getElementById('modal_mat_docente').value = '';
+    addModalField('modal_comps', '', true);
+    
+    const defInds = [
       "A. Se adapta a situaciones y contextos complejos.",
       "B. Hace aportaciones a las actividades académicas desarrolladas.",
       "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
       "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
       "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
       "F. Realiza su trabajo de manera autónoma y autorregulada."
-    ]
-  },
-  "Probabilidad y Estadística": {
-    docente: "M. en A. Lidia González González",
-    total_comp: 8,
-    competencias: [
-      "comprende los conceptos básicos de la estadística descriptiva y su aplicación en ingeniería.",
-      "utiliza los conceptos básicos de la teoría de la probabilidad.",
-      "identifica el tipo de variable aleatoria y su distribución de probabilidad.",
-      "identifica las propiedades y características de las distribuciones de probabilidad continua y discreta.",
-      "aplica los conceptos del modelo de regresión lineal simple y múltiple.",
-      "comprende los conceptos de muestreo y distribuciones muestrales.",
-      "aplica los fundamentos de la teoría de estimación puntual y por intervalos.",
-      "aplica los conceptos básicos de una prueba de hipótesis en problemas de ingeniería."
-    ],
-    indicadores: [
-      "A. Se adapta a situaciones y contextos complejos.",
-      "B. Hace aportaciones a las actividades académicas desarrolladas.",
-      "C. Propone y/o explica soluciones o procedimientos no vistos en clase (creatividad).",
-      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
-      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
-      "F. Realiza su trabajo de manera autónoma y autorregulada."
-    ]
-  },
-  "Física General": {
-    docente: "Jessica Linnete Morales Hernández",
-    total_comp: 8,
-    competencias: [
-      "comprende y aplica los conceptos de la Estática y equilibrio de cuerpos rígidos.",
-      "comprende y aplica los conocimientos de la dinámica de la partícula y las leyes de Newton.",
-      "soluciona problemas sencillos de reflexión, refracción y óptica física.",
-      "conoce, identifica y distingue los principios de la termodinámica.",
-      "conoce y aplica los conceptos de carga, campo y potencial eléctrico.",
-      "determina la capacitancia de distribuciones elementales de carga.",
-      "conoce los conceptos principales de la electrodinámica.",
-      "conoce los conceptos principales del electromagnetismo e inductancia."
-    ],
-    indicadores: [
-      "A. Se adapta a situaciones y contextos complejos.",
-      "B. Hace aportaciones a las actividades académicas desarrolladas.",
-      "C. Propone y/o explica soluciones o procedimientos no vistos en clase (creatividad).",
-      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
-      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
-      "F. Realiza su trabajo de manera autónoma y autorregulada."
-    ]
-  },
-  "Cálculo Integral": {
-    docente: "M. en T.I Brian Antonio Mejía Díaz",
-    total_comp: 5,
-    competencias: [
-      "comprende los dos teoremas fundamentales del cálculo integral.",
-      "aplica los teoremas y las propiedades de la integral definida e indefinida.",
-      "identifica el método de integración más adecuado para resolver integrales.",
-      "utiliza las definiciones de integral y las técnicas de integración en aplicaciones de ingeniería.",
-      "aplica series para aproximar la solución de integrales especiales."
-    ],
-    indicadores: ["A","B","C","D","E","F"]
-  },
-  "Contabilidad Financiera": {
-    docente: "L.C Miriam Juárez Gutiérrez",
-    total_comp: 5,
-    competencias: [
-      "conceptos Generales de la Contabilidad.",
-      "estados Financieros e importancia del estado de situación financiera.",
-      "teoría de la Partida Doble y asientos de diario.",
-      "registro de operaciones de mercancías y valuación de inventarios.",
-      "análisis e Interpretación de la Información Financiera."
-    ],
-    indicadores: [
-      "A. Se adapta a situaciones y contextos complejos.",
-      "B. Hace aportaciones a las actividades académicas desarrolladas.",
-      "C. Introduce recursos y experiencias que promueven un pensamiento crítico.",
-      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
-      "E. Realiza su trabajo de manera autónoma y autorregulada."
-    ]
-  },
-  "Algebra Lineal": {
-    docente: "Jose Juan Santana Ortiz",
-    total_comp: 5,
-    competencias: [
-      "utiliza los números complejos, sus representaciones y las operaciones entre ellos para tener una base de conocimiento a utilizar en ecuaciones diferenciales y en diferentes aplicaciones de ingeniería",
-      "utiliza las matrices, sus propiedades, el determinante y operaciones entre ellas, para resolver problemas de aplicación en las diferentes áreas de las matemáticas y de la ingeniería",
-      "resuelve problemas de aplicación en ingeniería sobre sistemas de ecuaciones lineales para interpretar las soluciones y tomar decisiones con base en ellas, utilizando los métodos de Gauss, Gauss-Jordan, matriz inversa y regla de Cramer",
-      "comprende la definición de espacio vectorial como una abstracción para relacionarlo con otras áreas de las matemáticas",
-      "utiliza la definición de transformación lineal y sus propiedades para representarla matricialmente"
-    ],
-    indicadores: [
-      "A. Se adapta a situaciones y contextos complejos.",
-      "B. Hace aportaciones a las actividades académicas desarrolladas.",
-      "C. Introduce recursos y experiencias que promueven un pensamiento crítico.",
-      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
-      "E. Realiza su trabajo de manera autónoma y autorregulada.",
-      "F. Realiza su trabajo de manera autónoma y autorregulada."
-    ]
+    ];
+    defInds.forEach(i => addModalField('modal_inds', i, false));
   }
-};
+  
+  document.getElementById('materia_modal').classList.add('active');
+}
+
+function closeMateriaModal() {
+  document.getElementById('materia_modal').classList.remove('active');
+}
+
+function addModalField(containerId, value = '', isTextArea = false) {
+  const container = document.getElementById(containerId);
+  const div = document.createElement('div');
+  div.className = 'dynamic-item';
+  
+  const input = isTextArea ? document.createElement('textarea') : document.createElement('input');
+  if(isTextArea) input.rows = 2;
+  input.value = value;
+  input.className = 'modal-dyn-input';
+  input.placeholder = isTextArea ? "Descripción..." : "Indicador...";
+  
+  const btn = document.createElement('button');
+  btn.textContent = 'x';
+  btn.className = 'btn-remove';
+  btn.onclick = () => container.removeChild(div);
+  
+  div.appendChild(input);
+  div.appendChild(btn);
+  container.appendChild(div);
+}
+
+function saveMateriaModal() {
+  const nombre = document.getElementById('modal_mat_name').value.trim();
+  const docente = document.getElementById('modal_mat_docente').value.trim();
+  if(!nombre) { showError('Ingresa el nombre de la materia'); return; }
+  
+  const comps = Array.from(document.getElementById('modal_comps').querySelectorAll('.modal-dyn-input')).map(i => i.value.trim()).filter(v => v);
+  const inds = Array.from(document.getElementById('modal_inds').querySelectorAll('.modal-dyn-input')).map(i => i.value.trim()).filter(v => v);
+  
+  if(comps.length === 0) { showError('Agrega al menos una competencia'); return; }
+  if(inds.length === 0) { showError('Agrega al menos un indicador'); return; }
+  
+  let custom = JSON.parse(localStorage.getItem('custom_materias') || '{}');
+  
+  if(editandoMateriaOldName && editandoMateriaOldName !== nombre) {
+    delete custom[editandoMateriaOldName];
+    delete asignaturasData[editandoMateriaOldName];
+  }
+  
+  custom[nombre] = {
+    docente: docente,
+    total_comp: comps.length,
+    competencias: comps,
+    indicadores: inds
+  };
+  
+  localStorage.setItem('custom_materias', JSON.stringify(custom));
+  renderizarSelectorMaterias();
+  
+  document.getElementById('asignatura_select').value = nombre;
+  document.getElementById('asignatura_select').dispatchEvent(new Event('change'));
+  
+  closeMateriaModal();
+  showSuccess(`✓ Materia "${nombre}" guardada correctamente`);
+}
 
 /* ════════════════════════════════════════
-   ESTADO
+   ESTADO Y UTILIDADES GLOBALES
 ════════════════════════════════════════ */
 let selectedComp = null;
 let selectedIndicadores = [];
+const el = id => document.getElementById(id);
 
-const $ = id => document.getElementById(id);
+function escHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escXml(str) {
+  return String(str || '').replace(/&/g, '&amp;')
+                           .replace(/</g, '&lt;')
+                           .replace(/>/g, '&gt;')
+                           .replace(/"/g, '&quot;')
+                           .replace(/'/g, '&apos;');
+}
 
 /* ════════════════════════════════════════
    PERSISTENCIA localStorage
 ════════════════════════════════════════ */
 function guardarLS() {
   localStorage.setItem('fo205', JSON.stringify({
-    nombre: $('nombre').value,
-    control: $('control').value,
-    division: $('division').value,
-    grupo: $('grupo').value
+    nombre: el('nombre').value,
+    control: el('control').value,
+    division: el('division').value,
+    grupo: el('grupo').value
   }));
 }
 function cargarLS() {
   try {
     const d = JSON.parse(localStorage.getItem('fo205') || '{}');
-    ['nombre','control','division','grupo'].forEach(k => { if(d[k]) $(k).value = d[k]; });
+    ['nombre','control','division','grupo'].forEach(k => { if(d[k]) el(k).value = d[k]; });
   } catch(e){}
 }
-['nombre','control','division','grupo'].forEach(id => $(id).addEventListener('input', guardarLS));
+['nombre','control','division','grupo'].forEach(id => el(id).addEventListener('input', guardarLS));
 
 /* ════════════════════════════════════════
-   STEPPER
+   STEPPER Y ASIGNATURA EVENTOS
 ════════════════════════════════════════ */
 function updateStepper() {
-  const mat = $('asignatura_select').value;
-  const s1 = $('nombre').value.trim() && $('control').value.trim();
+  const mat = el('asignatura_select').value;
+  const s1 = el('nombre').value.trim() && el('control').value.trim();
   const s2 = mat !== '';
-  const s3 = selectedComp !== null || mat === '__vacio__';
-  ['step1','step2','step3','step4'].forEach(id => {
-    $(id).classList.remove('active','done');
-  });
-  if(s1 && s2 && s3){ $(  'step4').classList.add('active'); ['step1','step2','step3'].forEach(id => $(id).classList.add('done')); }
-  else if(s1 && s2){ $('step3').classList.add('active'); ['step1','step2'].forEach(id => $(id).classList.add('done')); }
-  else if(s1){ $('step2').classList.add('active'); $('step1').classList.add('done'); }
-  else { $('step1').classList.add('active'); }
+  const s3 = selectedComp !== null || (mat === '__vacio__' && !customMateriaData);
+  ['step1','step2','step3','step4'].forEach(id => el(id).classList.remove('active','done'));
+  if(s1 && s2 && s3){ el('step4').classList.add('active'); ['step1','step2','step3'].forEach(id => el(id).classList.add('done')); }
+  else if(s1 && s2){ el('step3').classList.add('active'); ['step1','step2'].forEach(id => el(id).classList.add('done')); }
+  else if(s1){ el('step2').classList.add('active'); el('step1').classList.add('done'); }
+  else { el('step1').classList.add('active'); }
 }
-['nombre','control','asignatura_select'].forEach(id => $(id).addEventListener('input', updateStepper));
-['nombre','control'].forEach(id => $(id).addEventListener('change', updateStepper));
+['nombre','control','asignatura_select'].forEach(id => el(id).addEventListener('input', updateStepper));
+['nombre','control'].forEach(id => el(id).addEventListener('change', updateStepper));
 
-/* ════════════════════════════════════════
-   SELECTOR DE ASIGNATURA
-════════════════════════════════════════ */
-$('asignatura_select').addEventListener('change', function() {
+el('asignatura_select').addEventListener('change', function() {
   const val = this.value;
-  $('modo_vacio').style.display = val === '__vacio__' ? 'block' : 'none';
-  $('docente_auto_wrap').style.display = (val && val !== '__vacio__') ? 'block' : 'none';
-  $('card_competencia').style.display = (val && val !== '__vacio__') ? 'block' : 'none';
-  $('card_comp_manual').style.display = val === '__vacio__' ? 'block' : 'none';
+  el('modo_vacio').style.display = val === '__vacio__' ? 'block' : 'none';
+  el('docente_auto_wrap').style.display = (val && val !== '__vacio__') ? 'block' : 'none';
+  el('card_competencia').style.display = (val && val !== '__vacio__') ? 'block' : 'none';
+  el('card_comp_manual').style.display = val === '__vacio__' ? 'block' : 'none';
 
   selectedComp = null;
   selectedIndicadores = [];
-  $('desc_preview').className = 'desc-preview';
+  el('desc_preview').className = 'desc-preview';
 
   if(val && val !== '__vacio__' && asignaturasData[val]) {
     const d = asignaturasData[val];
-    $('docente_auto').value = d.docente;
+    el('docente_auto').value = d.docente;
     renderCompGrid(d.total_comp);
     renderIndGrid(d.indicadores);
   }
@@ -674,7 +2686,7 @@ $('asignatura_select').addEventListener('change', function() {
 });
 
 function renderCompGrid(total) {
-  const g = $('comp_grid'); g.innerHTML = '';
+  const g = el('comp_grid'); g.innerHTML = '';
   for(let i=1; i<=total; i++) {
     const b = document.createElement('button');
     b.className = 'comp-btn'; b.textContent = i; b.dataset.num = i;
@@ -684,7 +2696,7 @@ function renderCompGrid(total) {
 }
 
 function renderIndGrid(indicadores) {
-  const g = $('ind_grid'); g.innerHTML = '';
+  const g = el('ind_grid'); g.innerHTML = '';
   selectedIndicadores = [];
   indicadores.forEach((ind, idx) => {
     const letra = typeof ind === 'string' && ind.length <= 2 ? ind : ind.charAt(0);
@@ -700,10 +2712,10 @@ function selectComp(num, btn) {
   document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   selectedComp = num;
-  const mat = $('asignatura_select').value;
+  const mat = el('asignatura_select').value;
   const data = asignaturasData[mat];
   if(data && data.competencias[num-1]) {
-    const prev = $('desc_preview');
+    const prev = el('desc_preview');
     prev.textContent = data.competencias[num-1];
     prev.className = 'desc-preview show';
   }
@@ -720,51 +2732,31 @@ function toggleInd(letra, full, btn) {
 }
 
 /* ════════════════════════════════════════
-   URLS DE PLANTILLAS EN GITHUB
-   Cambia la base BASE_URL por la ruta de tu repositorio
+   BANNERS Y VALIDACIÓN Y GITHUB URLS
 ════════════════════════════════════════ */
 const BASE_URL = 'https://raw.githubusercontent.com/s12gamer/gxdasnz/main/';
 const githubUrls = {
-  'Programación Orientada a Objetos':  BASE_URL + 'Programación Orientada a Objetos 2 form.docx',
-  'Probabilidad y Estadística':        BASE_URL + 'probabilidad form.docx',
-  'Física General':                    BASE_URL + 'fisica form.docx',
-  'Cálculo Integral':                  BASE_URL + 'Calculo integral form.docx',
-  'Contabilidad Financiera':           BASE_URL + 'Conta form.docx',
-  'Algebra Lineal':                    BASE_URL + 'Algebra form.docx',
+  '__vacio__': BASE_URL + 'Formato vacio form2.docx',
 };
 
-/* ════════════════════════════════════════
-   FORMATO FECHA
-════════════════════════════════════════ */
-function formatFecha(val) {
-  if(!val) return '';
-  const [y,m,d] = val.split('-');
-  return `${d}/${m}/${y}`;
-}
+function formatFecha(val) { if(!val) return ''; const [y,m,d] = val.split('-'); return `${d}/${m}/${y}`; }
 
-/* ════════════════════════════════════════
-   BANNERS
-════════════════════════════════════════ */
-function hideBanners() {
-  ['loading_banner','success_banner','error_banner'].forEach(id => $(id).className = $(id).className.replace(' show','').trim());
-}
-function showLoading(msg) { hideBanners(); $('loading_banner').textContent = msg; $('loading_banner').classList.add('show'); }
-function showSuccess(msg) { hideBanners(); $('success_banner').textContent = msg; $('success_banner').classList.add('show'); setTimeout(hideBanners,5000); }
-function showError(msg)   { hideBanners(); $('error_banner').textContent = msg; $('error_banner').classList.add('show'); setTimeout(hideBanners,7000); }
+function hideBanners() { ['loading_banner','success_banner','error_banner'].forEach(id => el(id).className = el(id).className.replace(' show','').trim()); }
+function showLoading(msg) { hideBanners(); el('loading_banner').textContent = msg; el('loading_banner').classList.add('show'); }
+function showSuccess(msg) { hideBanners(); el('success_banner').textContent = msg; el('success_banner').classList.add('show'); setTimeout(hideBanners,5000); }
+function showError(msg)   { hideBanners(); el('error_banner').textContent = msg; el('error_banner').classList.add('show'); setTimeout(hideBanners,7000); }
 
-/* ════════════════════════════════════════
-   VALIDACIÓN
-════════════════════════════════════════ */
 function validar() {
-  const nombre   = $('nombre').value.trim();
-  const control  = $('control').value.trim();
-  const materia  = $('asignatura_select').value;
+  const nombre   = el('nombre').value.trim();
+  const control  = el('control').value.trim();
+  const materia  = el('asignatura_select').value;
   if(!nombre)   { showError('Ingresa tu nombre completo.'); return false; }
   if(!control)  { showError('Ingresa tu No. de Control.'); return false; }
   if(!materia)  { showError('Selecciona una materia.'); return false; }
   if(materia === '__vacio__') {
-    if(!$('materia_manual').value.trim()) { showError('Ingresa el nombre de la asignatura.'); return false; }
-    if(!$('docente_manual').value.trim()) { showError('Ingresa el nombre del docente.'); return false; }
+    if(!el('materia_manual').value.trim()) { showError('Ingresa el nombre de la asignatura.'); return false; }
+    if(!el('docente_manual').value.trim()) { showError('Ingresa el nombre del docente.'); return false; }
+    if(!el('comp_manual_num').value.trim()) { showError('Ingresa el número de competencia.'); return false; }
   } else {
     if(selectedComp === null) { showError('Selecciona una competencia.'); return false; }
   }
@@ -772,76 +2764,190 @@ function validar() {
 }
 
 /* ════════════════════════════════════════
-   LÓGICA PRINCIPAL: EDICIÓN DEL DOCX
+   TRADUCTOR OOXML RECURSIVO (NATIVO DESDE EL COMPLEJO)
 ════════════════════════════════════════ */
-async function generarDocumento() {
-  if(!validar()) return;
-  $('generar_btn').disabled = true;
-  showLoading('Descargando plantilla y procesando documento...');
+function convertirHtmlAWordXML(htmlContenido) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlContenido, 'text/html');
+  let bodyXml = "";
+  const bloques = doc.body.childNodes;
+  
+  const pPrEstandar = '<w:pPr><w:jc w:val="left"/></w:pPr>';
 
-  const materia_sel = $('asignatura_select').value;
-  const nombre    = $('nombre').value.trim();
-  const control   = $('control').value.trim();
-  const division  = $('division').value.trim();
-  const grupo     = $('grupo').value.trim();
-  const fecha     = formatFecha($('fecha').value);
-  const evidencia = $('evidencia').value.trim();
+  bloques.forEach(bloque => {
+    if (bloque.nodeType === Node.ELEMENT_NODE) {
+      if (bloque.nodeName === 'UL' || bloque.nodeName === 'OL') {
+        bloque.childNodes.forEach(li => {
+          if (li.nodeType === Node.ELEMENT_NODE && li.nodeName === 'LI') {
+            bodyXml += "<w:p>" + pPrEstandar;
+            bodyXml += '<w:r><w:rPr><w:rFonts w:ascii="Gotham Book" w:hAnsi="Gotham Book" w:cs="Gotham Book"/><w:b/></w:rPr><w:t xml:space="preserve">• </w:t></w:r>';
+            bodyXml += procesarNodo(li, { bold: false, italic: false, underline: false, size: null });
+            bodyXml += "</w:p>";
+          }
+        });
+      } else {
+        bodyXml += "<w:p>" + pPrEstandar;
+        bodyXml += procesarNodo(bloque, { bold: false, italic: false, underline: false, size: null });
+        bodyXml += "</w:p>";
+      }
+    }
+  });
 
-  let materia, docente, compNum, compDesc, indLetras, indFull;
+  return bodyXml;
+}
 
-  if(materia_sel === '__vacio__') {
-    materia   = $('materia_manual').value.trim();
-    docente   = $('docente_manual').value.trim();
-    compNum   = $('comp_manual_num').value.trim();
-    compDesc  = $('comp_manual_desc').value.trim().toLowerCase();
-    indLetras = selectedIndicadores.map(i => i.letra);
-    indFull   = selectedIndicadores.map(i => i.full);
-  } else {
-    const data = asignaturasData[materia_sel];
-    materia   = materia_sel;
-    docente   = data.docente;
-    compNum   = String(selectedComp);
-    compDesc  = data.competencias[selectedComp - 1];
-    indLetras = selectedIndicadores.map(i => i.letra);
-    indFull   = selectedIndicadores.map(i => i.full);
+function procesarNodo(nodo, formatoActual ) {
+  let xmlResultado = "";
+  let formato = { ...formatoActual };
+
+  if (nodo.nodeName === 'STRONG' || nodo.nodeName === 'B') formato.bold = true;
+  if (nodo.nodeName === 'EM' || nodo.nodeName === 'I') formato.italic = true;
+  if (nodo.nodeName === 'U') formato.underline = true;
+  if (nodo.nodeName === 'H3') {
+    formato.size = "36"; // Tamaño 16pt para el Word
+    formato.bold = true; // Forzamos negrita para los subtítulos
+  }
+  if (nodo.nodeName === 'H1') {
+    formato.size = "36"; // Tamaño 16pt para el Word
+    formato.bold = true; // Forzamos negrita para los subtítulos
+  }
+  if (nodo.nodeName === 'H2') {
+    formato.size = "36"; // Tamaño 16pt para el Word
+    formato.bold = true; // Forzamos negrita para los subtítulos
+  }
+  
+  if (nodo.classList && nodo.classList.contains('ql-size-small')) formato.size = "12"; 
+  if (nodo.classList && nodo.classList.contains('ql-size-large')) formato.size = "18"; 
+  if (nodo.classList && nodo.classList.contains('ql-size-huge'))  formato.size = "32"; 
+
+  if (nodo.nodeName === 'BR') {
+    return "<w:r><w:br/></w:r>";
   }
 
-  const githubUrl = githubUrls[materia_sel] || null;
+  if (nodo.nodeType === Node.TEXT_NODE) {
+    const textoEscapado = nodo.nodeValue
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    if (textoEscapado.trim() === "" && nodo.nodeValue !== " ") return "";
+
+    xmlResultado += "<w:r>";
+    
+    let rPr = "<w:rPr>";
+    rPr += '<w:rFonts w:ascii="Gotham Book" w:hAnsi="Gotham Book" w:cs="Gotham Book"/>';
+    if (formato.bold) rPr += "<w:b/>";
+    if (formato.italic) rPr += "<w:i/>";
+    if (formato.underline) rPr += '<w:u w:val="single"/>';
+    if (formato.size) rPr += `<w:sz w:val="${formato.size}"/>`; 
+    rPr += "</w:rPr>";
+    
+    xmlResultado += rPr;
+    xmlResultado += `<w:t xml:space="preserve">${nodo.nodeValue}</w:t>`;
+    xmlResultado += "</w:r>";
+  } else {
+    nodo.childNodes.forEach(hijo => {
+      xmlResultado += procesarNodo(hijo, formato);
+    });
+  }
+
+  return xmlResultado;
+}
+
+/* ════════════════════════════════════════
+   LÓGICA PRINCIPAL: EDICIÓN DEL DOCX
+════════════════════════════════════════ */
+/* Reúne los datos del formulario en un solo objeto "opts", compartido tanto
+   por la descarga final ("Generar Documento") como por la vista previa en
+   vivo, para que ambas rutas generen exactamente el mismo documento.
+   Devuelve null si todavía no hay suficiente información para procesar
+   una plantilla (por ejemplo, no se ha elegido materia). */
+function recopilarDatosFormulario() {
+  const materia_sel = el('asignatura_select').value;
+  if (!materia_sel) return null;
+
+  const nombre    = el('nombre').value.trim();
+  const control   = el('control').value.trim();
+  const division  = el('division').value.trim();
+  const grupo     = el('grupo').value.trim();
+  const fecha     = formatFecha(el('fecha').value);
+  const evidencia = el('evidencia').value.trim();
+
+  let materia, docente, compNum, compDesc;
+
+  if(materia_sel === '__vacio__') {
+    materia = el('materia_manual').value.trim();
+    docente = el('docente_manual').value.trim();
+    compNum  = el('comp_manual_num').value.trim();
+    compDesc = el('comp_manual_desc').value.trim().toLowerCase();
+  } else {
+    const data = asignaturasData[materia_sel];
+    if (!data) return null;
+    materia   = materia_sel;
+    docente   = data.docente;
+    compNum   = selectedComp !== null ? String(selectedComp) : '';
+    compDesc  = selectedComp !== null ? (data.competencias[selectedComp - 1] || '') : '';
+  }
+
+  const indLetras = selectedIndicadores.map(i => i.letra);
+  const indFull   = selectedIndicadores.map(i => i.full);
+  const urlFinal  = githubUrls[materia_sel] || (BASE_URL + 'Formato vacio form2.docx');
+
+  return {
+    githubUrl: urlFinal,
+    nombre, control, division, grupo, fecha,
+    materia, docente, compNum, compDesc, indLetras, indFull, evidencia, materia_sel
+  };
+}
+
+/* Cache en memoria de las plantillas .docx descargadas de GitHub, indexada
+   por URL, para no volver a descargar el mismo archivo en cada tecleo de
+   la vista previa en vivo. */
+const dvTemplateCache = {};
+async function obtenerPlantillaArrayBuffer(url) {
+  if (dvTemplateCache[url]) return dvTemplateCache[url];
+  const resp = await fetch(url);
+  if(!resp.ok) throw new Error(`No se pudo descargar el archivo (HTTP ${resp.status})`);
+  const ab = await resp.arrayBuffer();
+  dvTemplateCache[url] = ab;
+  return ab;
+}
+
+async function generarDocumento() {
+  if(!validar()) return;
+  el('generar_btn').disabled = true;
+  showLoading('Descargando plantilla y procesando documento...');
+
+  const opts = recopilarDatosFormulario();
 
   try {
-    let blob;
-    if(githubUrl) {
-      blob = await procesarDesdeGithub({ githubUrl, nombre, control, division, grupo, fecha,
-        materia, docente, compNum, compDesc, indLetras, indFull, evidencia, materia_sel });
-    } else {
-      blob = generarDocxNuevo({ nombre, control, division, grupo, fecha,
-        materia, docente, compNum, compDesc, indLetras, indFull, evidencia });
-    }
-    const filename = `FO-205P11000-14_${nombre.replace(/\s+/g,'_')}_Comp${compNum}.docx`;
+    if (!opts) throw new Error('Completa el formulario antes de generar el documento.');
+    let blob = await procesarDesdeGithub(opts);
+
+    const filename = `${opts.evidencia.replace(/\s+/g,'_')}_${opts.nombre.replace(/\s+/g,'_')}__${opts.materia.replace(/\s+/g,'_')}_C${opts.compNum}.docx`;
     saveAs(blob, filename);
     showSuccess('✓ Documento generado y descargado: ' + filename);
   } catch(e) {
     showError('Error al generar el documento: ' + e.message);
     console.error(e);
   } finally {
-    $('generar_btn').disabled = false;
+    el('generar_btn').disabled = false;
   }
 }
 
-/* ════════════════════════════════════════
-   PROCESAMIENTO DEL .DOCX DE GITHUB
-   Estrategia: edición directa del XML interno
-════════════════════════════════════════ */
 async function procesarDesdeGithub(opts) {
-  const resp = await fetch(opts.githubUrl);
-  if(!resp.ok) throw new Error(`No se pudo descargar el archivo (HTTP ${resp.status})`);
-  const ab   = await resp.arrayBuffer();
-  const zip  = new PizZip(ab);
+  const ab  = await obtenerPlantillaArrayBuffer(opts.githubUrl);
+  const zip = new PizZip(ab.slice(0));
 
-  /* Obtener el XML del documento */
   let xmlStr = zip.file('word/document.xml').asText();
-
   xmlStr = aplicarSustitucionesXML(xmlStr, opts);
+
+  // INYECCIÓN DE TEXTO ENRIQUECIDO ADICIONAL AL FINAL DE LA HOJA (SI ESTÁ ACTIVO)
+  if (el('insertar_texto_adicional').checked) {
+    const htmlAdicional = quill.root.innerHTML;
+    const xmlAdicional = convertirHtmlAWordXML(htmlAdicional);
+    xmlStr = insertarTextoEnXML(xmlStr, xmlAdicional);
+  }
 
   zip.file('word/document.xml', xmlStr);
 
@@ -851,126 +2957,81 @@ async function procesarDesdeGithub(opts) {
   });
 }
 
-/* ════════════════════════════════════════
-   SUSTITUCIONES EN EL XML
-   
-   ESTRATEGIA: El formato tiene filas con 4 celdas:
-     Col1=etiqueta | Col2=valor | Col3=etiqueta | Col4=valor
-   O filas con 2 celdas anchas:
-     Col1=etiqueta | Col2=valor (para descripción e indicadores)
-   
-   Trabajamos a nivel de <w:tr> (fila), identificamos la etiqueta
-   y escribimos el valor en la celda ADYACENTE A LA DERECHA.
-════════════════════════════════════════ */
-function aplicarSustitucionesXML(xml, opts) {
-  /* Paso 1 — reemplazar datos en celdas de valor adyacentes a la etiqueta */
-  xml = procesarFilasDeTabla(xml, opts);
+// Inserta de forma robusta las nuevas líneas de contenido justo antes del cierre del body/sectPr
+function insertarTextoEnXML(xml, textoXml) {
+  const lastSectPrIdx = xml.lastIndexOf('<w:sectPr');
+  
+  // Eliminamos 'parrafoEspaciador' para evitar el tercer salto de línea innecesario.
+  // Al insertar 'textoXml' directamente, se respeta el espacio nativo de la plantilla 
+  // dejando exactamente dos espacios de separación bajo el cuadro.
+  const totalAInsertar = textoXml;
 
-  /* Paso 2 — filtrar competencias (número y descripción) */
-  if(opts.materia_sel !== '__vacio__') {
-    xml = filtrarCompetencias(xml, opts);
+  if (lastSectPrIdx !== -1) {
+    return xml.slice(0, lastSectPrIdx) + totalAInsertar + xml.slice(lastSectPrIdx);
+  } else {
+    const bodyEndIdx = xml.lastIndexOf('</w:body>');
+    if (bodyEndIdx !== -1) {
+      return xml.slice(0, bodyEndIdx) + totalAInsertar + xml.slice(bodyEndIdx);
+    }
   }
-
-  /* Paso 3 — filtrar indicadores */
-  if(opts.indLetras.length > 0) {
-    xml = filtrarIndicadores(xml, opts);
-  }
-
   return xml;
 }
 
-/* ──────────────────────────────────────
-   NIVEL FILA: iterar <w:tr> y reemplazar
-   la celda de valor que está justo a la
-   derecha de la celda de etiqueta.
-────────────────────────────────────── */
+function aplicarSustitucionesXML(xml, opts) {
+  xml = procesarFilasDeTabla(xml, opts);
+  if(opts.materia_sel !== '__vacio__') xml = filtrarCompetencias(xml, opts);
+  xml = filtrarIndicadores(xml, opts);
+  return xml;
+}
+
 function procesarFilasDeTabla(xml, opts) {
-  /* Separar el XML en filas preservando todo lo que hay entre ellas */
   return xml.replace(/(<w:tr\b[\s\S]*?<\/w:tr>)/g, fila => {
-    /* Extraer todas las celdas de esta fila */
     const celdas = [];
     const reCell = /<w:tc\b[\s\S]*?<\/w:tc>/g;
     let m;
-    while((m = reCell.exec(fila)) !== null) {
-      celdas.push({ match: m[0], index: m.index });
-    }
+    while((m = reCell.exec(fila)) !== null) celdas.push({ match: m[0], index: m.index });
     if(celdas.length < 2) return fila;
 
     let filaModificada = fila;
 
-    /* Recorrer pares: celda etiqueta (par) → celda valor (impar) */
     for(let i = 0; i < celdas.length - 1; i++) {
       const txtEtiqueta = extraerTexto(celdas[i].match).toLowerCase().trim();
-
       let nuevoValor = null;
 
-      /* ── Mapeo etiqueta → valor ── */
-      if(/nombre.*alumno|nombre.*estudiante|^nombre$/i.test(txtEtiqueta)) {
-        nuevoValor = opts.nombre + ' ' + opts.control;
-      } else if(/no\.?\s*control|n[uú]mero.*control|control/i.test(txtEtiqueta)) {
-        nuevoValor = opts.nombre + ' ' + opts.control;
-      } else if(/divisi[oó]n|carrera|programa/i.test(txtEtiqueta)) {
-        nuevoValor = opts.division;
-      } else if(/^grupo$|^gr\.?$/i.test(txtEtiqueta)) {
-        nuevoValor = opts.grupo;
-      } else if(/fecha/i.test(txtEtiqueta)) {
-        nuevoValor = opts.fecha;
-      } else if(/asignatura|materia/i.test(txtEtiqueta)) {
-        nuevoValor = opts.materia;
-      } else if(/docente|profesor|maestro/i.test(txtEtiqueta)) {
-        nuevoValor = opts.docente;
-      } else if(/competencia.*no|no.*competencia|competencia\s*#|n[uú]m.*competencia/i.test(txtEtiqueta)) {
-        nuevoValor = opts.compNum;
-      } else if(/evidencia/i.test(txtEtiqueta)) {
-        nuevoValor = opts.evidencia;
-      }
+      if(/nombre.*alumno|nombre.*estudiante|^nombre$/i.test(txtEtiqueta)) nuevoValor = opts.nombre + ' ' + opts.control;
+      else if(/no\.?\s*control|n[uú]mero.*control|control/i.test(txtEtiqueta)) nuevoValor = opts.nombre + ' ' + opts.control;
+      else if(/divisi[oó]n|carrera|programa/i.test(txtEtiqueta)) nuevoValor = opts.division;
+      else if(/grupo/i.test(txtEtiqueta)) nuevoValor = opts.grupo;
+      else if(/fecha/i.test(txtEtiqueta)) nuevoValor = opts.fecha;
+      else if(/asignatura|materia/i.test(txtEtiqueta)) nuevoValor = opts.materia;
+      else if(/docente|profesor|maestro/i.test(txtEtiqueta)) nuevoValor = opts.docente;
+      else if(/competencia.*no|no.*competencia|competencia\s*#|n[uú]m.*competencia/i.test(txtEtiqueta)) nuevoValor = opts.compNum;
+      else if(/evidencia/i.test(txtEtiqueta)) nuevoValor = opts.evidencia;
 
       if(nuevoValor !== null) {
         const celdaValorOriginal = celdas[i + 1].match;
         const celdaValorNueva = escribirValorEnCelda(celdaValorOriginal, nuevoValor);
-        /* Reemplazar en la fila solo la primera ocurrencia exacta */
         filaModificada = filaModificada.replace(celdaValorOriginal, celdaValorNueva);
       }
     }
-
     return filaModificada;
   });
 }
 
-/* Escribe un valor de texto en la celda, conservando el formato (rPr) del primer run */
 function escribirValorEnCelda(celda, valor) {
-  /* Encontrar el primer <w:r> con su <w:rPr> para conservar el formato */
   const matchRpr = celda.match(/<w:rPr[\s\S]*?<\/w:rPr>/);
   const rPr = matchRpr ? matchRpr[0] : '';
-
-  /* Encontrar el primer <w:p> para conservar propiedades de párrafo */
   const matchPPr = celda.match(/<w:pPr[\s\S]*?<\/w:pPr>/);
   const pPr = matchPPr ? matchPPr[0] : '';
-
-  /* Encontrar propiedades de celda <w:tcPr> */
   const matchTcPr = celda.match(/<w:tcPr[\s\S]*?<\/w:tcPr>/);
   const tcPr = matchTcPr ? matchTcPr[0] : '';
-
-  /* Reconstruir la celda con un único párrafo y un único run */
   return `<w:tc>${tcPr}<w:p>${pPr}<w:r>${rPr}<w:t xml:space="preserve">${escXml(valor)}</w:t></w:r></w:p></w:tc>`;
 }
 
 function extraerTexto(xml) {
-  return (xml.match(/<w:t[^>]*>([^<]*)<\/w:t>/g) || [])
-    .map(m => m.replace(/<[^>]+>/g,''))
-    .join('');
+  return (xml.match(/<w:t[^>]*>([^<]*)<\/w:t>/g) || []).map(m => m.replace(/<[^>]+>/g,'')).join('');
 }
 
-/* ══════════════════════════════════════
-   FILTRADO DE COMPETENCIAS
-   
-   La tabla tiene:
-   - Una celda etiqueta "Competencia No." → celda valor con todos los números (col2)
-   - Una celda etiqueta "Descripción"     → celda valor con todos los textos  (col4)
-   
-   Buscamos esas celdas de VALOR (la que está a la derecha de la etiqueta)
-   y limpiamos los párrafos que no correspondan a la competencia elegida.
-══════════════════════════════════════ */
 function filtrarCompetencias(xml, opts) {
   const data = asignaturasData[opts.materia_sel];
   if(!data) return xml;
@@ -988,22 +3049,17 @@ function filtrarCompetencias(xml, opts) {
       const txtEtiq = extraerTexto(celdas[i]).toLowerCase().trim();
       const celdaValor = celdas[i + 1];
 
-      /* ── Celda de número de competencia ── */
       if(/competencia.*no|no.*competencia|competencia\s*#|n[uú]m.*competencia/i.test(txtEtiq)) {
         const nueva = limpiarNumerosCompetencia(celdaValor, compElegida, data.total_comp);
         filaModificada = filaModificada.replace(celdaValor, nueva);
       }
-
-      /* ── Celda de descripción ── */
       if(/descripci[oó]n/i.test(txtEtiq)) {
         const nueva = limpiarDescripcionesCompetencia(celdaValor, compElegida, todasComps);
         filaModificada = filaModificada.replace(celdaValor, nueva);
       }
     }
-
     return filaModificada;
   });
-
   return xml;
 }
 
@@ -1015,73 +3071,42 @@ function extraerCeldas(fila) {
   return celdas;
 }
 
-/* Deja solo el párrafo cuyo texto es el número elegido */
 function limpiarNumerosCompetencia(celda, compElegida, total) {
   const parrafos = extraerParrafos(celda);
   const mantenidos = parrafos.filter(p => {
     const txt = extraerTexto(p).trim();
-    if(!txt) return false; /* eliminar párrafos vacíos también */
-    /* ¿Este párrafo contiene solo el número elegido? */
+    if(!txt) return false;
     return txt === compElegida || txt === compElegida + '.' || txt.startsWith(compElegida);
   });
-
-  /* Si no encontramos nada con ese criterio estricto, buscar con más amplitud */
-  const resultado = mantenidos.length > 0 ? mantenidos : parrafos.filter(p => {
-    const txt = extraerTexto(p).trim();
-    return txt.includes(compElegida);
-  });
-
+  const resultado = mantenidos.length > 0 ? mantenidos : parrafos.filter(p => extraerTexto(p).trim().includes(compElegida));
   return reconstruirCelda(celda, resultado.length > 0 ? resultado : [crearParrafoTexto(celda, compElegida)]);
 }
 
-/* Deja solo el párrafo de la descripción de la competencia elegida */
 function limpiarDescripcionesCompetencia(celda, compElegida, todasComps) {
   const descElegida = todasComps[parseInt(compElegida) - 1];
   if(!descElegida) return celda;
 
   const parrafos = extraerParrafos(celda);
-  // Filtramos dejando solo los párrafos que tienen texto visible
   const conTexto = parrafos.filter(p => extraerTexto(p).trim().length > 0);
-  
   const numActual = parseInt(compElegida);
   const numSiguiente = numActual + 1;
-  
   let guardar = false;
   const elegidos = [];
-  
-  // Extraemos los primeros 20 caracteres como "firma" de la competencia actual y la siguiente
   const firmaActual = descElegida.toLowerCase().trim().substring(0, 20);
   const descSiguiente = todasComps[numSiguiente - 1];
   const firmaSiguiente = descSiguiente ? descSiguiente.toLowerCase().trim().substring(0, 20) : null;
   
   for (let i = 0; i < conTexto.length; i++) {
     const txtParagraph = extraerTexto(conTexto[i]).toLowerCase().trim();
-    
-    // Si el párrafo actual contiene el inicio de nuestra competencia, empezamos a acumular
-    if (txtParagraph.includes(firmaActual) || firmaActual.includes(txtParagraph)) {
-      guardar = true;
-    } 
-    // Si detectamos que ya empezó el texto de la SIGUIENTE competencia, dejamos de acumular
-    else if (firmaSiguiente && (txtParagraph.includes(firmaSiguiente) || firmaSiguiente.includes(txtParagraph))) {
-      guardar = false;
-    }
-    
-    // Si estamos en el rango correcto, guardamos el párrafo completo con todo su formato
-    if (guardar) {
-      elegidos.push(conTexto[i]);
-    }
+    if (txtParagraph.includes(firmaActual) || firmaActual.includes(txtParagraph)) guardar = true;
+    else if (firmaSiguiente && (txtParagraph.includes(firmaSiguiente) || firmaSiguiente.includes(txtParagraph))) guardar = false;
+    if (guardar) elegidos.push(conTexto[i]);
   }
-
-  // RESPALDO: Si la búsqueda por texto en el Word falló por diferencias de redacción,
-  // inyectamos directamente el texto limpio desde la base de datos de JavaScript.
   const resultado = elegidos.length > 0 ? elegidos : [crearParrafoTexto(celda, descElegida)];
-
   return reconstruirCelda(celda, resultado);
 }
 
-function extraerParrafos(celda) {
-  return celda.match(/<w:p\b[\s\S]*?<\/w:p>/g) || [];
-}
+function extraerParrafos(celda) { return celda.match(/<w:p\b[\s\S]*?<\/w:p>/g) || []; }
 
 function reconstruirCelda(celdaOriginal, parrafosNuevos) {
   const matchTcPr = celdaOriginal.match(/<w:tcPr[\s\S]*?<\/w:tcPr>/);
@@ -1092,188 +3117,130 @@ function reconstruirCelda(celdaOriginal, parrafosNuevos) {
 function crearParrafoTexto(celdaRef, texto) {
   const matchRpr = celdaRef.match(/<w:rPr[\s\S]*?<\/w:rPr>/);
   const rPr = matchRpr ? matchRpr[0] : '';
-  return `<w:p><w:r>${rPr}<w:t xml:space="preserve">${escXml(texto)}</w:t></w:r></w:p>`;
+  const matchPPr = celdaRef.match(/<w:pPr[\s\S]*?<\/w:pPr>/);
+  const pPr = matchPPr ? matchPPr[0] : '';
+  return `<w:p>${pPr}<w:r>${rPr}<w:t xml:space="preserve">${escXml(texto)}</w:t></w:r></w:p>`;
 }
 
-/* ══════════════════════════════════════
-   FILTRADO DE INDICADORES
-   
-   Busca la fila cuya etiqueta sea "Indicadores" (o similar)
-   y en la celda de valor adyacente elimina los párrafos
-   cuya letra inicial no esté en la selección del usuario.
-══════════════════════════════════════ */
 function filtrarIndicadores(xml, opts) {
-  const letraSet = new Set(opts.indLetras);
-
-  xml = xml.replace(/(<w:tr\b[\s\S]*?<\/w:tr>)/g, fila => {
+  return xml.replace(/(<w:tr\b[\s\S]*?<\/w:tr>)/g, fila => {
     const celdas = extraerCeldas(fila);
     if(celdas.length < 2) return fila;
 
     let filaModificada = fila;
-
     for(let i = 0; i < celdas.length - 1; i++) {
       const txtEtiq = extraerTexto(celdas[i]).toLowerCase().trim();
-
       if(/indicador|desempe[nñ]o/i.test(txtEtiq)) {
         const celdaValor = celdas[i + 1];
-        const parrafos = extraerParrafos(celdaValor);
-
-        const mantenidos = parrafos.filter(p => {
-          const txt = extraerTexto(p).trim();
-          if(!txt) return false;
-          /* ¿Empieza con letra de indicador? */
-          const m = txt.match(/^([A-F])[.):\s]/i);
-          if(!m) return true; /* No es indicador → conservar */
-          return letraSet.has(m[1].toUpperCase());
-        });
-
-        const nueva = reconstruirCelda(celdaValor,
-          mantenidos.length > 0 ? mantenidos : [crearParrafoTexto(celdaValor, opts.indFull.join(' / ') || '—')]
-        );
+        let parrafosNuevos = [];
+        if(opts.indFull && opts.indFull.length > 0) {
+          const ordenados = opts.indFull.slice().sort((a, b) => a.localeCompare(b));
+          parrafosNuevos = ordenados.map(ind => crearParrafoTexto(celdaValor, ind));
+        } else {
+          parrafosNuevos = [crearParrafoTexto(celdaValor, '—')];
+        }
+        const nueva = reconstruirCelda(celdaValor, parrafosNuevos);
         filaModificada = filaModificada.replace(celdaValor, nueva);
       }
     }
-
     return filaModificada;
   });
-
-  return xml;
-}
-
-function escXml(str) {
-  return String(str||'')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
 }
 
 /* ════════════════════════════════════════
-   FALLBACK: GENERAR DOCX DESDE CERO
-   Se usa si no hay URL de GitHub
+   VISTA PREVIA
 ════════════════════════════════════════ */
-function generarDocxNuevo(opts) {
-  const { nombre, control, division, grupo, fecha, materia, docente,
-          compNum, compDesc, indLetras, indFull, evidencia } = opts;
+let previewVisible = false;
 
-  const indTexto = indFull.length > 0
-    ? indFull.map(i => `<w:p><w:r><w:rPr><w:sz w:val="19"/></w:rPr><w:t xml:space="preserve">${escXml(i)}</w:t></w:r></w:p>`).join('')
-    : `<w:p><w:r><w:t>—</w:t></w:r></w:p>`;
+function toggleVistaPrvia() {
+  previewVisible = !previewVisible;
+  const panel = el('preview_panel');
+  const btn   = el('preview_toggle_btn');
+  const arrow = el('ptb_arrow');
+  if(previewVisible) {
+    panel.classList.add('show'); btn.classList.add('active'); arrow.textContent = '▴';
+    generarPreviewEnVivo();
+  } else {
+    panel.classList.remove('show'); btn.classList.remove('active'); arrow.textContent = '▾';
+  }
+}
 
-  const fila = (k, v, shade) => `
-    <w:tr>
-      <w:tc>
-        <w:tcPr><w:tcW w:w="3200" w:type="dxa"/>${shade?`<w:shd w:val="clear" w:color="auto" w:fill="F0EDE5"/>`:''}
-        </w:tcPr>
-        <w:p><w:r><w:rPr><w:b/><w:sz w:val="19"/><w:color w:val="3D2B1A"/></w:rPr>
-          <w:t>${escXml(k)}</w:t></w:r></w:p>
-      </w:tc>
-      <w:tc>
-        <w:tcPr><w:tcW w:w="6300" w:type="dxa"/></w:tcPr>
-        <w:p><w:r><w:rPr><w:sz w:val="19"/></w:rPr>
-          <w:t xml:space="preserve">${escXml(v||'')}</w:t></w:r></w:p>
-      </w:tc>
-    </w:tr>`;
+/* ── Generación de la vista previa real (.docx renderizado en Canvas) ──
+   Hace exactamente lo mismo que "Generar Documento" (descarga la
+   plantilla, aplica las mismas sustituciones XML) pero en vez de
+   descargar el archivo, lo entrega al visor de Canvas embebido para
+   que se muestre dentro del panel "Vista Previa en Vivo". */
+let dvPreviewGenId = 0;
 
-  const filaInd = () => `
-    <w:tr>
-      <w:tc>
-        <w:tcPr><w:tcW w:w="3200" w:type="dxa"/><w:shd w:val="clear" w:color="auto" w:fill="E8F0EF"/>
-        </w:tcPr>
-        <w:p><w:r><w:rPr><w:b/><w:sz w:val="19"/><w:color w:val="1D4E4A"/></w:rPr>
-          <w:t>Indicadores alcanzados</w:t></w:r></w:p>
-      </w:tc>
-      <w:tc>
-        <w:tcPr><w:tcW w:w="6300" w:type="dxa"/></w:tcPr>
-        ${indTexto}
-      </w:tc>
-    </w:tr>`;
+async function generarPreviewEnVivo() {
+  if(!previewVisible) return;
+  if(!window.DocxViewerEngine) return;
 
-  const docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-<w:body>
-  <w:p>
-    <w:pPr><w:jc w:val="center"/></w:pPr>
-    <w:r><w:rPr><w:b/><w:sz w:val="30"/></w:rPr><w:t>FO-205P11000-14</w:t></w:r>
-  </w:p>
-  <w:p>
-    <w:pPr><w:jc w:val="center"/></w:pPr>
-    <w:r><w:rPr><w:sz w:val="22"/><w:i/></w:rPr><w:t>Avance Programático · Registro de Competencias</w:t></w:r>
-  </w:p>
-  <w:p><w:r><w:t xml:space="preserve"> </w:t></w:r></w:p>
-  <w:tbl>
-    <w:tblPr>
-      <w:tblW w:w="9500" w:type="dxa"/>
-      <w:tblBorders>
-        <w:top w:val="single" w:sz="4" w:color="C8C0A8"/>
-        <w:left w:val="single" w:sz="4" w:color="C8C0A8"/>
-        <w:bottom w:val="single" w:sz="4" w:color="C8C0A8"/>
-        <w:right w:val="single" w:sz="4" w:color="C8C0A8"/>
-        <w:insideH w:val="single" w:sz="4" w:color="C8C0A8"/>
-        <w:insideV w:val="single" w:sz="4" w:color="C8C0A8"/>
-      </w:tblBorders>
-    </w:tblPr>
-    <w:tblGrid>
-      <w:gridCol w:w="3200"/>
-      <w:gridCol w:w="6300"/>
-    </w:tblGrid>
-    ${fila('Nombre del alumno', nombre, true)}
-    ${fila('No. de Control', control, false)}
-    ${fila('División / Carrera', division, true)}
-    ${fila('Grupo', grupo, false)}
-    ${fila('Fecha', fecha, true)}
-    ${fila('Materia / Asignatura', materia, false)}
-    ${fila('Docente', docente, true)}
-    ${fila('Competencia No.', compNum, false)}
-    ${fila('Descripción', compDesc, true)}
-    ${filaInd()}
-    ${fila('Evidencia de aprendizaje', evidencia, true)}
-  </w:tbl>
-  <w:sectPr>
-    <w:pgSz w:w="12240" w:h="15840"/>
-    <w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720"/>
-  </w:sectPr>
-</w:body>
-</w:document>`;
+  const opts = recopilarDatosFormulario();
+  if(!opts) {
+    window.DocxViewerEngine.setStatus('Selecciona una materia para previsualizar', '');
+    return;
+  }
 
-  const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
-</Relationships>`;
+  const myGenId = ++dvPreviewGenId;
+  try {
+    window.DocxViewerEngine.setStatus('Descargando plantilla…', 'ok');
+    const ab = await obtenerPlantillaArrayBuffer(opts.githubUrl);
+    if(myGenId !== dvPreviewGenId) return; // una solicitud más nueva ya está en curso
 
-  const relsRoot = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
-</Relationships>`;
+    const zip = new PizZip(ab.slice(0));
+    let xmlStr = zip.file('word/document.xml').asText();
+    xmlStr = aplicarSustitucionesXML(xmlStr, opts);
 
-  const ct = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-  <Default Extension="xml" ContentType="application/xml"/>
-  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
-  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
-</Types>`;
+    if(el('insertar_texto_adicional').checked) {
+      const htmlAdicional = quill.root.innerHTML;
+      const xmlAdicional = convertirHtmlAWordXML(htmlAdicional);
+      xmlStr = insertarTextoEnXML(xmlStr, xmlAdicional);
+    }
+    zip.file('word/document.xml', xmlStr);
 
-  const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-  <w:docDefaults>
-    <w:rPrDefault><w:rPr>
-      <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>
-      <w:sz w:val="20"/>
-    </w:rPr></w:rPrDefault>
-  </w:docDefaults>
-</w:styles>`;
+    const blob = zip.generate({
+      type: 'blob',
+      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
+    if(myGenId !== dvPreviewGenId) return;
 
-  const zip = new PizZip();
-  zip.file('[Content_Types].xml', ct);
-  zip.file('_rels/.rels', relsRoot);
-  zip.file('word/document.xml', docXml);
-  zip.file('word/_rels/document.xml.rels', rels);
-  zip.file('word/styles.xml', styles);
-  return zip.generate({
-    type: 'blob',
-    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    await window.DocxViewerEngine.loadBlob(blob, 'vista_previa.docx');
+  } catch(e) {
+    console.error(e);
+    window.DocxViewerEngine.setStatus('Error en vista previa: ' + e.message, 'error');
+  }
+}
+
+let dvPreviewTimer = null;
+function scheduleDocxPreview() {
+  if(!previewVisible) return;
+  clearTimeout(dvPreviewTimer);
+  dvPreviewTimer = setTimeout(generarPreviewEnVivo, 550);
+}
+// El botón "↻ Actualizar" dentro del visor fuerza una regeneración inmediata.
+window.dvOnRefreshRequested = generarPreviewEnVivo;
+
+function hookPreviewListeners() {
+  ['nombre','control','division','grupo','fecha','evidencia','materia_manual','docente_manual','comp_manual_num','comp_manual_desc'].forEach(id => {
+    const e = el(id); if(e) e.addEventListener('input', scheduleDocxPreview);
   });
+  el('asignatura_select').addEventListener('change', scheduleDocxPreview);
+}
+
+const _origSelectComp = selectComp;
+selectComp = function(num, btn) { _origSelectComp(num, btn); scheduleDocxPreview(); };
+
+const _origToggleInd = toggleInd;
+toggleInd = function(letra, full, btn) { _origToggleInd(letra, full, btn); scheduleDocxPreview(); };
+
+function seleccionarMateriaCard(nombre) {
+  const select = document.getElementById('asignatura_select');
+  if (select) {
+    select.value = nombre;
+    select.dispatchEvent(new Event('change'));
+    showSuccess(`Materia "${nombre}" seleccionada.`);
+  }
 }
 
 /* ════════════════════════════════════════
@@ -1281,192 +3248,103 @@ function generarDocxNuevo(opts) {
 ════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
   cargarLS();
-  $('fecha').value = new Date().toISOString().slice(0,10);
-});
-
-/* ════════════════════════════════════════
-   Intro video
-════════════════════════════════════════ */
-document.addEventListener("DOMContentLoaded", () => {
-  const introContainer = document.getElementById("video-intro");
-  const introVideo = document.getElementById("intro-video");
-
-  if (!introContainer || !introVideo) return;
-
-  // 🔍 COMPROBACIÓN ESTILO "UPDATE":
-  // Si en el navegador ya está guardado que el usuario vio el video, 
-  // lo eliminamos instantáneamente del HTML sin reproducir nada.
-  if (localStorage.getItem("intro_video_visto1") === "true") {
-    introContainer.remove();
-    return; // Detiene el script aquí para que la web cargue normal
+  renderizarSelectorMaterias(); 
+  el('fecha').value = new Date().toISOString().slice(0,10);
+  hookPreviewListeners();
+  
+  if(window.innerWidth < 900) {
+    el('custom_mat_panel').classList.remove('open');
   }
 
-  // Función encargada de realizar el fundido
-  const finalizarIntro = () => {
-    if (introContainer.classList.contains("fade-out")) return;
-    
-    introContainer.classList.add("fade-out");
-    
-    // 💾 GUARDAR EL REGISTRO:
-    // Guardamos la marca de forma permanente en el navegador del usuario
-    localStorage.setItem("intro_video_visto1", "true");
-    
-    setTimeout(() => {
-      introContainer.remove();
-    }, 800); // 0.8s de la transición CSS
-  };
-
-  // Detección anticipada (0.5 segundos antes de que termine)
-  introVideo.addEventListener("timeupdate", () => {
-    const segundosAnticipados = 0.5; 
-    if (introVideo.duration) {
-      const tiempoRestante = introVideo.duration - introVideo.currentTime;
-      if (tiempoRestante <= segundosAnticipados) {
-        finalizarIntro();
-      }
+  quill = new Quill('#editor-container', {
+    theme: 'snow',
+    formats: [
+    'header', 
+    'bold', 'italic', 'underline', 
+    'list', 'bullet'
+    ],
+    modules: {
+      toolbar: [
+        [{ 'header': [1, 2, 3, false] }],
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        ['bold', 'italic', 'underline', 'strike']
+      ]
     }
   });
 
-  // Mecanismo de seguridad por si falla el video
-  setTimeout(finalizarIntro, 6000); 
+  quill.on('text-change', () => {
+    scheduleDocxPreview();
+  });
+
+  el('insertar_texto_adicional').addEventListener('change', function() {
+    el('editor_wrapper').style.display = this.checked ? 'block' : 'none';
+    el('ai_controls').style.display = this.checked ? 'flex' : 'none';
+    scheduleDocxPreview();
+  });
 });
-/* ══════════════════════════════════════════
-   GENERADOR DE FONDO ANIMADO MUNDIALISTA
-══════════════════════════════════════════ */
-function generarFondoTrionda() {
-  const bgContainer = document.getElementById('worldcup-bg');
-  if (!bgContainer) return;
-  
-  // Colores principales de la paleta Trionda
-  const colors = ['#e20047', '#0044ff', '#00cc44'];
-  const numShapes = 250; 
-  
-  // Figuras SVG relacionadas al mundial
-  const pentagono = `<svg viewBox="0 0 100 100"><polygon points="50,10 90,40 75,90 25,90 10,40" fill="none" stroke="COLOR" stroke-width="5"/><circle cx="50" cy="53" r="10" fill="COLOR"/></svg>`;
-  const cancha = `<svg viewBox="0 0 100 100"><rect x="10" y="15" width="80" height="70" rx="5" fill="none" stroke="COLOR" stroke-width="4"/><line x1="50" y1="15" x2="50" y2="85" stroke="COLOR" stroke-width="4"/><circle cx="50" cy="50" r="12" fill="none" stroke="COLOR" stroke-width="4"/></svg>`;
-  const trofeo = `<svg viewBox="0 0 100 100"><path d="M30 20 C30 10, 70 10, 70 20 C70 45, 55 55, 55 70 L45 70 C45 55, 30 45, 30 20 Z" fill="none" stroke="COLOR" stroke-width="4"/><rect x="35" y="70" width="30" height="15" fill="none" stroke="COLOR" stroke-width="4"/><line x1="15" y1="20" x2="30" y2="20" stroke="COLOR" stroke-width="4"/><line x1="70" y1="20" x2="85" y2="20" stroke="COLOR" stroke-width="4"/></svg>`;
-  const silbato = `<svg viewBox="0 0 100 100"><circle cx="65" cy="50" r="20" fill="none" stroke="COLOR" stroke-width="5"/><path d="M15 45 L45 45 L45 55 L15 55 Z" fill="COLOR"/><circle cx="65" cy="50" r="6" fill="COLOR"/></svg>`;
-  const zapato = `<svg viewBox="0 0 100 100"><path d="M15 70 L85 70 C90 70, 95 60, 90 50 C80 35, 55 35, 45 25 L20 25 L15 70 Z" fill="none" stroke="COLOR" stroke-width="4"/><circle cx="25" cy="75" r="4" fill="COLOR"/><circle cx="50" cy="75" r="4" fill="COLOR"/><circle cx="75" cy="75" r="4" fill="COLOR"/></svg>`;
-  const tarjetas = `<svg viewBox="0 0 100 100"><rect x="20" y="15" width="35" height="50" rx="3" fill="none" stroke="COLOR" stroke-width="4" transform="rotate(-15 37 40)"/><rect x="45" y="25" width="35" height="50" rx="3" fill="none" stroke="COLOR" stroke-width="4" transform="rotate(10 62 50)"/></svg>`;
-  const pelota = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="COLOR" stroke-width="4"/><polygon points="50,35 63,44 58,59 42,59 37,44" fill="none" stroke="COLOR" stroke-width="4"/><line x1="50" y1="35" x2="50" y2="10" stroke="COLOR" stroke-width="4"/><line x1="63" y1="44" x2="84" y2="31" stroke="COLOR" stroke-width="4"/><line x1="58" y1="59" x2="74" y2="82" stroke="COLOR" stroke-width="4"/><line x1="42" y1="59" x2="26" y2="82" stroke="COLOR" stroke-width="4"/><line x1="37" y1="44" x2="16" y2="31" stroke="COLOR" stroke-width="4"/></svg>`;
-  const camiseta = `<svg viewBox="0 0 100 100"><path d="M35 20 L20 32 L28 44 L36 38 L36 80 L64 80 L64 38 L72 44 L80 32 L65 20 C60 25, 40 25, 35 20 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><line x1="36" y1="45" x2="64" y2="45" stroke="COLOR" stroke-width="2"/></svg>`;
-  const mundial26 = `<svg viewBox="0 0 100 100"><path d="M18 38 C18 22, 45 22, 45 38 C45 52, 18 55, 18 75 L48 75" fill="none" stroke="COLOR" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M78 28 C63 28, 54 45, 54 60 C54 75, 82 75, 82 58 C82 45, 54 45, 54 58" fill="none" stroke="COLOR" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  const banderin = `<svg viewBox="0 0 100 100"><line x1="30" y1="15" x2="30" y2="85" stroke="COLOR" stroke-width="5" stroke-linecap="round"/><polygon points="30,15 75,32 30,50" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><line x1="15" y1="85" x2="55" y2="85" stroke="COLOR" stroke-width="5" stroke-linecap="round"/></svg>`;
-  const cronometro = `<svg viewBox="0 0 100 100"><circle cx="50" cy="55" r="30" fill="none" stroke="COLOR" stroke-width="4"/><rect x="45" y="12" width="10" height="10" fill="COLOR"/><line x1="38" y1="12" x2="62" y2="12" stroke="COLOR" stroke-width="4"/><line x1="50" y1="55" x2="50" y2="35" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="50" y1="55" x2="68" y2="45" stroke="COLOR" stroke-width="3" stroke-linecap="round"/></svg>`;
-  const medalla = `<svg viewBox="0 0 100 100"><path d="M32 15 L50 48 L68 15" fill="none" stroke="COLOR" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="50" cy="65" r="20" fill="none" stroke="COLOR" stroke-width="4"/><circle cx="50" cy="65" r="8" fill="COLOR"/></svg>`;
-  const estadio = `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="45" ry="32" fill="none" stroke="COLOR" stroke-width="4"/><ellipse cx="50" cy="50" rx="32" ry="20" fill="none" stroke="COLOR" stroke-width="3"/><rect x="36" y="42" width="28" height="16" rx="2" fill="none" stroke="COLOR" stroke-width="3"/><line x1="50" y1="18" x2="50" y2="30" stroke="COLOR" stroke-width="3"/><line x1="50" y1="70" x2="50" y2="82" stroke="COLOR" stroke-width="3"/><line x1="5" y1="50" x2="18" y2="50" stroke="COLOR" stroke-width="3"/><line x1="82" y1="50" x2="95" y2="50" stroke="COLOR" stroke-width="3"/></svg>`;
-  const copa = `<svg viewBox="0 0 100 100"><path d="M35 85 L65 85 L62 70 L38 70 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><line x1="36.5" y1="77" x2="63.5" y2="77" stroke="COLOR" stroke-width="3"/><path d="M42 70 C42 55, 30 48, 38 36 C43 30, 48 34, 50 38 C52 34, 57 30, 62 36 C70 48, 58 55, 58 70" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><circle cx="50" cy="24" r="13" fill="none" stroke="COLOR" stroke-width="4"/><path d="M40 20 Q50 26 60 20" fill="none" stroke="COLOR" stroke-width="3"/></svg>`;
-  const viajeMundial = `<svg viewBox="0 0 100 100"><path d="M50 12 L55 35 L88 55 L56 55 L50 85 L44 55 L12 55 L45 35 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M20 25 A40 40 0 0 1 80 25" fill="none" stroke="COLOR" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round"/></svg>`;
-  const porteria = `<svg viewBox="0 0 100 100"><path d="M10 80 L10 25 L90 25 L90 80" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="10" y1="43" x2="90" y2="43" stroke="COLOR" stroke-width="2"/><line x1="10" y1="61" x2="90" y2="61" stroke="COLOR" stroke-width="2"/><line x1="36" y1="25" x2="36" y2="80" stroke="COLOR" stroke-width="2"/><line x1="64" y1="25" x2="64" y2="80" stroke="COLOR" stroke-width="2"/><circle cx="36" cy="43" r="7" fill="COLOR"/></svg>`;
-  const logoOficial26 = `<svg viewBox="0 0 100 100">
-  <!-- El número 26 vertical de fondo (grueso) -->
-  <path d="M40 10 C25 10, 20 25, 30 35 L50 55 C60 65, 55 80, 40 80 L60 80" fill="none" stroke="COLOR" stroke-width="8" stroke-linecap="round"/>
-  <path d="M80 20 C65 20, 60 35, 60 50 C60 65, 80 65, 80 50 C80 35, 60 35, 60 50" fill="none" stroke="COLOR" stroke-width="8" stroke-linecap="round"/>
-  <!-- La Copa FIFA en el centro (más fina para contrastar y superpuesta) -->
-  <path d="M42 85 L58 85 L56 75 L44 75 Z" fill="COLOR"/>
-  <path d="M50 75 C50 65, 42 60, 44 52 C46 48, 50 50, 50 52 C50 50, 54 48, 56 52 C58 60, 50 65, 50 75" fill="none" stroke="COLOR" stroke-width="3" stroke-linejoin="round"/>
-  <circle cx="50" cy="46" r="7" fill="none" stroke="COLOR" stroke-width="3"/>
-</svg>`;
-  const banderasHost = `<svg viewBox="0 0 100 100">
-  <!-- CANADÁ (Izquierda: Hoja de maple estilizada) -->
-  <rect x="5" y="25" width="25" height="50" rx="2" fill="none" stroke="COLOR" stroke-width="3"/>
-  <path d="M17.5 35 L19 41 L25 40 L21 45 L23 51 L17.5 48 L12 51 L14 45 L10 40 L16 41 Z" fill="COLOR"/>
-  
-  <!-- USA (Centro: Barras y zona de estrellas) -->
-  <rect x="37.5" y="25" width="25" height="50" rx="2" fill="none" stroke="COLOR" stroke-width="3"/>
-  <rect x="37.5" y="25" width="12" height="15" fill="COLOR"/>
-  <line x1="50" y1="31" x2="62.5" y2="31" stroke="COLOR" stroke-width="2"/>
-  <line x1="37.5" y1="37" x2="62.5" y2="37" stroke="COLOR" stroke-width="2"/>
-  <line x1="37.5" y1="43" x2="62.5" y2="43" stroke="COLOR" stroke-width="2"/>
-  
-  <!-- MÉXICO (Derecha: Tricolor y escudo central) -->
-  <rect x="70" y="25" width="25" height="50" rx="2" fill="none" stroke="COLOR" stroke-width="3"/>
-  <line x1="78.3" y1="25" x2="78.3" y2="75" stroke="COLOR" stroke-width="2"/>
-  <line x1="86.6" y1="25" x2="86.6" y2="75" stroke="COLOR" stroke-width="2"/>
-  <circle cx="82.5" cy="50" r="4" fill="COLOR"/>
-</svg>`;
-  const fanCelebrando = `<svg viewBox="0 0 100 100">
-  <circle cx="50" cy="25" r="10" fill="none" stroke="COLOR" stroke-width="4"/>
-  <path d="M20 40 Q50 30, 80 40 L75 55 Q50 45, 25 55 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/>
-  <path d="M35 52 L35 90 M65 52 L65 90" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/>
-  <path d="M20 40 L10 15 M80 40 L90 15" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/>
-</svg>`;
-  // 17. Guante de portero (Atajada clave)
-  const guantePortero = `<svg viewBox="0 0 100 100"><rect x="35" y="72" width="30" height="15" rx="2" fill="none" stroke="COLOR" stroke-width="4"/><path d="M30 72 L30 40 C30 32, 40 32, 40 40 L40 30 C40 22, 50 22, 50 30 L50 28 C50 20, 60 20, 60 28 L60 35 C60 27, 70 27, 70 35 L70 72 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M30 60 Q18 55, 22 45 Q30 45, 34 55" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/></svg>`;
-
-// 18. Brazalete de Capitán (Liderazgo en la cancha)
-  const brazaleteCapitan = `<svg viewBox="0 0 100 100"><rect x="15" y="30" width="70" height="40" rx="5" fill="none" stroke="COLOR" stroke-width="4"/><path d="M60 42 C44 42, 40 46, 40 50 C40 54, 44 58, 60 58" fill="none" stroke="COLOR" stroke-width="6" stroke-linecap="round"/><line x1="15" y1="50" x2="25" y2="50" stroke="COLOR" stroke-width="3"/><line x1="75" y1="50" x2="85" y2="50" stroke="COLOR" stroke-width="3"/></svg>`;
-
-// 19. Banderín de Juez de Línea (Fueras de juego)
-  const banderaLinier = `<svg viewBox="0 0 100 100"><line x1="20" y1="15" x2="20" y2="85" stroke="COLOR" stroke-width="5" stroke-linecap="round"/><rect x="20" y="20" width="60" height="42" fill="none" stroke="COLOR" stroke-width="4"/><line x1="20" y1="20" x2="80" y2="62" stroke="COLOR" stroke-width="4"/><line x1="20" y1="62" x2="80" y2="20" stroke="COLOR" stroke-width="2" stroke-dasharray="3,3"/></svg>`;
-
-// 20. Entrada / Ticket del Partido (Acceso al estadio)
-  const ticketMundial = `<svg viewBox="0 0 100 100"><rect x="15" y="25" width="70" height="50" rx="4" fill="none" stroke="COLOR" stroke-width="4"/><line x1="65" y1="25" x2="65" y2="75" stroke="COLOR" stroke-width="4" stroke-dasharray="4,4"/><circle cx="65" cy="25" r="6" fill="COLOR"/><circle cx="65" cy="75" r="6" fill="COLOR"/><line x1="25" y1="40" x2="55" y2="40" stroke="COLOR" stroke-width="4"/><line x1="25" y1="52" x2="45" y2="52" stroke="COLOR" stroke-width="3"/><line x1="25" y1="62" x2="35" y2="62" stroke="COLOR" stroke-width="2"/></svg>`;
-
-// 21. Cámara de TV / Transmisión (Cobertura global del evento)
-  const camaraTransmision = `<svg viewBox="0 0 100 100"><rect x="15" y="25" width="45" height="30" rx="3" fill="none" stroke="COLOR" stroke-width="4"/><polygon points="60,32 82,20 82,58 60,48" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><circle cx="30" cy="40" r="6" fill="COLOR"/><line x1="37" y1="55" x2="20" y2="85" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="37" y1="55" x2="55" y2="85" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="37" y1="55" x2="37" y2="85" stroke="COLOR" stroke-width="3"/></svg>`;
-
-// 22. Spray Evanescente del Árbitro (Falta y barrera)
-  const sprayEspuma = `<svg viewBox="0 0 100 100"><rect x="35" y="45" width="30" height="40" rx="3" fill="none" stroke="COLOR" stroke-width="4"/><rect x="43" y="37" width="14" height="8" fill="none" stroke="COLOR" stroke-width="3"/><path d="M50 37 L50 30 L42 33" fill="none" stroke="COLOR" stroke-width="3" stroke-linecap="round"/><circle cx="35" cy="20" r="6" fill="COLOR"/><circle cx="50" cy="15" r="8" fill="COLOR"/><circle cx="65" cy="22" r="5" fill="COLOR"/></svg>`;
-
-// 23. Autobús del Equipo (Logística y traslados de las selecciones)
-  const autobusEquipo = `<svg viewBox="0 0 100 100"><path d="M10 35 L80 35 C88 35, 90 42, 90 50 L90 70 L10 70 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><circle cx="30" cy="72" r="8" fill="none" stroke="COLOR" stroke-width="4"/><circle cx="70" cy="72" r="8" fill="none" stroke="COLOR" stroke-width="4"/><line x1="10" y1="48" x2="85" y2="48" stroke="COLOR" stroke-width="3"/><line x1="35" y1="35" x2="35" y2="48" stroke="COLOR" stroke-width="2"/><line x1="60" y1="35" x2="60" y2="48" stroke="COLOR" stroke-width="2"/></svg>`;
-
-// 24. Fuegos Artificiales / Fiesta (Ceremonia de inauguración y final)
-  const fiestaEstadio = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="5" fill="COLOR"/><line x1="50" y1="35" x2="50" y2="15" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="50" y1="65" x2="50" y2="85" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="35" y1="50" x2="15" y2="50" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="65" y1="50" x2="85" y2="50" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><line x1="39" y1="39" x2="25" y2="25" stroke="COLOR" stroke-width="3" stroke-linecap="round"/><line x1="61" y1="61" x2="75" y2="75" stroke="COLOR" stroke-width="3" stroke-linecap="round"/><line x1="61" y1="39" x2="75" y2="25" stroke="COLOR" stroke-width="3" stroke-linecap="round"/><line x1="39" y1="61" x2="25" y2="75" stroke="COLOR" stroke-width="3" stroke-linecap="round"/></svg>`;
-
-// 25. Estrella de Campeón (La gloria máxima)
-  const estrellaVictoria = `<svg viewBox="0 0 100 100"><polygon points="50,12 63,38 92,38 68,55 77,85 50,68 23,85 32,55 8,38 37,38" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><circle cx="50" cy="50" r="7" fill="COLOR"/></svg>`;
-
-// 26. Pasaportes de Viaje (Cruzar fronteras entre CAN, USA y MEX)
-  const pasaporteViajero = `<svg viewBox="0 0 100 100"><rect x="20" y="15" width="45" height="65" rx="4" fill="none" stroke="COLOR" stroke-width="4" transform="rotate(-10 42 50)"/><rect x="35" y="20" width="45" height="65" rx="4" fill="none" stroke="COLOR" stroke-width="4" transform="rotate(5 57 52)"/><circle cx="58" cy="50" r="10" fill="none" stroke="COLOR" stroke-width="3"/><path d="M52 50 L64 50 M58 44 L58 56" stroke="COLOR" stroke-width="2"/></svg>`;
-  // 27. Hoja de Maple Clásica (Símbolo nacional absoluto, geometría simétrica de 11 puntas)
-  const hojaMaple = `<svg viewBox="0 0 100 100"><path d="M50 85 L50 70 L32 75 L38 58 L15 52 L35 45 L25 25 L46 32 L50 10 L54 32 L75 25 L65 45 L85 52 L62 58 L68 75 L50 70" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/></svg>`;
-
-// 28. Bosque y Montañas Rocosas (La imponente naturaleza canadiense con un pino alpino en primer plano)
-  const naturalezaCanada = `<svg viewBox="0 0 100 100"><path d="M10 75 L45 30 L75 65 L90 50 L95 75 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><polygon points="25,75 25,62 18,62 28,48 38,62 31,62 31,75" fill="COLOR"/></svg>`;
-  // 29. Estatua de la Libertad (Silueta icónica de la corona de rayos y la antorcha encendida)
-  const estatuaLibertad = `<svg viewBox="0 0 100 100"><path d="M35 75 L38 52 C38 42, 62 42, 62 52 L65 75" fill="none" stroke="COLOR" stroke-width="4"/><path d="M34 48 L18 42 M39 44 L25 25 M45 42 L45 12 M55 42 L55 12 M61 44 L75 25 M66 48 L82 42" fill="none" stroke="COLOR" stroke-width="4" stroke-linecap="round"/><path d="M72 75 L72 50 L68 50 L66 42 L78 42 L76 50 L72 50" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M72 42 C68 32, 72 25, 72 25 C72 25, 76 32, 72 42" fill="COLOR"/></svg>`;
-
-// 30. Águila Calva (Perfil estilizado del ave nacional americana con el pico sólido)
-  const aguilaUSA = `<svg viewBox="0 0 100 100"><path d="M20 70 C20 40, 40 25, 65 25 C72 25, 76 30, 72 40 L85 46 L68 58 C60 75, 35 75, 20 70 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M68 40 L85 46 L68 58 C64 52, 64 45, 68 40 Z" fill="COLOR"/><circle cx="55" cy="40" r="3" fill="COLOR"/></svg>`;
-  // 31. Pirámide de Chichén Itzá / El Castillo (Legado prehispánico con escalinata central y niveles simétricos)
-  const piramideMexico = `<svg viewBox="0 0 100 100"><path d="M10 80 L20 62 L30 44 L40 30 L60 30 L70 44 L80 62 L90 80 Z" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><line x1="20" y1="62" x2="80" y2="62" stroke="COLOR" stroke-width="3"/><line x1="30" y1="44" x2="70" y2="44" stroke="COLOR" stroke-width="3"/><rect x="42" y="16" width="16" height="14" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><polygon points="44,80 46,30 54,30 56,80" fill="none" stroke="COLOR" stroke-width="3"/></svg>`;
-
-// 32. Sombrero de Charro (El rey de la fiesta en las tribunas del mundial, adornado con un mini balón abajo)
-  const sombreroMexico = `<svg viewBox="0 0 100 100"><path d="M30 60 C30 25, 42 15, 50 15 C58 15, 70 25, 70 60" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M8 60 Q50 82 92 60 Q50 48 8 60" fill="none" stroke="COLOR" stroke-width="4" stroke-linejoin="round"/><path d="M31 52 Q50 58 69 52" stroke="COLOR" stroke-width="3" stroke-dasharray="4,2"/><circle cx="50" cy="70" r="5" fill="COLOR"/></svg>`;
-
-  const shapes = [pentagono, cancha, trofeo, silbato, zapato, tarjetas, pelota, camiseta, mundial26, banderin, cronometro, medalla, estadio, copa, viajeMundial, porteria, logoOficial26, banderasHost, fanCelebrando, guantePortero, brazaleteCapitan, ticketMundial,camaraTransmision, sprayEspuma, autobusEquipo, fiestaEstadio, estrellaVictoria, pasaporteViajero, hojaMaple, naturalezaCanada, estatuaLibertad,aguilaUSA, piramideMexico, sombreroMexico];
-  const animations = ['floatRandom1', 'floatRandom2', 'floatRandom3'];
-
-  for (let i = 0; i < numShapes; i++) {
-    const div = document.createElement('div');
-    const size = Math.random() * 70 + 35; 
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const svgCode = shapes[Math.floor(Math.random() * shapes.length)].replace(/COLOR/g, color);
-    
-    div.innerHTML = svgCode;
-    div.className = 'bg-shape';
-    
-    div.style.left = (Math.random() * 120 - 10) + 'vw';
-    div.style.top = (Math.random() * 120 - 10) + 'vh';
-    div.style.width = size + 'px';
-    div.style.height = size + 'px';
-    
-    // Aumenté la opacidad (entre 6% y 15%) para que sí se vean
-    div.style.opacity = Math.random() * 0.09 + 0.06; 
-    
-    const anim = animations[Math.floor(Math.random() * animations.length)];
-    const duration = Math.random() * 40 + 30; 
-    const delay = Math.random() * -50; 
-    
-    div.style.animation = `${anim} ${duration}s infinite ease-in-out ${delay}s`;
-    
-    bgContainer.appendChild(div);
-  }
-}
-
-document.addEventListener('DOMContentLoaded', generarFondoTrionda);
 </script>
+
+<!-- ═══════════════ PWA: banner de instalación (quitable) + Service Worker ═══════════════ -->
+<style>
+#pwa-install-banner{position:fixed;left:50%;bottom:16px;transform:translateX(-50%) translateY(160%);
+  max-width:440px;width:calc(100% - 32px);background:#1C1917;color:#EDE8DF;border-radius:14px;
+  padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;align-items:center;gap:12px;
+  font-family:'DM Sans',Segoe UI,sans-serif;z-index:99999;transition:transform .35s ease;}
+#pwa-install-banner.show{transform:translateX(-50%) translateY(0);}
+#pwa-install-banner p{margin:0;font-size:.85rem;line-height:1.35;flex:1;}
+#pwa-install-banner button{border:none;border-radius:8px;padding:8px 14px;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+#pwa-install-btn{background:#C8893A;color:#1C1917;}
+#pwa-dismiss-btn{background:transparent;color:#EDE8DF;opacity:.6;padding:8px;font-size:1rem;line-height:1;}
+#pwa-dismiss-btn:hover{opacity:1;}
+</style>
+<div id="pwa-install-banner" role="dialog" aria-label="Instalar aplicación">
+  <p>📲 Puedes instalar el Centro de Recursos Académicos en tu dispositivo y usarlo sin conexión.</p>
+  <button id="pwa-install-btn" type="button">Instalar</button>
+  <button id="pwa-dismiss-btn" type="button" aria-label="Cerrar aviso">✕</button>
+</div>
+<script>
+(function(){
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch((err) => console.warn('SW no registrado:', err));
+    });
+  }
+
+  const DISMISS_KEY = 'pwa_install_dismissed';
+  let deferredPrompt = null;
+  const banner = document.getElementById('pwa-install-banner');
+  const installBtn = document.getElementById('pwa-install-btn');
+  const dismissBtn = document.getElementById('pwa-dismiss-btn');
+
+  function yaFueRechazado(){
+    try { return localStorage.getItem(DISMISS_KEY) === '1'; } catch(e){ return false; }
+  }
+  function estaInstalada(){
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!yaFueRechazado() && !estaInstalada()) banner.classList.add('show');
+  });
+
+  installBtn && installBtn.addEventListener('click', async () => {
+    banner.classList.remove('show');
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  });
+
+  dismissBtn && dismissBtn.addEventListener('click', () => {
+    banner.classList.remove('show');
+    try { localStorage.setItem(DISMISS_KEY, '1'); } catch(e){}
+  });
+
+  window.addEventListener('appinstalled', () => banner.classList.remove('show'));
+})();
+</script>
+
 </body>
 </html>
