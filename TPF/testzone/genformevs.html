@@ -3247,8 +3247,8 @@ function seleccionarMateriaCard(nombre) {
    INIT
 ════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
-  renderizarSelectorMaterias(); 
   cargarLS();
+  renderizarSelectorMaterias(); 
   el('fecha').value = new Date().toISOString().slice(0,10);
   hookPreviewListeners();
   
