@@ -1,6 +1,6 @@
 MODO=MANUAL
 TITULO=Bienvenidos de Nuevo!!!
-TEMA=teal
+TEMA=rust
 BORDE=pulso
 TAMANO=lg
 POSICION=centro
