@@ -15,7 +15,7 @@ importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
      6) Las tipografías de Google Fonts
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION   = 'v4';
+const CACHE_VERSION   = 'v5';
 const APP_SHELL_CACHE = `tpf-app-shell-${CACHE_VERSION}`;
 const CDN_CACHE       = `tpf-cdn-libs-${CACHE_VERSION}`;
 const TEMPLATE_CACHE  = `tpf-plantillas-${CACHE_VERSION}`;
@@ -145,9 +145,10 @@ async function cacheFirstConActualizacion(req, cacheName) {
   });
 }
 
-// Network-first con respaldo en caché. Ideal para los .html propios de la app:
-// si hay internet, siempre se ve la versión más reciente; si no hay internet,
-// se sirve la última copia guardada (y se refresca la caché cuando sí hay red).
+// Network-first con respaldo en caché. Ya NO se usa por defecto para las
+// páginas de la app (ver más abajo, ahora usan cache-first para abrir más
+// rápido), pero la dejamos aquí por si algún día necesitas que una página en
+// particular SIEMPRE muestre la versión más nueva antes que la de caché.
 async function networkFirstConRespaldo(req, cacheName) {
   const cache = await caches.open(cacheName);
   try {
@@ -199,9 +200,14 @@ self.addEventListener('fetch', (e) => {
   }
 
   // 3) Archivos propios de la app (TPF.html, genformevs.html, SPYidle.html, manifest, íconos...)
+  //    Cache-first con actualización en segundo plano: la página se abre AL
+  //    INSTANTE con la copia guardada (sin esperar a internet), y mientras
+  //    tanto se descarga la versión más nueva en silencio para la próxima
+  //    vez que se abra. Esto es lo que hace que las variables de
+  //    localStorage se pinten de inmediato en vez de esperar la red.
   const esMismoOrigen = url.startsWith(self.location.origin);
   if (esMismoOrigen) {
-    e.respondWith(networkFirstConRespaldo(req, APP_SHELL_CACHE));
+    e.respondWith(cacheFirstConActualizacion(req, APP_SHELL_CACHE));
     return;
   }
 
