@@ -2344,7 +2344,27 @@ window.DocxViewerEngine = {
 /* ════════════════════════════════════════
    BASE DE DATOS DE ASIGNATURAS (VACÍA)
 ════════════════════════════════════════ */
-const asignaturasData = {};
+const asignaturasData = {
+  "Cultura Empresarial": {
+    docente: "M. en TI Edith Flores Hernández",
+    total_comp: 5,
+    competencias: [
+      "Analiza los conceptos fundamentales del contexto de la empresa para identificar áreas de oportunidad proponiendo planes de negocio.",
+      "Realiza el análisis de mercado para determinar la factibilidad del plan de negocio aplicando las metodologías pertinentes.",
+      "Realiza el estudio técnico para determinar la viabilidad del plan de negocio considerando el proceso productivo, tecnología del producto o servicio, los proveedores y la normatividad vigente.",
+      "Diseña la estructura organizacional para el funcionamiento eficiente de la empresa considerando el perfil del capital humano.",
+      "Realiza la evaluación económica para proyectar la rentabilidad de la empresa mediante las metodologías pertinentes.",
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+};
 
 /* ════════════════════════════════════════
    MATERIA PERSONALIZADA Y LOCALSTORAGE
@@ -2365,6 +2385,7 @@ function renderizarSelectorMaterias() {
 
   select.add(new Option('— Selecciona una materia —', ''));
   select.add(new Option('✏️ Formato vacío (ingresar todo manualmente)', '__vacio__'));
+  select.add(new Option('Cultura Empresarial', 'Cultura Empresarial'));
 
   try {
     const stored = localStorage.getItem('custom_materias');

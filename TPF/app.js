@@ -35,17 +35,17 @@ const formatos = [
   {id:13,sem:2,  name:"Portafolio Física",       desc:"By: S12/Trucoteca",          url:"https://drive.google.com/uc?export=download&id=1C26atG7hMxCDd0GT9-z-p69XZdPcK7gX"},
   {id:14,sem:2,  name:"Portafolio Álgebra Lin.", desc:"By: CS",                     url:"https://drive.google.com/uc?export=download&id=1IH7Q4wjhWU-7zEUQa2a1yE2qXJz0ENI1"},
   /* ── 3° y 4° ── (agrega los tuyos aquí con sem:3 o sem:4) */
-  {id:14, sem:3,  name:"Formato Cultura Empresarial",   desc:"Mtra. Edith Flores Morales",     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:15, sem:3,  name:"Formato Calculo Vectorial", desc:"Profr. Fernando René barbosa Morales",       url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:16, sem:3,  name:"Formato Investigacíon de Operaciones", desc:"José Juan Santana Ortiz",     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:17, sem:3,  name:"Formato Sistemas Operativos",   desc:"Oscar Olivares López",     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:18, sem:3,  name:"Formato Estructura de Datos",   desc:"Luis Antonio Reynoso Sánchez",    url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:19, sem:3,  name:"Formato PEAD",            desc:"Christopher Aron Rico Fonseca",           url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:20, sem:3,  name:"Formato Ingles N5 y N6",   desc:"Karen Dalí Figueroa Vázquez",           url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:21,sem:3,  name:"Portafolio Cálculo Vectorial", desc:"By: S12/Trucoteca & CS",     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:22,sem:3,  name:"Portafolio Cultura Empresarial",        desc:"Mtra. Edith Flores Morales",                     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:23,sem:3,  name:"Portafolio Ingles N5 y N6",       desc:"By: S12/Trucoteca",          url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:24,sem:3,  name:"Portafolio Sitemas Operativos", desc:"By: CS",                     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
+  {id:14, sem:3,  name:"Formato Cultura Empresarial",   desc:"M. en TI Edith Flores Morales",     url:"https://drive.google.com/uc?export=download&id=1bQdqI4YcRz0fM9PxyQA8facak7Ct9SUL"},
+   /* {id:15, sem:3,  name:"Formato Calculo Vectorial", desc:"Profr. Fernando René barbosa Morales",       url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+   /* {id:16, sem:3,  name:"Formato Investigacíon de Operaciones", desc:"José Juan Santana Ortiz",     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+   /* {id:17, sem:3,  name:"Formato Sistemas Operativos",   desc:"Oscar Olivares López",     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+   /* {id:18, sem:3,  name:"Formato Estructura de Datos",   desc:"Luis Antonio Reynoso Sánchez",    url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+   /* {id:19, sem:3,  name:"Formato PEAD",            desc:"Christopher Aron Rico Fonseca",           url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+   /* {id:20, sem:3,  name:"Formato Ingles N5 y N6",   desc:"Karen Dalí Figueroa Vázquez",           url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+   /* {id:21,sem:3,  name:"Portafolio Cálculo Vectorial", desc:"By: S12/Trucoteca & CS",     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  {id:22,sem:3,  name:"Portafolio Cultura Empresarial",        desc:"M. en TI Edith Flores Morales",                     url:"https://drive.google.com/uc?export=download&id=1EWf6o0aoVpgXT2jKoy3CY4GoAiO4HYGm"},
+   /* {id:23,sem:3,  name:"Portafolio Ingles N5 y N6",       desc:"By: S12/Trucoteca",          url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+   /* {id:24,sem:3,  name:"Portafolio Sitemas Operativos", desc:"By: CS",                     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
 ];
 
 const instrumentaciones = [
@@ -57,13 +57,13 @@ const instrumentaciones = [
   {id:6,sem:2,name:"Instrumentación Inglés N3 y N4",         desc:"Planeación — Coord. Lenguas Extranjeras", url:"https://drive.google.com/uc?export=download&id=1k4tEpzfDz2WFzENnyknNk9uLUOUUhB1h"},
   {id:7,sem:2,name:"Instrumentación POO",                    desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=1r0BRhQvbeAI703Muet0h_WhNbEej9Ox1"},
   /* ── 3° y 4° ── (agrega los tuyos aquí con sem:3 o sem:4) */
-  {id:8,sem:3,name:"Instrumentación Cultura Empresarial",          desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:9,sem:3,name:"Instrumentación Calculo Vectorial",         desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:10,sem:3,name:"Instrumentación investigacion de Operaciones",         desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:11,sem:3,name:"Instrumentación Sistemas Operativos",           desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:12,sem:3,name:"Instrumentación Estructura de Datos",           desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:13,sem:3,name:"Instrumentación Inglés N5 y N6",         desc:"Planeación — Coord. Lenguas Extranjeras", url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
-  {id:14,sem:3,name:"Instrumentación PEAD",                    desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},
+  {id:8,sem:3,name:"Instrumentación Cultura Empresarial",          desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=19i91lh-_c7NxsOW_OsrLPbvTqqZsX2bp"},
+  /* {id:9,sem:3,name:"Instrumentación Calculo Vectorial",         desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  /* {id:10,sem:3,name:"Instrumentación investigacion de Operaciones",         desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  /* {id:11,sem:3,name:"Instrumentación Sistemas Operativos",           desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  /* {id:12,sem:3,name:"Instrumentación Estructura de Datos",           desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  /* {id:13,sem:3,name:"Instrumentación Inglés N5 y N6",         desc:"Planeación — Coord. Lenguas Extranjeras", url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  /* {id:14,sem:3,name:"Instrumentación PEAD",                    desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
 ];
 
 const programas = [
