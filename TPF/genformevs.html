@@ -288,6 +288,11 @@ body::before {
 /* ── COLUMNA LATERAL (Sidebar Herramientas) ── */
 .sidebar-tools { display: flex; flex-direction: column; gap: 1.5rem; }
 
+/* ── AI (Sidebar Herramientas) ── */
+#ai_controls {
+  display: none !important;
+}
+
 /* ── PANEL GESTOR DE MATERIAS ── */
 .custom-mat-panel {
   background: var(--surface); border: 1.5px solid rgba(91,62,143,.25);
@@ -892,7 +897,7 @@ body::before {
 
   <div class="sidebar-tools">
     
-    <div class="custom-mat-panel open" id="custom_mat_panel">
+    <div class="custom-mat-panel open" id="custom_mat_panel" style="display:none;">
       <div class="custom-mat-header" onclick="toggleCustomPanel()">
         <span class="cm-icon">⚙️</span>
         <h3 class="cm-text">Gestor de Mis Materias</h3>
@@ -2384,8 +2389,8 @@ function renderizarSelectorMaterias() {
   select.innerHTML = ''; 
 
   select.add(new Option('— Selecciona una materia —', ''));
-  select.add(new Option('✏️ Formato vacío (ingresar todo manualmente)', '__vacio__'));
   select.add(new Option('Cultura Empresarial', 'Cultura Empresarial'));
+  select.add(new Option('✏️ Formato vacío (ingresar todo manualmente)', '__vacio__'));
 
   try {
     const stored = localStorage.getItem('custom_materias');
