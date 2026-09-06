@@ -2369,6 +2369,21 @@ const asignaturasData = {
       "F. Realiza su trabajo de manera autónoma y autorregulada."
     ]
   },
+  "Sistemas Operativos": {
+    docente: "M. en S.T.R Oscar Olivares López",
+    total_comp: 1,
+    competencias: [
+      "Identificar los componentes de los sistemas operativos, la funcíon y las características de diferentes sistemas operativos",
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
 };
 
 /* ════════════════════════════════════════
@@ -2390,6 +2405,7 @@ function renderizarSelectorMaterias() {
 
   select.add(new Option('— Selecciona una materia —', ''));
   select.add(new Option('Cultura Empresarial', 'Cultura Empresarial'));
+  select.add(new Option('Sistemas Operativos', 'Sistemas Operativos'));
   select.add(new Option('✏️ Formato vacío (ingresar todo manualmente)', '__vacio__'));
 
   try {
