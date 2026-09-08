@@ -39,7 +39,7 @@ const formatos = [
    /* {id:15, sem:3,  name:"Formato Calculo Vectorial", desc:"Profr. Fernando René barbosa Morales",       url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
   {id:16, sem:3,  name:"Formato Investigacíon de Operaciones", desc:"José Juan Santana Ortiz",     url:"https://drive.google.com/uc?export=download&id=18iKV-Us_8L-N3ZdniUkZIhMyN3u_WVC6"},
    /* {id:17, sem:3,  name:"Formato Sistemas Operativos",   desc:"Oscar Olivares López",     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
-   /* {id:18, sem:3,  name:"Formato Estructura de Datos",   desc:"Luis Antonio Reynoso Sánchez",    url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  {id:18, sem:3,  name:"Formato Estructura de Datos",   desc:"Luis Antonio Reynoso Sánchez",    url:"https://drive.google.com/uc?export=download&id=1lIC5zOGp55DewQdF7Wm4Cs9OFOAfp1Gm"},
    /* {id:19, sem:3,  name:"Formato PEAD",            desc:"Christopher Aron Rico Fonseca",           url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
    /* {id:20, sem:3,  name:"Formato Ingles N5 y N6",   desc:"Karen Dalí Figueroa Vázquez",           url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
    /* {id:21,sem:3,  name:"Portafolio Cálculo Vectorial", desc:"By: S12/Trucoteca & CS",     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
@@ -61,18 +61,19 @@ const instrumentaciones = [
   /* {id:9,sem:3,name:"Instrumentación Calculo Vectorial",         desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
   {id:10,sem:3,name:"Instrumentación investigacion de Operaciones",         desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=1esdZATUZvBAIboqo83SD_E1qhipMQz5r"},
   /* {id:11,sem:3,name:"Instrumentación Sistemas Operativos",           desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
-  /* {id:12,sem:3,name:"Instrumentación Estructura de Datos",           desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  {id:12,sem:3,name:"Instrumentación Estructura de Datos",           desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=1fVBoiSBDm1-nDV9jsdjby5nLdlKHqVyK"},
   /* {id:13,sem:3,name:"Instrumentación Inglés N5 y N6",         desc:"Planeación — Coord. Lenguas Extranjeras", url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
   /* {id:14,sem:3,name:"Instrumentación PEAD",                    desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
 ];
 
 const programas = [
-  {id:1,name:"Anaconda Spyder 6",       desc:"Brian A. Mejía Díaz / Cálculo Integral",      url:"https://repo.anaconda.com/archive/Anaconda3-2025.12-2-Windows-x86_64.exe"},
-  {id:2,name:"Visual Studio Community", desc:"David Teran Gomez / POO",                     url:"https://visualstudio.microsoft.com/es/thank-you-downloading-visual-studio/?sku=Community&channel=Stable&version=VS18&source=VSLandingPage"},
-  {id:3,name:"Siigo Aspel COI",         desc:"Miriam Juárez Gutiérrez / Contabilidad",      url:"https://www.siigo.com/mx/prueba-gratis-coi-aspel/"},
-  {id:4,name:"GeoGebra Suite",         desc:"Fernando René barbosa Morales / Calculo Vectorial",      url:"https://download.geogebra.org/package/win-suite"},
-  {id:5,name:"Oracle VirtualBox",         desc:"Oscar Olivares López / Sistemas operativos",      url:"https://download.virtualbox.org/virtualbox/7.2.16/VirtualBox-7.2.16-174877-Win.exe"},
-  {id:6,name:"NetBeans",         desc:"Oscar Olivares López / Sistemas operativos",      url:"https://github.com/codelerity/netbeans-packages/releases/download/v31-build1/Apache-NetBeans-31.exe"},
+  {id:1,name:"Visual Studio Code",       desc:"Luis Antonio Reynoso Sánchez / Fundamentos de Programación",      url:"https://code.visualstudio.com/sha/download?build=stable&os=win32-x64-user"},
+  {id:2,name:"Anaconda Spyder 6",       desc:"Brian A. Mejía Díaz / Cálculo Integral",      url:"https://repo.anaconda.com/archive/Anaconda3-2025.12-2-Windows-x86_64.exe"},
+  {id:3,name:"Visual Studio Community", desc:"David Teran Gomez / POO",                     url:"https://visualstudio.microsoft.com/es/thank-you-downloading-visual-studio/?sku=Community&channel=Stable&version=VS18&source=VSLandingPage"},
+  {id:4,name:"Siigo Aspel COI",         desc:"Miriam Juárez Gutiérrez / Contabilidad",      url:"https://www.siigo.com/mx/prueba-gratis-coi-aspel/"},
+  {id:5,name:"GeoGebra Suite",         desc:"Fernando René barbosa Morales / Calculo Vectorial",      url:"https://download.geogebra.org/package/win-suite"},
+  {id:6,name:"Oracle VirtualBox",         desc:"Oscar Olivares López / Sistemas operativos",      url:"https://download.virtualbox.org/virtualbox/7.2.16/VirtualBox-7.2.16-174877-Win.exe"},
+  {id:7,name:"NetBeans",         desc:"Oscar Olivares López / Sistemas operativos",      url:"https://github.com/codelerity/netbeans-packages/releases/download/v31-build1/Apache-NetBeans-31.exe"},
 ];
 
 const materias = [
