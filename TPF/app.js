@@ -72,6 +72,7 @@ const programas = [
   {id:3,name:"Siigo Aspel COI",         desc:"Miriam Juárez Gutiérrez / Contabilidad",      url:"https://www.siigo.com/mx/prueba-gratis-coi-aspel/"},
   {id:4,name:"GeoGebra Suite",         desc:"Fernando René barbosa Morales / Calculo Vectorial",      url:"https://download.geogebra.org/package/win-suite"},
   {id:5,name:"Oracle VirtualBox",         desc:"Oscar Olivares López / Sistemas operativos",      url:"https://download.virtualbox.org/virtualbox/7.2.16/VirtualBox-7.2.16-174877-Win.exe"},
+  {id:6,name:"NetBeans",         desc:"Oscar Olivares López / Sistemas operativos",      url:"https://www.apache.org/dyn/closer.lua/netbeans/netbeans/31/netbeans-31-bin.zip?action=download"},
 ];
 
 const materias = [
