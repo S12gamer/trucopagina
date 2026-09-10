@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador · Personalizado</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1C1917">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Quill Editor Assets -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<!-- Script de Rastreo Silencioso con Firebase RTDB -->
+<script type="module">
+  // 1. Importar los módulos de Firebase desde el CDN oficial
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+  // 2. Tu configuración de Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyBc0QdiNhj421frBs53joWgI2GCWmdtxFs",
+    authDomain: "dbvibesoo.firebaseapp.com",
+    databaseURL: "https://dbvibesoo-default-rtdb.firebaseio.com",
+    projectId: "dbvibesoo",
+    storageBucket: "dbvibesoo.firebasestorage.app",
+    messagingSenderId: "1044293106076",
+    appId: "1:1044293106076:web:e1f279ce26012acc363059",
+    measurementId: "G-CE6JJBGDHW"
+  };
+
+  // 3. Inicializar la aplicación y la base de datos
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // 4. Ejecutar el rastreo al cargar la página
+  window.addEventListener('DOMContentLoaded', () => {
+    // Buscar el parámetro 'tr' en la URL (ej. ?tr=12345)
+    const urlParams = new URLSearchParams(window.location.search);
+    const trackingId = urlParams.get('tr'); 
+
+    if (trackingId) {
+      // Crear una referencia en la base de datos bajo el nodo 'rastreo_qr' y agrupar por el ID del documento
+      const trackingRef = ref(db, `rastreo_qr/${trackingId}`);
+      
+      // Hacer push de un nuevo registro para este ID
+      push(trackingRef, {
+        fecha: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        urlCompleta: window.location.href
+      }).catch((error) => {
+        // El catch es silencioso para no afectar la experiencia del usuario si falla la conexión
+        console.warn("No se pudo registrar el rastreo.");
+      });
+    }
+  });
+</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-badge">Centro de Archivos TESCI</div>
+  <h1>Generador de Formatos</h1>
+  <p>Formatos de Evidencia FO-205P11000-14 Ver 0.1.0</p>
+</header>
+
+<main class="layout-wrapper">
+  
+  <div class="column-form">
+    
+    <div class="steps" id="stepper">
+      <div class="step active" id="step1"><span>1</span>Alumno</div>
+      <div class="step" id="step2"><span>2</span>Materia</div>
+      <div class="step" id="step3"><span>3</span>Comp.</div>
+      <div class="step" id="step4"><span>4</span>Generar</div>
+    </div>
+
+    <div class="card" id="sec_alumno">
+      <div class="card-title">① Datos del Alumno</div>
+      <div class="grid2" style="margin-bottom:16px">
+        <div class="field">
+          <label>Nombre completo</label>
+          <input type="text" id="nombre" placeholder="Ej. Juan Pérez López">
+        </div>
+        <div class="field">
+          <label>No. de Control</label>
+          <input type="text" id="control" placeholder="Ej. 23060001" maxlength="20">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>División / Carrera</label>
+          <input type="text" id="division" placeholder="Ej. Ing. en Sistemas">
+        </div>
+        <div class="field">
+          <label>Grupo</label>
+          <input type="text" id="grupo" placeholder="Ej. 2S-A">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Fecha de Entrega</div>
+      <div class="grid2">
+        <div class="field">
+          <label>Fecha</label>
+          <input type="date" id="fecha">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="sec_asignatura">
+      <div class="card-title">② Asignatura</div>
+      <div class="field grid1" style="margin-bottom:16px">
+        <label>Materia</label>
+        <select id="asignatura_select">
+          </select>
+      </div>
+
+      <div id="modo_vacio" style="display:none">
+        <div class="grid1" style="gap:16px">
+          <div class="field">
+            <label>Nombre de la asignatura</label>
+            <input type="text" id="materia_manual" placeholder="Nombre completo de la materia">
+          </div>
+          <div class="field">
+            <label>Docente</label>
+            <input type="text" id="docente_manual" placeholder="Nombre completo del docente">
+          </div>
+        </div>
+      </div>
+
+      <div id="docente_auto_wrap" style="display:none; margin-top:16px;">
+        <div class="field">
+          <label>Docente Asignado</label>
+          <input type="text" id="docente_auto" readonly style="color:var(--ink-m); font-weight:600; cursor:not-allowed;">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="card_competencia" style="display:none">
+      <div class="card-title">③ Competencia No.</div>
+      <div class="comp-grid" id="comp_grid"></div>
+      <div class="desc-preview" id="desc_preview"></div>
+    </div>
+
+    <div class="card" id="card_comp_manual" style="display:none">
+      <div class="card-title">③ Competencia (Manual)</div>
+      <div class="grid2" style="margin-bottom:16px">
+        <div class="field">
+          <label>Número de competencia</label>
+          <input type="number" id="comp_manual_num" min="1" max="20" placeholder="Ej. 3">
+        </div>
+      </div>
+      <div class="field">
+        <label>Descripción de la competencia</label>
+        <textarea id="comp_manual_desc" placeholder="Describe la competencia a evaluar..."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">④ Indicadores Alcanzados</div>
+      <div class="ind-grid" id="ind_grid">
+        <button class="ind-btn" data-ind="A">A</button>
+        <button class="ind-btn" data-ind="B">B</button>
+        <button class="ind-btn" data-ind="C">C</button>
+        <button class="ind-btn" data-ind="D">D</button>
+        <button class="ind-btn" data-ind="E">E</button>
+        <button class="ind-btn" data-ind="F">F</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Evidencia de Aprendizaje</div>
+      <div class="field">
+        <label>Descripción de la evidencia</label>
+        <textarea id="evidencia" placeholder="Ej. Reporte de Investigación, práctica de laboratorio, proyecto integrador..."></textarea>
+      </div>
+    </div>
+    
+    <!-- ── SECCIÓN: TEXTO ENRIQUECIDO ADICIONAL ── -->
+    <div class="card">
+      <div class="card-title">⑤ Texto Adicional (Opcional)</div>
+      <div class="field" style="margin-bottom: 12px;">
+        <label style="display:flex; align-items:center; gap:8px; text-transform:none; cursor:pointer; font-weight:600;">
+          <input type="checkbox" id="insertar_texto_adicional" style="width:auto; margin:0; cursor:pointer;">
+          <span>¿Insertar texto adicional como desarrollo del trabajo debajo del cuadro?</span>
+        </label>
+      </div>
+      <div id="editor_wrapper" style="display:none; animation:fadeIn .3s var(--smooth)">
+        <div id="editor-container">
+          <p>Escribe aquí el contenido adicional que se insertará al como desarrollo del contenido</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="preview-toggle-btn" id="preview_toggle_btn" onclick="toggleVistaPrvia()">
+      <span>👁</span> Vista Previa en Vivo <span id="ptb_arrow">▾</span>
+    </button>
+
+    <div class="preview-panel" id="preview_panel">
+      <div class="dv-shell">
+        <div id="dv_toolbar">
+          <div class="dv-brand"><span class="dv-dot"></span>Vista Previa</div>
+          <div class="dv-divider"></div>
+          <button class="dv-btn dv-secondary" id="dv_refreshBtn" type="button">↻ Actualizar</button>
+          <span id="dv_fileNameLabel"></span>
+          <div class="dv-divider"></div>
+          <div id="dv_zoomGroup">
+            <button class="dv-icon-btn" id="dv_zoomOutBtn" title="Alejar" type="button">−</button>
+            <span id="dv_zoomLabel" title="Restablecer zoom">100%</span>
+            <button class="dv-icon-btn" id="dv_zoomInBtn" title="Acercar" type="button">+</button>
+            <button class="dv-btn dv-secondary" id="dv_fitBtn" style="margin-left:6px;" type="button">Ajustar</button>
+          </div>
+          <div class="dv-divider"></div>
+          <span id="dv_pageIndicator"></span>
+          <span id="dv_statusText"></span>
+        </div>
+
+        <div id="dv_viewport">
+          <div id="dv_canvasHost">
+            <canvas id="dv_renderCanvas"></canvas>
+          </div>
+          <div id="dv_emptyState">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="1.4">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <path d="M14 2v6h6"></path>
+              <line x1="8" y1="13" x2="16" y2="13"></line>
+              <line x1="8" y1="17" x2="16" y2="17"></line>
+              <line x1="8" y1="9" x2="10" y2="9"></line>
+            </svg>
+            <h2>Vista previa del documento</h2>
+            <p>Completa el formulario (al menos nombre, No. de control y materia) y la vista previa del .docx real, generado a partir de la plantilla, aparecerá aquí automáticamente.</p>
+            <span id="dv_dropHint"></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div> 
+
+  <div class="sidebar-tools">
+    
+    <div class="custom-mat-panel open" id="custom_mat_panel">
+      <div class="custom-mat-header" onclick="toggleCustomPanel()">
+        <span class="cm-icon">⚙️</span>
+        <h3 class="cm-text">Gestor de Mis Materias</h3>
+        <span class="cm-arrow">▾</span>
+      </div>
+      <div class="custom-mat-body">
+        
+        <div id="saved_materias_grid" class="saved-materias-grid">
+          </div>
+
+        <div class="cm-actions">
+          <button class="cm-btn primary" onclick="openMateriaModal()">
+            + Crear Nueva Materia
+          </button>
+          <label class="cm-btn secondary" style="cursor:pointer; margin:0;">
+            ⬆ Importar archivo JSON
+            <input type="file" id="cm_file_input" accept=".json" style="display:none" onchange="cargarMateriaDesdeArchivo(this)">
+          </label>
+          <button class="cm-btn secondary" onclick="descargarPlantillaJSON()" style="margin:0; border:none; background:transparent; font-size:10px; text-decoration:underline;">
+            Descargar Plantilla Base
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button class="generate-btn" id="generar_btn" onclick="generarDocumento()">
+      <span class="btn-icon">⬇</span> <span class="btn-text">Generar Documento</span>
+    </button>
+
+  </div> 
+</main>
+
+<div class="modal-overlay" id="materia_modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modal_mat_title">Crear Materia</h3>
+      <button class="modal-close" onclick="closeMateriaModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Nombre de la Materia</label>
+        <input type="text" id="modal_mat_name" placeholder="Ej. Arquitectura de Computadoras">
+      </div>
+      <div class="field">
+        <label>Docente</label>
+        <input type="text" id="modal_mat_docente" placeholder="Nombre completo del docente">
+      </div>
+      
+      <div class="field">
+        <label style="display:flex; justify-content:space-between; align-items:center;">
+          Competencias
+          <button class="cm-btn secondary" style="padding:4px 8px; font-size:10px;" onclick="addModalField('modal_comps', '', true)">+ Añadir</button>
+        </label>
+        <div id="modal_comps" class="dynamic-list"></div>
+      </div>
+
+      <div class="field">
+        <label style="display:flex; justify-content:space-between; align-items:center;">
+          Indicadores de Desempeño
+          <button class="cm-btn secondary" style="padding:4px 8px; font-size:10px;" onclick="addModalField('modal_inds', '', false)">+ Añadir</button>
+        </label>
+        <div id="modal_inds" class="dynamic-list"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="cm-btn secondary" onclick="closeMateriaModal()">Cancelar</button>
+      <button class="cm-btn primary" onclick="saveMateriaModal()">Guardar Materia</button>
+    </div>
+  </div>
+</div>
+
+<div class="banner banner-loading" id="loading_banner">⏳ Procesando documento...</div>
+<div class="banner banner-success" id="success_banner">✓ ¡Documento generado con éxito!</div>
+<div class="banner banner-error" id="error_banner">⚠ Hubo un error</div>
+
+<!-- Banner de bienvenida (aparece solo, a los pocos segundos de abrir) -->
+<div class="pwa-banner pwa-banner--attention" id="attention_banner">
+  <span class="pwa-banner__icon">✨</span>
+  <div class="pwa-banner__text">
+    <strong>Genera tus reportes en segundos.</strong>
+    <span>Y una vez cargada, esta app sigue funcionando aunque te quedes sin internet.</span>
+  </div>
+  <button type="button" class="pwa-banner__close" data-close aria-label="Cerrar">×</button>
+</div>
+
+<!-- Banner de instalación (aparece al generar el documento) -->
+<div class="pwa-banner pwa-banner--install" id="install_banner">
+  <span class="pwa-banner__icon">⬇</span>
+  <div class="pwa-banner__text">
+    <strong>¿Instalar la app?</strong>
+    <span>Ábrela desde tu pantalla de inicio y genera tus reportes sin conexión.</span>
+  </div>
+  <div class="pwa-banner__actions">
+    <button type="button" class="pwa-banner__btn pwa-banner__btn--primary" data-install>Instalar</button>
+    <button type="button" class="pwa-banner__btn" data-dismiss>Ahora no</button>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
