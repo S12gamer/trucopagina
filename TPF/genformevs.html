@@ -2424,6 +2424,28 @@ const asignaturasData = {
       "F. Realiza su trabajo de manera autónoma y autorregulada."
     ]
   },
+  "Principios Electricos y aplicaciones digitales": {
+    docente: "M. en TI Christhoper Aaron Rico Fonseca",
+    total_comp: 7,
+    competencias: [
+      "Soluciona problemas que engloben escenarios de circuitos electricos para calcular parametros en base leyes y teoremas",
+      "maneja instrumentos y equipos de medicion eléctricos",
+      "Identifica las características de los dispositivos electrónicos utilizando hoja de especificaciones",
+      "Simula circuitos analógicos para su comprensión, demostrando los conceptos vistos en clase",
+      "Aplica técnicas de simplificación para construir circuitos con el minimo costo",
+      "Diseña, arma y prueba circuitos combinacional y secuencial SSI y MSI para entender el funcionamiento del hardware de la computadora",
+      "Comprende la acción de conversión de A/D y D/A y el impacto en el funcionamiento de una computadora",
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      // "C. Realiza actividades de desempeño y completa la investigacion practica"
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
 };
 
 /* ════════════════════════════════════════
@@ -2448,6 +2470,7 @@ function renderizarSelectorMaterias() {
   select.add(new Option('Sistemas Operativos', 'Sistemas Operativos'));
   select.add(new Option('Investigacion de Operaciones', 'Investicación de Operaciones'));
   select.add(new Option('Estructura de Datos', 'Estructura de Datos'));
+  select.add(new Option('Principios Electricos y aplicaciones digitales', 'Principios Electricos y aplicaciones digitales'));
 
   try {
     const stored = localStorage.getItem('custom_materias');
