@@ -63,7 +63,7 @@ const instrumentaciones = [
   /* {id:11,sem:3,name:"Instrumentación Sistemas Operativos",           desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
   {id:12,sem:3,name:"Instrumentación Estructura de Datos",           desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=1fVBoiSBDm1-nDV9jsdjby5nLdlKHqVyK"},
   /* {id:13,sem:3,name:"Instrumentación Inglés N5 y N6",         desc:"Planeación — Coord. Lenguas Extranjeras", url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
-  {id:14,sem:3,name:"Instrumentación PEAD",                    desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=1mRj3fNFTDf168cvUqQvjli1Jt2y7rzx2"},*/
+  {id:14,sem:3,name:"Instrumentación PEAD",                    desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=1mRj3fNFTDf168cvUqQvjli1Jt2y7rzx2"},
 ];
 
 const programas = [
