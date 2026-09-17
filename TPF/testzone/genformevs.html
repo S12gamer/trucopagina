@@ -288,6 +288,9 @@ body::before {
 /* ── COLUMNA LATERAL (Sidebar Herramientas) ── */
 .sidebar-tools { display: flex; flex-direction: column; gap: 1.5rem; }
 
+/* ── AI (Sidebar Herramientas) ── */
+
+
 /* ── PANEL GESTOR DE MATERIAS ── */
 .custom-mat-panel {
   background: var(--surface); border: 1.5px solid rgba(91,62,143,.25);
@@ -823,7 +826,7 @@ body::before {
         </label>
       </div>
       <!-- NUEVO: Controles de IA -->
-      <div id="ai_controls" style="display:none; gap:10px; margin-bottom: 12px; animation:fadeIn .3s var(--smooth)">
+      <div id="ai_controls" style="display: none"; gap:10px; margin-bottom: 12px; animation:fadeIn .3s var(--smooth)">
         <select id="ai_template_select" style="flex:1; padding:10px; border: 1.5px solid rgba(28,25,23,.1); border-radius: var(--r-s); font-family: 'DM Sans', sans-serif;">
           <option value="ensayo">Ensayo Académico</option>
           <option value="reporte">Reporte Técnico</option>
@@ -831,12 +834,13 @@ body::before {
           <option value="libre">Redacción Libre</option>
         </select>
         <button id="btn_ai_generate" type="button" style="padding:10px 16px; background:var(--purple); color:#fff; border:none; border-radius:var(--r-s); cursor:pointer; font-weight:bold; font-family: 'DM Sans', sans-serif;">
-          ✨ Auto-redactar
+          ✨ Enviar a CDA IA
         </button>
-        <button type="button" onclick="resetearApiKey()" style="background:transparent; border:none; color:var(--ink-faint); font-size:12px; cursor:pointer; text-decoration:underline;" title="Cambiar API Key de Gemini">
+        <!-- <button type="button" onclick="resetearApiKey()" style="background:transparent; border:none; color:var(--ink-faint); font-size:12px; cursor:pointer; text-decoration:underline;" title="Cambiar API Key de Gemini">
           🔑 Reset Key
-        </button>
+        </button> -->
       </div>
+      <!-- <script src="tpf-theme-engine.js"></script> --> 
       <div id="editor_wrapper" style="display:none; animation:fadeIn .3s var(--smooth)">
         <div id="editor-container">
           <p>Escribe aquí el contenido adicional que se insertará al como desarrollo del contenido</p>
@@ -892,7 +896,7 @@ body::before {
 
   <div class="sidebar-tools">
     
-    <div class="custom-mat-panel open" id="custom_mat_panel">
+    <div class="custom-mat-panel open" id="custom_mat_panel" style="display:none;">
       <div class="custom-mat-header" onclick="toggleCustomPanel()">
         <span class="cm-icon">⚙️</span>
         <h3 class="cm-text">Gestor de Mis Materias</h3>
@@ -2344,7 +2348,104 @@ window.DocxViewerEngine = {
 /* ════════════════════════════════════════
    BASE DE DATOS DE ASIGNATURAS (VACÍA)
 ════════════════════════════════════════ */
-const asignaturasData = {};
+const asignaturasData = {
+  "Cultura Empresarial": {
+    docente: "M. en TI Edith Flores Hernández",
+    total_comp: 5,
+    competencias: [
+      "Analiza los conceptos fundamentales del contexto de la empresa para identificar áreas de oportunidad proponiendo planes de negocio.",
+      "Realiza el análisis de mercado para determinar la factibilidad del plan de negocio aplicando las metodologías pertinentes.",
+      "Realiza el estudio técnico para determinar la viabilidad del plan de negocio considerando el proceso productivo, tecnología del producto o servicio, los proveedores y la normatividad vigente.",
+      "Diseña la estructura organizacional para el funcionamiento eficiente de la empresa considerando el perfil del capital humano.",
+      "Realiza la evaluación económica para proyectar la rentabilidad de la empresa mediante las metodologías pertinentes.",
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+  "Sistemas Operativos": {
+    docente: "M. en S.T.R Oscar Olivares López",
+    total_comp: 1,
+    competencias: [
+      "Identificar los componentes de los sistemas operativos, la funcíon y las características de diferentes sistemas operativos",
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+  "Investigación de Operaciones": {
+    docente: "José Juan Santana Ortiz",
+    total_comp: 6,
+    competencias: [
+      "Resuelve problemas de programación lineal para generar la solución óptima aplicando el uso de conceptos, técnicas y algoritmos del método simplex",
+      "Aplica los métodos de solución de problemas de redes que permitan tomar la mejor decisión para la solución del problema aplicando los modelos principales de transporte y asignación",
+      "Aplica los métodos de solución de problemas de administración de proyectos que permitan una correcta planeación, administración y control aplicando las técnicas de revisión y evaluación de proyectos y el camino crítico",
+      "Resuelve problemas propuestos para encontrar máximos y mínimos de los problemas no lineales restringidos",
+      "Resolver problemas de manejo de inventarios con el objeto de equilibrar los costos de conservación, preparación y déficit empleando los modelos determinísticos",
+      "Utiliza los modelos de líneas de espera para identificar, representar y analizar tipos de modelos de líneas de espera y los costos asociados",
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+  "Estructura de Datos": {
+    docente: "Luis Antonio Sánchez Reynoso",
+    total_comp: 6,
+    competencias: [
+      "Conoce y comprende las diferentes estructuras de datos, su clasificación y forma de manipularlas para buscar la manera más eficiente de resolver problemas",
+      "Aplica la recursividad en la solución de problemas valorando su pertinencia en el uso eficaz de los recursos",
+      "Comprende y aplica estructuras de datos lineales para solución de problemas",
+      "Comprende y aplica estructuras no lineales para la solución de problemas",
+      "Conoce, comprende y aplica los algoritmos de ordenamiento para el uso adecuado en el desarrollo de aplicaciones que permita solucionar problemas del entorno",
+      "Conoce, comprende y aplica los algoritmos de búsqueda para el uso adecuado en el desarrollo de aplicaciones que permita solucionar problemas del entorno",
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+  "Principios Electricos y aplicaciones digitales": {
+    docente: "M. en TI Christhoper Aaron Rico Fonseca",
+    total_comp: 7,
+    competencias: [
+      "Soluciona problemas que engloben escenarios de circuitos electricos para calcular parametros en base leyes y teoremas",
+      "maneja instrumentos y equipos de medicion eléctricos",
+      "Identifica las características de los dispositivos electrónicos utilizando hoja de especificaciones",
+      "Simula circuitos analógicos para su comprensión, demostrando los conceptos vistos en clase",
+      "Aplica técnicas de simplificación para construir circuitos con el minimo costo",
+      "Diseña, arma y prueba circuitos combinacional y secuencial SSI y MSI para entender el funcionamiento del hardware de la computadora",
+      "Comprende la acción de conversión de A/D y D/A y el impacto en el funcionamiento de una computadora",
+    ],
+    indicadores: [
+      "A. Se adapta a situaciones y contextos complejos.",
+      "B. Hace aportaciones a las actividades académicas desarrolladas.",
+      // "C. Realiza actividades de desempeño y completa la investigacion practica"
+      "C. Propone y/o explica soluciones o procedimientos no vistos en clase.",
+      "D. Introduce recursos y experiencias que promueven un pensamiento crítico.",
+      "E. Incorpora conocimientos y actividades interdisciplinarias en su aprendizaje.",
+      "F. Realiza su trabajo de manera autónoma y autorregulada."
+    ]
+  },
+};
 
 /* ════════════════════════════════════════
    MATERIA PERSONALIZADA Y LOCALSTORAGE
@@ -2364,7 +2465,11 @@ function renderizarSelectorMaterias() {
   select.innerHTML = ''; 
 
   select.add(new Option('— Selecciona una materia —', ''));
-  select.add(new Option('✏️ Formato vacío (ingresar todo manualmente)', '__vacio__'));
+  select.add(new Option('Cultura Empresarial', 'Cultura Empresarial'));
+  select.add(new Option('Sistemas Operativos', 'Sistemas Operativos'));
+  select.add(new Option('Investigacion de Operaciones', 'Investicación de Operaciones'));
+  select.add(new Option('Estructura de Datos', 'Estructura de Datos'));
+  select.add(new Option('Principios Electricos y aplicaciones digitales', 'Principios Electricos y aplicaciones digitales'));
 
   try {
     const stored = localStorage.getItem('custom_materias');
