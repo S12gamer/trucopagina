@@ -289,9 +289,7 @@ body::before {
 .sidebar-tools { display: flex; flex-direction: column; gap: 1.5rem; }
 
 /* ── AI (Sidebar Herramientas) ── */
-#ai_controls {
-  display: none !important;
-}
+
 
 /* ── PANEL GESTOR DE MATERIAS ── */
 .custom-mat-panel {
@@ -828,7 +826,7 @@ body::before {
         </label>
       </div>
       <!-- NUEVO: Controles de IA -->
-      <div id="ai_controls" style="display:none; gap:10px; margin-bottom: 12px; animation:fadeIn .3s var(--smooth)">
+      <div id="ai_controls" style="display: none"; gap:10px; margin-bottom: 12px; animation:fadeIn .3s var(--smooth)">
         <select id="ai_template_select" style="flex:1; padding:10px; border: 1.5px solid rgba(28,25,23,.1); border-radius: var(--r-s); font-family: 'DM Sans', sans-serif;">
           <option value="ensayo">Ensayo Académico</option>
           <option value="reporte">Reporte Técnico</option>
@@ -836,12 +834,13 @@ body::before {
           <option value="libre">Redacción Libre</option>
         </select>
         <button id="btn_ai_generate" type="button" style="padding:10px 16px; background:var(--purple); color:#fff; border:none; border-radius:var(--r-s); cursor:pointer; font-weight:bold; font-family: 'DM Sans', sans-serif;">
-          ✨ Auto-redactar
+          ✨ Enviar a CDA IA
         </button>
-        <button type="button" onclick="resetearApiKey()" style="background:transparent; border:none; color:var(--ink-faint); font-size:12px; cursor:pointer; text-decoration:underline;" title="Cambiar API Key de Gemini">
+        <!-- <button type="button" onclick="resetearApiKey()" style="background:transparent; border:none; color:var(--ink-faint); font-size:12px; cursor:pointer; text-decoration:underline;" title="Cambiar API Key de Gemini">
           🔑 Reset Key
-        </button>
+        </button> -->
       </div>
+      <!-- <script src="tpf-theme-engine.js"></script> --> 
       <div id="editor_wrapper" style="display:none; animation:fadeIn .3s var(--smooth)">
         <div id="editor-container">
           <p>Escribe aquí el contenido adicional que se insertará al como desarrollo del contenido</p>

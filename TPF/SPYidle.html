@@ -103,10 +103,50 @@ body{
 }
 
 /* EDITOR */
-#editor{
+#editor-pane{
     grid-column:2;
     grid-row:1;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    background:#1e1e1e;
+    overflow:hidden;
 }
+#editor-tabs{
+    display:flex;
+    flex-shrink:0;
+    background:#181818;
+    border-bottom:1px solid #000;
+}
+.editor-tab{
+    margin:0;
+    padding:8px 16px;
+    background:transparent;
+    color:#9d9d9d;
+    border:none;
+    border-bottom:2px solid transparent;
+    border-radius:0;
+    font-size:13px;
+    cursor:pointer;
+}
+.editor-tab:hover{ color:#fff; background:#222; }
+.editor-tab.active{ color:#fff; border-bottom-color:#0e639c; background:#1e1e1e; }
+.editor-tab.tk-live{ color:#7ec97e; }
+.editor-tab.tk-live.active{ border-bottom-color:#7ec97e; }
+.editor-tab .dot{ margin-left:6px; vertical-align:middle; }
+#editor-body{ flex:1; position:relative; min-height:0; }
+#editor{ position:absolute; inset:0; }
+#tkRunPane{
+    position:absolute; inset:0; display:none;
+    background:#141414; overflow:auto; padding:22px;
+    font-family:-apple-system,"Segoe UI",Arial,sans-serif;
+}
+#tkRunEmptyHint{ color:#8a8a86; font-size:12px; text-align:center; margin-top:60px; }
+/* Igual que #tkCanvasScaler: reserva el hueco ya escalado de la ventana Tk
+   en vivo (#tkRunWrapper) para que en móvil vertical se vea completa, sin
+   recortarse por el borde del panel ni dejar espacio vacío de sobra. */
+#tkRunScaler{ position:relative; overflow:visible; }
+#tkRunWrapper{ position:absolute; top:0; left:0; transform-origin:top left; }
 
 /* CONSOLE */
 #console{
@@ -269,7 +309,7 @@ button{max-width:100%;}
     }
 
     #files{grid-column:1;grid-row:1 / span 3;}
-    #editor{grid-column:2;grid-row:1;}
+    #editor-pane{grid-column:2;grid-row:1;}
     #console{grid-column:2;grid-row:2;}
     #plots{grid-column:2;grid-row:3;min-height:250px;}
 }
@@ -283,7 +323,7 @@ button{max-width:100%;}
     }
 
     #files{width:100%;height:220px;min-height:220px;}
-    #editor{width:100%;height:55vh;min-height:350px;}
+    #editor-pane{width:100%;height:55vh;min-height:350px;}
     #console{width:100%;height:180px;}
     #plots{width:100%;min-height:300px;}
 
@@ -302,9 +342,201 @@ button{max-width:100%;}
 
 @media (max-width:480px){
     #files{height:180px;min-height:180px;}
-    #editor{height:50vh;min-height:280px;}
+    #editor-pane{height:50vh;min-height:280px;}
     #console{height:150px;}
     button{width:100%;}
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DISEÑADOR VISUAL TKINTER (bidireccional) — fusionado
+   La pestaña "🎨 Diseño visual" del editor solo aloja el lienzo
+   (la ventana simulada). Los widgets disponibles viven debajo de
+   la lista de archivos (izquierda) y las propiedades del widget
+   seleccionado aparecen encima de la terminal (centro-abajo) solo
+   mientras se diseña; scripts.js muestra/oculta los tres a la vez
+   y esta página los oculta también al pulsar "Ejecutar".
+   ════════════════════════════════════════════════════════════════ */
+#tkDesignPane{
+    display:none; /* lo activa scripts.js al entrar a la pestaña */
+    height:100%;
+    background:#1e1e1e;
+    color:#e7e9ee;
+    font-family:-apple-system,"Segoe UI",Arial,sans-serif;
+}
+#tkDesignPane *{ box-sizing:border-box; }
+#tkToolboxCol *, #tkPropsCol *{ box-sizing:border-box; }
+#tkToolboxCol input[type="text"], #tkToolboxCol input[type="number"]{
+    background:#0f0f10; border:1px solid #303036; color:#e7e9ee;
+    border-radius:5px; padding:5px 8px; font-size:12px; width:100%;
+}
+#tkToolboxCol input[type="text"]:focus, #tkToolboxCol input[type="number"]:focus{
+    outline:none; border-color:#0e639c;
+}
+#tkToolboxCol label, #tkPropsCol label{ font-size:11px; color:#9a9a9a; }
+.tk-mini-title{
+    font-size:11px; color:#9a9a9a; letter-spacing:.3px; margin:12px 0 6px; text-transform:uppercase;
+}
+.tk-field-row{ margin-bottom:8px; }
+.tk-field-row2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+.tk-check-row{ display:flex; align-items:center; gap:6px; font-size:11px; color:#9a9a9a; margin:6px 0 12px; }
+.tk-mini-btn{
+    display:block; width:100%; margin:6px 0 0; padding:7px 8px; font-size:11px;
+    background:#232326; border:1px solid #303036; color:#e7e9ee; border-radius:6px; cursor:pointer;
+}
+.tk-mini-btn:hover{ border-color:#0e639c; }
+
+/* --- Widgets: debajo de la lista de archivos (#files) --- */
+#tkToolboxCol{
+    display:none; /* lo activa scripts.js junto con la pestaña de diseño */
+    margin-top:14px;
+    padding-top:12px;
+    border-top:1px solid #262b35;
+    color:#e7e9ee;
+    font-family:-apple-system,"Segoe UI",Arial,sans-serif;
+}
+#toolbox{ display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.tool-btn{
+    background:#1a1a1c; border:1px solid #2c2c30; color:#e7e9ee; border-radius:7px;
+    padding:8px 4px; font-size:10.5px; cursor:pointer; display:flex; flex-direction:column;
+    align-items:center; gap:5px; text-align:center; line-height:1.15;
+}
+.tool-btn:hover{ border-color:#0e639c; background:#20242f; }
+.tool-glyph{
+    width:24px; height:18px; border:1.5px solid #9a9a9a; border-radius:3px;
+    display:flex; align-items:center; justify-content:center; font-size:8.5px; color:#9a9a9a;
+}
+
+/* --- Lienzo: única pieza que queda en la pestaña "Diseño visual" --- */
+#tkCanvasCol{
+    height:100%; background:#141414; display:flex; align-items:flex-start;
+    justify-content:center; overflow:auto; padding:26px 16px;
+    background-image: radial-gradient(circle, #232323 1px, transparent 1px);
+    background-size: 18px 18px;
+}
+/* Contenedor que reserva el hueco EXACTO (ya escalado) que ocupa la ventana
+   simulada; window-mock vive dentro con su tamaño real y se encoge con
+   transform:scale() cuando no cabe en pantalla (móvil vertical), sin que
+   el resto del lienzo herede espacio vacío de más ni recorte contenido. */
+#tkCanvasScaler{ position:relative; overflow:visible; }
+#window-mock{
+    box-shadow:0 16px 40px rgba(0,0,0,.55); border-radius:8px; overflow:visible;
+    position:absolute; top:0; left:0; transform-origin:top left;
+}
+#canvas-size-label{ position:absolute; top:-22px; left:0; font-size:11px; color:#9a9a9a; }
+#window-chrome{
+    background:#d8d7d3; height:26px; border-radius:8px 8px 0 0; display:flex; align-items:center;
+    padding:0 10px; gap:6px;
+}
+#window-chrome .dot{ width:10px; height:10px; border-radius:50%; }
+#window-chrome .dot.r{ background:#ec6a5e; } #window-chrome .dot.y{ background:#f4bf4f; } #window-chrome .dot.g{ background:#61c454; }
+#window-title{
+    margin-left:8px; font-size:11px; color:#5a5a55; flex:1; text-align:center; margin-right:40px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+#canvas{ background:#ececea; position:relative; overflow:hidden; border-radius:0 0 8px 8px; }
+#canvas-resize-handle{
+    position:absolute; right:-3px; bottom:-3px; width:16px; height:16px; cursor:nwse-resize;
+    background:
+      linear-gradient(135deg, transparent 0 45%, #0e639c 45% 55%, transparent 55% 100%),
+      linear-gradient(135deg, transparent 0 65%, #0e639c 65% 75%, transparent 75% 100%);
+    opacity:.85; z-index:50; touch-action:none;
+}
+.designer-widget{
+    position:absolute; box-sizing:border-box; user-select:none; cursor:grab; touch-action:none;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.designer-widget:active{ cursor:grabbing; }
+.designer-widget.selected{ outline:2px solid #0e639c; outline-offset:1px; }
+.resize-handle{
+    position:absolute; right:-5px; bottom:-5px; width:11px; height:11px; background:#0e639c;
+    border:2px solid #06263b; border-radius:2px; cursor:nwse-resize; z-index:20; touch-action:none;
+}
+#empty-hint{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    color:#8a8a86; font-size:12px; text-align:center; pointer-events:none; width:80%;
+}
+
+/* --- Propiedades: bloque normal debajo del toolbox, misma columna --- */
+#tkPropsCol{
+    display:none; /* lo activa scripts.js junto con la pestaña de diseño */
+    margin-top:14px;
+    padding-top:12px;
+    border-top:1px solid #262b35;
+    background:transparent;
+    color:#e7e9ee;
+    font-family:-apple-system,"Segoe UI",Arial,sans-serif;
+}
+#tkPropsCol .tk-props-note{
+    font-size:10.5px; color:#6f7580; margin:-2px 0 10px; line-height:1.4;
+}
+#props.empty{ color:#9a9a9a; font-size:12px; }
+.prop-row{ margin-bottom:9px; }
+.prop-row label{ display:block; margin-bottom:3px; }
+.prop-row input, .prop-row select, .prop-row textarea{ width:100%; }
+.prop-row textarea{
+    resize:vertical; min-height:54px; font-family:inherit; background:#0f0f10; color:#e7e9ee;
+    border:1px solid #303036; border-radius:5px; padding:5px 8px; font-size:12px;
+}
+.prop-row select{
+    background:#0f0f10; color:#e7e9ee; border:1px solid #303036; border-radius:5px; padding:5px 8px; font-size:12px;
+}
+.prop-row input[type="color"]{ width:28px; height:26px; padding:0; border:1px solid #303036; border-radius:5px; background:none; cursor:pointer; }
+.prop-grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.prop-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.prop-header b{ font-size:13px; }
+.del-btn{
+    background:none; border:1px solid #e2604f; color:#e2604f; border-radius:5px;
+    font-size:11px; padding:4px 8px; cursor:pointer;
+}
+.del-btn:hover{ background:#e2604f; color:#fff; }
+
+#toast{
+    position:fixed; bottom:18px; left:50%; transform:translateX(-50%) translateY(10px);
+    background:#232326; border:1px solid #0e639c; color:#e7e9ee; padding:9px 16px; border-radius:7px;
+    font-size:12.5px; opacity:0; pointer-events:none; transition:opacity .18s, transform .18s;
+    z-index:999; max-width:70vw; text-align:center;
+}
+#toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+#toast.toast-err{ border-color:#e2604f; }
+
+@media (max-width:800px){
+    #tkCanvasCol{ padding:16px; }
+}
+
+#tkPropsCloseBtn{ display:none; }
+
+/* ════════════════════════════════════════════════════════════════
+   TKINTER EN MÓVIL VERTICAL — diseñador y ventana en vivo
+   Mientras se diseña o se ejecuta una app Tkinter, el panel del
+   editor gana todo el alto posible, la paleta de widgets y las
+   propiedades dejan de ir apretadas en cajas diminutas, y tanto el
+   lienzo del diseñador como la ventana Tk en vivo se escalan para
+   caber por completo a lo ancho (ver #tkCanvasScaler/#tkRunScaler),
+   sin recortarse ni quedar ilegibles.
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width:700px){
+    body.tk-mode #editor-pane{ height:78vh; min-height:460px; }
+    body.tk-mode #files{ height:auto; max-height:40vh; }
+    body.tk-mode #tkToolboxCol .tool-btn{ padding:10px 6px; font-size:11.5px; }
+
+    #tkCanvasCol{ padding:14px 8px; }
+    #tkRunPane{ padding:14px 8px; }
+
+    /* Las propiedades del widget seleccionado se abren como una hoja
+       inferior amplia y fácil de tocar, en vez de vivir apretadas en la
+       columna de archivos; solo mientras hay algo seleccionado. */
+    #tkPropsCol:has(#props:not(.empty)){
+        position:fixed; left:0; right:0; top:auto; bottom:0;
+        max-height:72vh; margin-top:0; border-top:none;
+        border-radius:14px 14px 0 0;
+        background:#171717; padding:12px 14px 14px; overflow-y:auto;
+        box-shadow:0 -10px 28px rgba(0,0,0,.55);
+        z-index:500;
+    }
+    #tkPropsCol .prop-header{
+        position:sticky; top:0; background:#171717; padding-top:2px; margin-top:-2px; z-index:1;
+    }
+    #tkPropsCloseBtn{ display:inline-flex; }
 }
 
 </style>
@@ -367,13 +599,74 @@ function hideLoader(){
     <button onclick="createFile()">+ Nuevo archivo</button>
     <button onclick="openFile()">Abrir .py</button>
     <div id="fileList"></div>
+
+    <!-- Widgets del diseñador Tkinter: aparecen debajo de la lista de
+         archivos mientras la pestaña "🎨 Diseño visual" está activa. -->
+    <div id="tkToolboxCol">
+        <div class="tk-mini-title">Widgets</div>
+        <div id="toolbox"></div>
+        <div class="tk-mini-title">Ventana</div>
+        <div class="tk-field-row">
+            <label>Título</label>
+            <input type="text" id="rootTitle" value="Mi Aplicación">
+        </div>
+        <div class="tk-field-row2">
+            <div><label>Ancho</label><input type="number" id="winW" value="480" min="200" max="1000"></div>
+            <div><label>Alto</label><input type="number" id="winH" value="340" min="150" max="700"></div>
+        </div>
+        <label class="tk-check-row"><input type="checkbox" id="resizableChk" checked> Redimensionable</label>
+        <button id="tkSyncBtn" class="tk-mini-btn" title="Reconstruye el lienzo a partir del código que hay ahora en el editor">🔄 Sincronizar desde código</button>
+        <button id="tkCopyCodeBtn" class="tk-mini-btn" title="Copia el código Python generado">📋 Copiar código</button>
+
+        <!-- Propiedades del widget seleccionado: al lado mismo de donde se
+             arman los widgets (esta misma columna), justo debajo de la
+             paleta. Solo visible mientras se diseña. -->
+        <div id="tkPropsCol">
+            <div class="tk-mini-title">Propiedades</div>
+            <div class="tk-props-note">Selecciona un widget en el lienzo para editarlo aquí.</div>
+            <div id="props" class="empty">Ningún widget seleccionado.</div>
+        </div>
+    </div>
 </div>
 
-<!-- EDITOR -->
-<div id="editor"></div>
+<!-- EDITOR (código + diseño visual Tkinter + ventana en vivo, misma zona) -->
+<div id="editor-pane">
+    <div id="editor-tabs">
+        <button id="tabCodigoBtn" class="editor-tab active">💻 Código</button>
+        <button id="tabDisenoBtn" class="editor-tab">🎨 Diseño visual<span class="dot dot-green" id="tkHintDot" style="display:none"></span></button>
+        <button id="tabEjecutandoBtn" class="editor-tab tk-live" style="display:none;">▶ <span id="tkRunningLabel">Ejecutando</span></button>
+    </div>
+    <div id="editor-body">
+        <div id="editor"></div>
+        <div id="tkDesignPane">
+            <div id="tkCanvasCol">
+                <div id="tkCanvasScaler">
+                <div id="window-mock">
+                    <div id="canvas-size-label"></div>
+                    <div id="window-chrome">
+                        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+                        <div id="window-title">Mi Aplicación</div>
+                    </div>
+                    <div id="canvas">
+                        <div id="empty-hint">Añade un widget desde la lista, debajo de tus archivos, para empezar a diseñar tu interfaz.<br>El código Python se genera solo y aparece en la pestaña "💻 Código".<br>Pulsa "Ejecutar" para probarla de verdad: aparecerá en la pestaña "▶ Ejecutando", aquí al lado.</div>
+                    </div>
+                    <div id="canvas-resize-handle" title="Redimensionar ventana"></div>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div id="tkRunPane">
+            <div id="tkRunEmptyHint">Cuando ejecutes código con tkinter, su ventana aparecerá aquí — real e interactiva, no una captura.</div>
+        </div>
+    </div>
+</div>
+<textarea id="pythonCode" style="display:none" aria-hidden="true"></textarea>
+<div id="toast"></div>
+<script type="module" src="scripts.js"></script>
 
 <!-- CONSOLE -->
-<div id="console"></div>
+<div id="console">
+</div>
 
 <!-- PLOTS -->
 <div id="plots">
@@ -381,6 +674,7 @@ function hideLoader(){
 <h3>Acciones</h3>
 
 <button id="run">Ejecutar</button>
+<button id="stopBtn" style="display:none;background:#8a2f2f;border-color:#8a2f2f;">⏹ Detener</button>
 <button id="save">PNG</button>
 <button id="copy">Copiar</button>
 <button onclick="savePy()">Descargar .py</button>
@@ -405,7 +699,7 @@ packages = ["numpy","matplotlib","sympy"]
 <script type="py">
 
 import re
-import sys, io, traceback
+import sys, io, traceback, types
 import numpy as np
 import sympy as sp
 import matplotlib.pyplot as plt
@@ -416,6 +710,24 @@ from js import document, navigator, Blob, URL, window
 from pyodide.ffi import create_proxy
 
 ENV = {"np":np,"sp":sp,"__name__":"__main__"}
+
+# ------------------------------------------------------------
+# input() real: el intérprete del navegador no tiene stdin, así que
+# cada llamada a input() abre un window.prompt() (diálogo nativo,
+# bloqueante) y devuelve lo escrito. Si el usuario pulsa "Cancelar",
+# o si ya se pidió "Detener", se lanza EOFError para cortar limpio
+# la ejecución (igual que Python real cuando se acaba la entrada).
+# ------------------------------------------------------------
+def _spy_input(prompt=""):
+    if bool(getattr(window, "__spy_stop_requested", False)):
+        raise EOFError("Ejecución detenida por el usuario.")
+    texto = "" if prompt is None else str(prompt)
+    respuesta = window.prompt(texto + "  (Cancelar para detener)", "")
+    if respuesta is None:
+        raise EOFError("Entrada cancelada: el usuario pulsó \"Cancelar\".")
+    return str(respuesta)
+
+ENV["input"] = _spy_input
 LIBRERIAS_DISPONIBLES = {
     "numpy",
     "matplotlib",
@@ -469,13 +781,15 @@ LIBRERIAS_DISPONIBLES = {
     "pydantic",
     "pytest",
     "anyio",
-    "cffi"
+    "cffi",
+
+    # --- GUI de escritorio, simuladas sobre HTML/DOM ---
+    "tkinter",
+    "customtkinter",
 
 }
 
 LIBRERIAS_PROHIBIDAS = {
-    "tkinter",
-    "customtkinter",
     "PyQt6",
     "PySide6",
     "cv2",
@@ -484,6 +798,1090 @@ LIBRERIAS_PROHIBIDAS = {
     "manim"
 }
 current_img = None
+
+# ============================================================
+# SIMULADOR DE TKINTER — fusionado con el motor Python principal
+# ------------------------------------------------------------
+# Instala un tkinter (y un customtkinter aproximado) que traduce
+# widgets a elementos HTML/DOM reales, usando el MISMO intérprete
+# Pyodide que corre el resto del código: no hay una segunda copia
+# de Pyodide ni una ventana aparte. Cuando el código del usuario
+# hace "import tkinter", ejecutar() prepara un contenedor dentro
+# del panel "Gráficas / Vista" (mismo lugar que las figuras de
+# matplotlib) y este módulo dibuja ahí, con widgets interactivos
+# de verdad (botones con click real, campos editables, etc).
+# ============================================================
+
+_tk_target = {"container": None, "title_el": None}
+
+
+def _tk_container():
+    return _tk_target["container"]
+
+
+def _tk_set_title(text):
+    el = _tk_target.get("title_el")
+    if el is not None:
+        el.textContent = "\U0001FA9F " + str(text)
+    if hasattr(window, "actualizarTituloEjecutando"):
+        window.actualizarTituloEjecutando(str(text))
+
+
+def _tk_set_size(w, h):
+    c = _tk_target.get("container")
+    if c is not None:
+        c.style.width = str(w) + "px"
+        c.style.minHeight = str(h) + "px"
+    # La ventana puede haber cambiado de tamaño (geometry() se puede llamar
+    # en cualquier momento): re-ajustamos su escala para que siga cabiendo
+    # entera en pantalla, sobre todo en móvil vertical.
+    if hasattr(window, "fitRunWindow"):
+        window.fitRunWindow()
+
+
+END = 'end'
+W, E, N, S = 'w', 'e', 'n', 's'
+CENTER = 'center'
+LEFT, RIGHT, TOP, BOTTOM = 'left', 'right', 'top', 'bottom'
+BOTH, X, Y = 'both', 'x', 'y'
+HORIZONTAL, VERTICAL = 'horizontal', 'vertical'
+NORMAL, DISABLED, ACTIVE, READONLY = 'normal', 'disabled', 'active', 'readonly'
+FLAT, RAISED, SUNKEN, GROOVE, RIDGE = 'flat', 'raised', 'sunken', 'groove', 'ridge'
+SINGLE, BROWSE, MULTIPLE, EXTENDED = 'single', 'browse', 'multiple', 'extended'
+
+_root_ref = {'root': None}
+
+
+def _font_css(font):
+    try:
+        fam, size = font[0], font[1]
+        return str(fam), int(size)
+    except Exception:
+        return 'Segoe UI', 10
+
+
+class Variable:
+    _default = None
+
+    def __init__(self, master=None, value=None, name=None):
+        self._value = value if value is not None else self._default
+        self._callbacks = []
+
+    def get(self):
+        return self._value
+
+    def set(self, value):
+        self._value = value
+        for cb in list(self._callbacks):
+            try:
+                cb()
+            except Exception:
+                traceback.print_exc()
+
+    def trace_add(self, mode, callback):
+        self._callbacks.append(lambda: callback(str(id(self)), '', mode))
+
+
+class IntVar(Variable):
+    _default = 0
+
+
+class StringVar(Variable):
+    _default = ''
+
+
+class DoubleVar(Variable):
+    _default = 0.0
+
+
+class BooleanVar(Variable):
+    _default = False
+
+
+class _Widget:
+    _tag = 'div'
+    # 'char': width in characters / height in text lines (Tk default for Button, Label,
+    # Entry, Checkbutton, Radiobutton, Spinbox, Listbox, Text). 'px': literal pixels
+    # (Frame, LabelFrame, Canvas, Scale, Progressbar, Scrollbar).
+    _size_unit = 'char'
+
+    def __init__(self, master=None, **kwargs):
+        self.master = master if master is not None else _root_ref['root']
+        self.el = document.createElement(self._tag)
+        self.el.style.position = 'absolute'
+        self.el.style.boxSizing = 'border-box'
+        self._configure_defaults()
+        self.configure(**kwargs)
+        parent_el = self.master.el if hasattr(self.master, 'el') else self.master
+        parent_el.appendChild(self.el)
+        if not parent_el.style.position:
+            parent_el.style.position = 'relative'
+
+    def _configure_defaults(self):
+        pass
+
+    def configure(self, **kwargs):
+        for k, v in kwargs.items():
+            if k == 'width':
+                try:
+                    unit = 'px' if self._size_unit == 'px' else 'ch'
+                    self.el.style.width = str(float(v)) + unit
+                except Exception:
+                    pass
+            elif k == 'height':
+                try:
+                    if self._size_unit == 'px':
+                        self.el.style.height = str(float(v)) + 'px'
+                    else:
+                        self.el.style.height = str(float(v) * 1.7) + 'em'
+                except Exception:
+                    pass
+            elif k == 'justify':
+                try:
+                    self.el.style.textAlign = v
+                except Exception:
+                    pass
+            try:
+                self._apply_option(k, v)
+            except Exception:
+                traceback.print_exc()
+
+    config = configure
+
+    def _apply_option(self, k, v):
+        pass
+
+    def place(self, x=0, y=0, width=None, height=None, **kw):
+        self.el.style.left = str(x) + 'px'
+        self.el.style.top = str(y) + 'px'
+        if width is not None:
+            self.el.style.width = str(width) + 'px'
+        if height is not None:
+            self.el.style.height = str(height) + 'px'
+
+    def place_forget(self):
+        self.el.style.display = 'none'
+
+    def pack(self, **kw):
+        self.el.style.position = 'static'
+        self.el.style.display = 'block'
+        self.el.style.margin = '4px'
+
+    def pack_forget(self):
+        self.el.style.display = 'none'
+
+    def grid(self, row=0, column=0, **kw):
+        self.el.style.position = 'static'
+        self.el.style.display = 'inline-block'
+        self.el.style.margin = '4px'
+        self.el.style.verticalAlign = 'top'
+
+    def grid_forget(self):
+        self.el.style.display = 'none'
+
+    def destroy(self):
+        if self.el.parentNode:
+            self.el.parentNode.removeChild(self.el)
+
+    def bind(self, *a, **kw):
+        pass
+
+    def focus_set(self):
+        try:
+            self.el.focus()
+        except Exception:
+            pass
+
+    def winfo_width(self):
+        return int(self.el.offsetWidth or 0)
+
+    def winfo_height(self):
+        return int(self.el.offsetHeight or 0)
+
+
+class Frame(_Widget):
+    _size_unit = 'px'
+
+    def _configure_defaults(self):
+        self.el.style.border = '1px solid #9a9a95'
+
+    def _apply_option(self, k, v):
+        if k == 'bg' or k == 'background':
+            self.el.style.background = v
+
+
+class LabelFrame(_Widget):
+    _size_unit = 'px'
+
+    def _configure_defaults(self):
+        self.el.style.border = '1px solid #9a9a95'
+        self.label_el = document.createElement('span')
+        self.label_el.style.position = 'absolute'
+        self.label_el.style.top = '-8px'
+        self.label_el.style.left = '8px'
+        self.label_el.style.padding = '0 4px'
+        self.label_el.style.fontSize = '10px'
+        self.el.appendChild(self.label_el)
+
+    def _apply_option(self, k, v):
+        if k == 'text':
+            self.label_el.textContent = str(v)
+        elif k in ('bg', 'background'):
+            self.el.style.background = v
+            self.label_el.style.background = v
+        elif k == 'fg':
+            self.label_el.style.color = v
+
+
+class Label(_Widget):
+    def _configure_defaults(self):
+        self.el.style.display = 'flex'
+        self.el.style.alignItems = 'center'
+        self.el.style.justifyContent = 'center'
+
+    def _apply_option(self, k, v):
+        if k == 'text':
+            self.el.textContent = str(v)
+        elif k in ('bg', 'background'):
+            self.el.style.background = v
+        elif k == 'fg':
+            self.el.style.color = v
+        elif k == 'font':
+            fam, size = _font_css(v)
+            self.el.style.fontFamily = fam
+            self.el.style.fontSize = str(size) + 'px'
+
+    def config_text(self, text):
+        self.el.textContent = str(text)
+
+
+class Button(_Widget):
+    def _configure_defaults(self):
+        self.el.style.display = 'flex'
+        self.el.style.alignItems = 'center'
+        self.el.style.justifyContent = 'center'
+        self.el.style.border = '1px solid #767676'
+        self.el.style.borderRadius = '3px'
+        self.el.style.background = '#e1e1e1'
+        self.el.style.cursor = 'pointer'
+        self.el.style.userSelect = 'none'
+        self._command = None
+        self._proxy = None
+
+    def _apply_option(self, k, v):
+        if k == 'text':
+            self.el.textContent = str(v)
+        elif k in ('bg', 'background'):
+            self.el.style.background = v
+        elif k == 'fg':
+            self.el.style.color = v
+        elif k == 'font':
+            fam, size = _font_css(v)
+            self.el.style.fontFamily = fam
+            self.el.style.fontSize = str(size) + 'px'
+        elif k == 'command':
+            self._command = v
+            if self._proxy:
+                self.el.removeEventListener('click', self._proxy)
+
+            def _cb(evt):
+                try:
+                    if self._command:
+                        self._command()
+                except Exception:
+                    traceback.print_exc()
+
+            self._proxy = create_proxy(_cb)
+            self.el.addEventListener('click', self._proxy)
+        elif k == 'state':
+            self.el.style.opacity = '0.5' if v == DISABLED else '1'
+
+
+class Entry(_Widget):
+    _tag = 'input'
+
+    def _configure_defaults(self):
+        self.el.type = 'text'
+        self.el.style.border = '1px solid #767676'
+        self.el.style.padding = '0 4px'
+
+    def _apply_option(self, k, v):
+        if k in ('bg', 'background'):
+            self.el.style.background = v
+        elif k == 'fg':
+            self.el.style.color = v
+        elif k == 'font':
+            fam, size = _font_css(v)
+            self.el.style.fontFamily = fam
+            self.el.style.fontSize = str(size) + 'px'
+        elif k == 'show':
+            self.el.type = 'password'
+        elif k == 'state':
+            self.el.disabled = (v == DISABLED)
+
+    def insert(self, index, text):
+        cur = self.el.value or ''
+        if index in (0, '0'):
+            self.el.value = str(text) + cur
+        else:
+            self.el.value = cur + str(text)
+
+    def get(self):
+        return self.el.value
+
+    def delete(self, start, end=None):
+        self.el.value = ''
+
+
+class Text(_Widget):
+    _tag = 'textarea'
+
+    def _configure_defaults(self):
+        self.el.style.border = '1px solid #767676'
+        self.el.style.resize = 'none'
+        self.el.style.padding = '4px'
+
+    def _apply_option(self, k, v):
+        if k in ('bg', 'background'):
+            self.el.style.background = v
+        elif k == 'fg':
+            self.el.style.color = v
+        elif k == 'font':
+            fam, size = _font_css(v)
+            self.el.style.fontFamily = fam
+            self.el.style.fontSize = str(size) + 'px'
+
+    def insert(self, index, text):
+        self.el.value = (self.el.value or '') + str(text)
+
+    def get(self, start=None, end=None):
+        return self.el.value
+
+    def delete(self, start, end=None):
+        self.el.value = ''
+
+
+class Checkbutton(_Widget):
+    _tag = 'label'
+
+    def _configure_defaults(self):
+        self.el.style.display = 'flex'
+        self.el.style.alignItems = 'center'
+        self.el.style.gap = '5px'
+        self.input = document.createElement('input')
+        self.input.type = 'checkbox'
+        self.span = document.createElement('span')
+        self.el.appendChild(self.input)
+        self.el.appendChild(self.span)
+        self._var = None
+        self._command = None
+        self._proxy = None
+
+    def _apply_option(self, k, v):
+        if k == 'text':
+            self.span.textContent = str(v)
+        elif k in ('bg', 'background'):
+            self.el.style.background = v
+        elif k == 'fg':
+            self.el.style.color = v
+        elif k == 'font':
+            fam, size = _font_css(v)
+            self.el.style.fontFamily = fam
+            self.el.style.fontSize = str(size) + 'px'
+        elif k == 'variable':
+            self._var = v
+            if self._proxy:
+                self.input.removeEventListener('change', self._proxy)
+
+            def _oncheck(evt):
+                if self._var is not None:
+                    self._var.set(1 if self.input.checked else 0)
+                if self._command:
+                    try:
+                        self._command()
+                    except Exception:
+                        traceback.print_exc()
+
+            self._proxy = create_proxy(_oncheck)
+            self.input.addEventListener('change', self._proxy)
+        elif k == 'command':
+            self._command = v
+
+    def configure(self, **kwargs):
+        super().configure(**kwargs)
+        if self._var is not None:
+            self.input.checked = bool(self._var.get())
+
+
+class Radiobutton(_Widget):
+    _tag = 'label'
+
+    def _configure_defaults(self):
+        self.el.style.display = 'flex'
+        self.el.style.alignItems = 'center'
+        self.el.style.gap = '5px'
+        self.input = document.createElement('input')
+        self.input.type = 'radio'
+        self.span = document.createElement('span')
+        self.el.appendChild(self.input)
+        self.el.appendChild(self.span)
+        self._var = None
+        self._value = None
+        self._command = None
+        self._proxy = None
+
+    def _apply_option(self, k, v):
+        if k == 'text':
+            self.span.textContent = str(v)
+        elif k in ('bg', 'background'):
+            self.el.style.background = v
+        elif k == 'fg':
+            self.el.style.color = v
+        elif k == 'font':
+            fam, size = _font_css(v)
+            self.el.style.fontFamily = fam
+            self.el.style.fontSize = str(size) + 'px'
+        elif k == 'value':
+            self._value = v
+            self.input.value = str(v)
+        elif k == 'variable':
+            self._var = v
+            self.input.name = 'radiogroup_' + str(id(v))
+            if self._proxy:
+                self.input.removeEventListener('change', self._proxy)
+
+            def _onchange(evt):
+                if self._var is not None:
+                    self._var.set(self._value)
+                if self._command:
+                    try:
+                        self._command()
+                    except Exception:
+                        traceback.print_exc()
+
+            self._proxy = create_proxy(_onchange)
+            self.input.addEventListener('change', self._proxy)
+        elif k == 'command':
+            self._command = v
+
+    def configure(self, **kwargs):
+        super().configure(**kwargs)
+        if self._var is not None and self._value is not None:
+            self.input.checked = (self._var.get() == self._value)
+
+
+class Listbox(_Widget):
+    def _configure_defaults(self):
+        self.el.style.overflow = 'auto'
+        self.el.style.border = '1px solid #767676'
+        self.el.style.textAlign = 'left'
+        self.el.style.background = '#ffffff'
+        self.items = []
+        self.selected_index = None
+
+    def _apply_option(self, k, v):
+        if k in ('bg', 'background'):
+            self.el.style.background = v
+        elif k == 'fg':
+            self.el.style.color = v
+        elif k == 'font':
+            fam, size = _font_css(v)
+            self.el.style.fontFamily = fam
+            self.el.style.fontSize = str(size) + 'px'
+
+    def insert(self, index, *elements):
+        for text in elements:
+            self.items.append(str(text))
+        self._render()
+
+    def delete(self, first, last=None):
+        try:
+            if first in ('end', END) and last is None:
+                if self.items:
+                    self.items.pop()
+            else:
+                i = int(first)
+                if last is None:
+                    del self.items[i]
+                else:
+                    j = len(self.items) - 1 if last in ('end', END) else int(last)
+                    del self.items[i:j + 1]
+        except Exception:
+            traceback.print_exc()
+        self._render()
+
+    def get(self, first, last=None):
+        try:
+            i = int(first)
+            if last is None:
+                return self.items[i]
+            j = len(self.items) - 1 if last in ('end', END) else int(last)
+            return tuple(self.items[i:j + 1])
+        except Exception:
+            return ''
+
+    def curselection(self):
+        return (self.selected_index,) if self.selected_index is not None else ()
+
+    def _render(self):
+        self.el.innerHTML = ''
+        for idx, text in enumerate(self.items):
+            row = document.createElement('div')
+            row.textContent = text
+            row.style.padding = '1px 4px'
+            row.style.cursor = 'pointer'
+
+            def make_cb(i, r):
+                def _cb(evt):
+                    self.selected_index = i
+                    child = self.el.firstChild
+                    while child:
+                        child.style.background = 'transparent'
+                        child.style.color = 'inherit'
+                        child = child.nextSibling
+                    r.style.background = '#3a6ea5'
+                    r.style.color = '#fff'
+                return _cb
+
+            proxy = create_proxy(make_cb(idx, row))
+            row.addEventListener('click', proxy)
+            self.el.appendChild(row)
+
+
+class Canvas(_Widget):
+    _tag = 'canvas'
+    _size_unit = 'px'
+
+    def _configure_defaults(self):
+        self.el.style.border = '1px solid #767676'
+        self._ctx = None
+
+    def _apply_option(self, k, v):
+        if k in ('bg', 'background'):
+            self.el.style.background = v
+        elif k == 'width':
+            try:
+                self.el.width = int(float(v))
+            except Exception:
+                pass
+        elif k == 'height':
+            try:
+                self.el.height = int(float(v))
+            except Exception:
+                pass
+
+    def place(self, x=0, y=0, width=None, height=None, **kw):
+        super().place(x=x, y=y, width=width, height=height, **kw)
+        if width is not None:
+            self.el.width = width
+        if height is not None:
+            self.el.height = height
+
+    def _get_ctx(self):
+        if self._ctx is None:
+            self._ctx = self.el.getContext('2d')
+        return self._ctx
+
+    def create_line(self, *coords, **kw):
+        ctx = self._get_ctx()
+        ctx.strokeStyle = kw.get('fill', 'black')
+        ctx.beginPath()
+        ctx.moveTo(coords[0], coords[1])
+        i = 2
+        while i + 1 < len(coords):
+            ctx.lineTo(coords[i], coords[i + 1])
+            i += 2
+        ctx.stroke()
+
+    def create_rectangle(self, x1, y1, x2, y2, **kw):
+        ctx = self._get_ctx()
+        fill = kw.get('fill')
+        if fill:
+            ctx.fillStyle = fill
+            ctx.fillRect(x1, y1, x2 - x1, y2 - y1)
+        ctx.strokeStyle = kw.get('outline', 'black')
+        ctx.strokeRect(x1, y1, x2 - x1, y2 - y1)
+
+    def create_oval(self, x1, y1, x2, y2, **kw):
+        ctx = self._get_ctx()
+        cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
+        rx, ry = abs(x2 - x1) / 2, abs(y2 - y1) / 2
+        ctx.beginPath()
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, 6.283185307179586)
+        fill = kw.get('fill')
+        if fill:
+            ctx.fillStyle = fill
+            ctx.fill()
+        ctx.strokeStyle = kw.get('outline', 'black')
+        ctx.stroke()
+
+    def create_text(self, x, y, **kw):
+        ctx = self._get_ctx()
+        ctx.fillStyle = kw.get('fill', 'black')
+        ctx.font = '12px sans-serif'
+        ctx.fillText(kw.get('text', ''), x, y)
+
+    def create_polygon(self, *coords, **kw):
+        ctx = self._get_ctx()
+        if len(coords) < 4:
+            return
+        ctx.beginPath()
+        ctx.moveTo(coords[0], coords[1])
+        i = 2
+        while i + 1 < len(coords):
+            ctx.lineTo(coords[i], coords[i + 1])
+            i += 2
+        ctx.closePath()
+        fill = kw.get('fill')
+        if fill:
+            ctx.fillStyle = fill
+            ctx.fill()
+        ctx.strokeStyle = kw.get('outline', 'black')
+        ctx.stroke()
+
+    def delete(self, *a):
+        ctx = self._get_ctx()
+        ctx.clearRect(0, 0, self.el.width or 0, self.el.height or 0)
+
+
+class Scale(_Widget):
+    _tag = 'input'
+    _size_unit = 'px'
+
+    def _configure_defaults(self):
+        self.el.type = 'range'
+        self._command = None
+        self._proxy = None
+
+    def _apply_option(self, k, v):
+        if k == 'from_':
+            self.el.min = v
+        elif k == 'to':
+            self.el.max = v
+        elif k == 'orient':
+            pass
+        elif k in ('bg', 'background'):
+            self.el.style.background = v
+        elif k == 'command':
+            self._command = v
+            if self._proxy:
+                self.el.removeEventListener('input', self._proxy)
+
+            def _cb(evt):
+                if self._command:
+                    try:
+                        self._command(self.el.value)
+                    except Exception:
+                        traceback.print_exc()
+
+            self._proxy = create_proxy(_cb)
+            self.el.addEventListener('input', self._proxy)
+
+    def get(self):
+        return float(self.el.value)
+
+    def set(self, v):
+        self.el.value = v
+
+
+class Spinbox(_Widget):
+    _tag = 'input'
+
+    def _configure_defaults(self):
+        self.el.type = 'number'
+        self.el.style.border = '1px solid #767676'
+
+    def _apply_option(self, k, v):
+        if k == 'from_':
+            self.el.min = v
+        elif k == 'to':
+            self.el.max = v
+        elif k in ('bg', 'background'):
+            self.el.style.background = v
+        elif k == 'fg':
+            self.el.style.color = v
+        elif k == 'font':
+            fam, size = _font_css(v)
+            self.el.style.fontFamily = fam
+            self.el.style.fontSize = str(size) + 'px'
+
+    def get(self):
+        return self.el.value
+
+
+class Tk(_Widget):
+    def __init__(self):
+        self.el = _tk_container()
+        self.el.innerHTML = ''
+        self.el.style.position = 'relative'
+        self.master = None
+        self._title = 'Tk'
+        _root_ref['root'] = self
+
+    def title(self, text=None):
+        if text is None:
+            return self._title
+        self._title = text
+        _tk_set_title(text)
+
+    def geometry(self, spec=None):
+        if spec is None:
+            return None
+        try:
+            wh = spec.split('+')[0]
+            w, h = wh.split('x')
+            _tk_set_size(int(w), int(h))
+        except Exception:
+            pass
+
+    def resizable(self, *a, **kw):
+        pass
+
+    def mainloop(self, *a, **kw):
+        pass
+
+    def destroy(self):
+        self.el.innerHTML = ''
+
+    def configure(self, **kwargs):
+        for k, v in kwargs.items():
+            if k in ('bg', 'background'):
+                self.el.style.background = v
+    config = configure
+
+    def after(self, ms, func=None, *args):
+        if func is None:
+            return
+
+        def _cb():
+            try:
+                func(*args)
+            except Exception:
+                traceback.print_exc()
+
+        proxy = create_proxy(_cb)
+        js.setTimeout(proxy, ms)
+
+    def bind(self, *a, **kw):
+        pass
+
+    def protocol(self, *a, **kw):
+        pass
+
+    def update(self, *a, **kw):
+        pass
+
+    def update_idletasks(self, *a, **kw):
+        pass
+
+
+class Toplevel(_Widget):
+    _size_unit = 'px'
+
+    def __init__(self, master=None, **kwargs):
+        self.master = master if master is not None else _root_ref['root']
+        self.el = document.createElement('div')
+        self.el.style.position = 'absolute'
+        self.el.style.left = '20px'
+        self.el.style.top = '20px'
+        self.el.style.background = '#ececea'
+        self.el.style.border = '2px solid #888'
+        self.el.style.minWidth = '160px'
+        self.el.style.minHeight = '100px'
+        self.el.style.boxShadow = '0 6px 18px rgba(0,0,0,.4)'
+        self.el.style.zIndex = '10'
+        parent_el = self.master.el if hasattr(self.master, 'el') else _tk_container()
+        parent_el.appendChild(self.el)
+        self._title = 'Toplevel'
+        self.configure(**kwargs)
+
+    def _apply_option(self, k, v):
+        if k in ('bg', 'background'):
+            self.el.style.background = v
+
+    def title(self, text=None):
+        if text is None:
+            return self._title
+        self._title = text
+
+    def geometry(self, spec=None):
+        if spec is None:
+            return
+        try:
+            wh = spec.split('+')[0]
+            w, h = wh.split('x')
+            self.el.style.width = w + 'px'
+            self.el.style.height = h + 'px'
+        except Exception:
+            pass
+
+    def resizable(self, *a, **kw):
+        pass
+
+    def mainloop(self, *a, **kw):
+        pass
+
+    def protocol(self, *a, **kw):
+        pass
+
+    def destroy(self):
+        if self.el.parentNode:
+            self.el.parentNode.removeChild(self.el)
+
+
+def _msg(kind, title='', message='', **kw):
+    text = (str(title) + '\n\n' + str(message)) if title else str(message)
+    if kind in ('askyesno', 'askokcancel', 'askretrycancel'):
+        return bool(bool(window.confirm(text)))
+    window.alert(text)
+    return None
+
+
+messagebox = types.ModuleType('tkinter.messagebox')
+messagebox.showinfo = lambda title='', message='', **kw: _msg('showinfo', title, message)
+messagebox.showwarning = lambda title='', message='', **kw: _msg('showwarning', title, message)
+messagebox.showerror = lambda title='', message='', **kw: _msg('showerror', title, message)
+messagebox.askyesno = lambda title='', message='', **kw: _msg('askyesno', title, message)
+messagebox.askokcancel = lambda title='', message='', **kw: _msg('askokcancel', title, message)
+messagebox.askretrycancel = lambda title='', message='', **kw: _msg('askretrycancel', title, message)
+
+filedialog = types.ModuleType('tkinter.filedialog')
+filedialog.askopenfilename = lambda **kw: (print('[filedialog] no soportado en el navegador'), '')[1]
+filedialog.asksaveasfilename = lambda **kw: (print('[filedialog] no soportado en el navegador'), '')[1]
+filedialog.askdirectory = lambda **kw: (print('[filedialog] no soportado en el navegador'), '')[1]
+
+
+def _ask(kind, title='', prompt='', **kw):
+    result = window.prompt(str(prompt), '')
+    if result is None or result == '':
+        return None
+    if kind == 'integer':
+        try:
+            return int(float(result))
+        except Exception:
+            return None
+    if kind == 'float':
+        try:
+            return float(result)
+        except Exception:
+            return None
+    return result
+
+
+simpledialog = types.ModuleType('tkinter.simpledialog')
+simpledialog.askinteger = lambda title='', prompt='', **kw: _ask('integer', title, prompt)
+simpledialog.askfloat = lambda title='', prompt='', **kw: _ask('float', title, prompt)
+simpledialog.askstring = lambda title='', prompt='', **kw: _ask('string', title, prompt)
+
+ttk = types.ModuleType('tkinter.ttk')
+ttk.Frame = Frame
+ttk.Label = Label
+ttk.Button = Button
+ttk.Entry = Entry
+ttk.LabelFrame = LabelFrame
+
+
+class Combobox(_Widget):
+    _tag = 'select'
+
+    def _configure_defaults(self):
+        self.el.style.border = '1px solid #767676'
+        self.el.style.background = '#ffffff'
+        self._textvariable = None
+
+    def _apply_option(self, k, v):
+        if k == 'values':
+            self.el.innerHTML = ''
+            for val in v:
+                opt = document.createElement('option')
+                opt.value = str(val)
+                opt.textContent = str(val)
+                self.el.appendChild(opt)
+        elif k == 'state':
+            self.el.disabled = (v == DISABLED)
+        elif k == 'textvariable':
+            self._textvariable = v
+
+    def get(self):
+        return self.el.value
+
+    def set(self, v):
+        self.el.value = v
+
+    def current(self, idx=None):
+        if idx is None:
+            return self.el.selectedIndex
+        self.el.selectedIndex = idx
+
+
+ttk.Combobox = Combobox
+
+
+class Progressbar(_Widget):
+    _size_unit = 'px'
+
+    def _configure_defaults(self):
+        self.el.style.background = '#dcdcdc'
+        self.el.style.border = '1px solid #b3b3b3'
+        self.fill = document.createElement('div')
+        self.fill.style.height = '100%'
+        self.fill.style.background = '#4a90d9'
+        self.el.appendChild(self.fill)
+        self._value = 0
+
+    def _apply_option(self, k, v):
+        if k == 'value':
+            self._value = float(v)
+            pct = max(0, min(100, self._value))
+            self.fill.style.width = str(pct) + '%'
+
+    def start(self, *a):
+        pass
+
+    def stop(self, *a):
+        pass
+
+
+ttk.Progressbar = Progressbar
+
+
+class Scrollbar(_Widget):
+    _size_unit = 'px'
+
+    def _configure_defaults(self):
+        self.el.style.background = '#e4e4e4'
+        self.el.style.border = '1px solid #b3b3b3'
+
+    def _apply_option(self, k, v):
+        pass
+
+    def set(self, *a):
+        pass
+
+
+ttk.Scrollbar = Scrollbar
+
+
+class Style:
+    def __init__(self, master=None):
+        pass
+
+    def configure(self, *a, **kw):
+        pass
+
+    def theme_use(self, *a, **kw):
+        pass
+
+
+ttk.Style = Style
+
+tkinter_module = types.ModuleType('tkinter')
+for _name in ('Tk', 'Toplevel', 'Frame', 'Label', 'Button', 'Entry', 'Text', 'Checkbutton',
+              'Radiobutton', 'Listbox', 'LabelFrame', 'Canvas', 'Scale', 'Spinbox',
+              'IntVar', 'StringVar', 'DoubleVar', 'BooleanVar', 'END', 'W', 'E', 'N', 'S',
+              'CENTER', 'LEFT', 'RIGHT', 'TOP', 'BOTTOM', 'BOTH', 'X', 'Y', 'HORIZONTAL',
+              'VERTICAL', 'NORMAL', 'DISABLED', 'ACTIVE', 'FLAT', 'RAISED', 'SUNKEN',
+              'GROOVE', 'RIDGE', 'SINGLE', 'BROWSE', 'MULTIPLE', 'EXTENDED'):
+    setattr(tkinter_module, _name, globals()[_name])
+tkinter_module.ttk = ttk
+tkinter_module.messagebox = messagebox
+tkinter_module.filedialog = filedialog
+tkinter_module.simpledialog = simpledialog
+
+sys.modules['tkinter'] = tkinter_module
+sys.modules['tkinter.ttk'] = ttk
+sys.modules['tkinter.messagebox'] = messagebox
+sys.modules['tkinter.filedialog'] = filedialog
+sys.modules['tkinter.simpledialog'] = tkinter_module.simpledialog
+
+
+# --- customtkinter (aproximado): reutiliza las mismas clases del shim ---
+customtkinter_module = types.ModuleType('customtkinter')
+customtkinter_module.CTk = Tk
+customtkinter_module.CTkToplevel = Toplevel
+customtkinter_module.CTkFrame = Frame
+customtkinter_module.CTkLabel = Label
+customtkinter_module.CTkButton = Button
+customtkinter_module.CTkEntry = Entry
+customtkinter_module.CTkTextbox = Text
+customtkinter_module.CTkCheckBox = Checkbutton
+customtkinter_module.CTkRadioButton = Radiobutton
+customtkinter_module.CTkComboBox = Combobox
+customtkinter_module.CTkOptionMenu = Combobox
+customtkinter_module.CTkProgressBar = Progressbar
+customtkinter_module.CTkSlider = Scale
+customtkinter_module.CTkScrollbar = Scrollbar
+customtkinter_module.CTkCanvas = Canvas
+customtkinter_module.StringVar = StringVar
+customtkinter_module.IntVar = IntVar
+customtkinter_module.DoubleVar = DoubleVar
+customtkinter_module.BooleanVar = BooleanVar
+customtkinter_module.set_appearance_mode = lambda *a, **kw: None
+customtkinter_module.set_default_color_theme = lambda *a, **kw: None
+sys.modules['customtkinter'] = customtkinter_module
+
+
+def _usa_tkinter(codigo):
+    return bool(re.search(
+        r'^\s*(import\s+tkinter\b|from\s+tkinter\b|import\s+customtkinter\b|from\s+customtkinter\b)',
+        codigo, re.MULTILINE
+    ))
+
+
+def _preparar_entorno_tkinter():
+    run_pane = document.getElementById("tkRunPane")
+    if run_pane is None:
+        return
+    run_pane.innerHTML = ""
+
+    # scaler: hueco reservado en el flujo normal (JS le da el tamaño YA
+    # escalado). wrapper: tamaño real de la ventana, con position:absolute
+    # se ajusta solo a su contenido y es lo que JS encoge con transform
+    # cuando no cabe a lo ancho — así en móvil vertical se ve completa en
+    # vez de recortada por el borde del panel.
+    scaler = document.createElement("div")
+    scaler.id = "tkRunScaler"
+
+    wrapper = document.createElement("div")
+    wrapper.id = "tkRunWrapper"
+    wrapper.style.border = "1px solid #3c3c3c"
+    wrapper.style.borderRadius = "6px"
+    wrapper.style.overflow = "hidden"
+    wrapper.style.background = "#ececea"
+
+    titlebar = document.createElement("div")
+    titlebar.style.background = "#2d2d30"
+    titlebar.style.color = "#cfcfcf"
+    titlebar.style.fontSize = "11px"
+    titlebar.style.padding = "5px 10px"
+    titlebar.style.fontFamily = "Segoe UI, Arial, sans-serif"
+    titlebar.textContent = "\U0001FA9F Tk"
+
+    # Ancho por defecto en píxeles (no "100%"): wrapper ahora se ajusta a su
+    # contenido para que JS pueda escalarlo, y eso necesita un ancho
+    # concreto en vez de un porcentaje relativo a un contenedor "auto".
+    avail_w = run_pane.clientWidth or 400
+    default_w = max(220, int(avail_w) - 24)
+
+    body = document.createElement("div")
+    body.style.position = "relative"
+    body.style.background = "#ececea"
+    body.style.minHeight = "220px"
+    body.style.width = str(default_w) + "px"
+    body.style.overflow = "hidden"
+
+    wrapper.appendChild(titlebar)
+    wrapper.appendChild(body)
+    scaler.appendChild(wrapper)
+    run_pane.appendChild(scaler)
+
+    _tk_target["container"] = body
+    _tk_target["title_el"] = titlebar
+
+    if hasattr(window, "mostrarPestanaEjecutando"):
+        window.mostrarPestanaEjecutando("Tk")
+    if hasattr(window, "fitRunWindow"):
+        window.fitRunWindow()
 
 
 # =========================
@@ -499,6 +1897,10 @@ def ejecutar(event):
 
     console.innerHTML = ""
     graph.innerHTML = ""
+
+    # Cada ejecución nueva arranca "sin detener"; el botón ⏹ Detener la
+    # activa (ver stopBtn en el panel de Acciones).
+    window.__spy_stop_requested = False
 
     code = window.current_code or ""
     # 1. Obtenemos el nombre del archivo real desde JS
@@ -542,7 +1944,22 @@ def ejecutar(event):
 
         plt.show = show_web
 
+        usa_tk = _usa_tkinter(code)
+        if usa_tk:
+            _preparar_entorno_tkinter()
+        elif hasattr(window, "ocultarPestanaEjecutando"):
+            # Este run ya no es de tkinter: si había una ventana anterior
+            # viva en la pestaña "Ejecutando", la cerramos.
+            window.ocultarPestanaEjecutando(False)
+
         exec(code, ENV)
+
+        if usa_tk:
+            print(
+                "\n✓ Interfaz Tkinter simulada renderizada en la pestaña "
+                "'▶ Ejecutando', junto a 'Código' y 'Diseño visual'. Es "
+                "interactiva de verdad: prueba los botones y campos."
+            )
         if estado_grafica["detectada"]:
             print(
                 "\n--------------Importante----------------\n"
@@ -551,14 +1968,18 @@ def ejecutar(event):
                 "desmarcar 'Silenciar gráficos en línea' en el menú de opciones de Gráficos."
             )
         console.innerText = buffer.getvalue() or "OK"
-        
-            
+
+    except EOFError as e:
+        # input() cancelado, o "Detener" pulsado antes del siguiente input().
+        console.innerText = buffer.getvalue() + "\n\n⏹ " + str(e)
 
     except Exception:
-        console.innerText = traceback.format_exc()
+        # Se conserva lo ya impreso antes del error, en vez de perderlo.
+        console.innerText = buffer.getvalue() + "\n\n" + traceback.format_exc()
 
     finally:
         sys.stdout = stdout
+
 
 
 def detectar_imports(codigo):
@@ -600,9 +2021,16 @@ def verificar_dependencias(codigo):
 
         elif lib in LIBRERIAS_DISPONIBLES:
 
-            reporte.append(
-                f" {lib}"
-            )
+            if lib in ("tkinter", "customtkinter"):
+                reporte.append(
+                    f" {lib} (interfaz simulada sobre HTML/DOM — al Ejecutar "
+                    f"aparece en la pestaña '▶ Ejecutando' del editor, real e "
+                    f"interactiva; usa '🎨 Diseño visual' para armarla arrastrando widgets)"
+                )
+            else:
+                reporte.append(
+                    f" {lib}"
+                )
 
         else:
 
@@ -741,6 +2169,7 @@ function renderFiles(){
             currentFile = name;
             window.editor.setValue(files[name]);
             renderFiles();
+            checkTkinterForCode(files[name]);
         };
 
         list.appendChild(div);
@@ -797,6 +2226,272 @@ function openFile(){
     input.click();
 }
 
+/* ══════════════════════════════════════════
+   DISEÑADOR VISUAL TKINTER — INTEGRACIÓN
+   ------------------------------------------
+   tkinter/customtkinter ya NO están bloqueados: el bloque Python
+   principal (más abajo) instala un tkinter simulado sobre HTML/DOM
+   con el MISMO intérprete Pyodide que usa el botón "Ejecutar", así
+   que el código con "import tkinter" corre normal y su interfaz
+   aparece, interactiva, en el panel "Gráficas / Vista".
+   Aparte de eso, cuando detectamos ese import en el editor, cambiamos
+   automáticamente a la pestaña "🎨 Diseño visual" (dentro del mismo
+   panel del editor, no una ventana ni un overlay aparte) para que se
+   pueda armar la interfaz arrastrando widgets. Esa pestaña y toda su
+   lógica de arrastrar/generar código viven en scripts.js aparte.
+══════════════════════════════════════════ */
+let tkAutoShown = false;   // evita reabrir el visor en cada pulsación de tecla
+let tkBoundFile = null;    // qué archivo está sincronizado con el visor
+let tkDebounceTimer = null;
+let tkApplyingDesignerCode = false; // true mientras escribimos en Monaco un
+                                     // código que generó el propio diseñador
+                                     // (evita re-analizarlo y causar parpadeos)
+
+function detectaTkinter(codigo){
+    return /^\s*(import\s+tkinter(\s|$|\.)|from\s+tkinter(\s|\.)|import\s+customtkinter(\s|$)|from\s+customtkinter(\s|\.))/m.test(codigo || "");
+}
+
+function actualizarBadgeTkinter(activo){
+    const dot = document.getElementById("tkHintDot");
+    if(!dot) return;
+    const mostrarAviso = !!activo && !(window.TkDesigner && window.TkDesigner.isOpen());
+    dot.style.display = mostrarAviso ? "inline-block" : "none";
+}
+
+function checkTkinterForCode(codigo){
+    const tiene = detectaTkinter(codigo);
+    actualizarBadgeTkinter(tiene);
+
+    if(!tiene){
+        tkAutoShown = false;
+        return;
+    }
+
+    // Debounce: no reconstruir el lienzo en cada tecla, solo cuando el
+    // usuario hace una pausa al escribir.
+    clearTimeout(tkDebounceTimer);
+    tkDebounceTimer = setTimeout(() => {
+        if(!window.TkDesigner) return;
+        if(!tkAutoShown){
+            tkBoundFile = currentFile;
+            window.TkDesigner.setCode(codigo);
+            window.TkDesigner.open();
+            tkAutoShown = true;
+            actualizarBadgeTkinter(false);
+        } else if(window.TkDesigner.isOpen() && tkBoundFile === currentFile){
+            window.TkDesigner.setCode(codigo);
+        }
+    }, 450);
+}
+
+function initTkDesignerIntegration(){
+    if(!window.TkDesigner) return;
+    // Cada vez que el propio diseñador regenera el código (arrastrar,
+    // redimensionar, editar propiedades) lo reflejamos de vuelta en el
+    // archivo y, si sigue siendo el archivo visible, en Monaco. Esto debe
+    // pasar SIEMPRE que se edite visualmente —tanto si se partía de un
+    // código vacío como de uno ya importado con widgets—, así que si por
+    // lo que sea aún no había un archivo vinculado (p.ej. se entró a
+    // "🎨 Diseño visual" a mano en vez de detectarse al escribir), usamos
+    // el archivo actualmente abierto como respaldo en vez de descartar
+    // el cambio.
+    window.TkDesigner.onUpdate((codigo) => {
+        const targetFile = tkBoundFile || currentFile;
+        if(!targetFile) return;
+        tkBoundFile = targetFile;
+        files[targetFile] = codigo;
+        if(targetFile === currentFile && window.editor){
+            const pos = window.editor.getPosition();
+            window.current_code = codigo;
+            tkApplyingDesignerCode = true;
+            window.editor.setValue(codigo);
+            tkApplyingDesignerCode = false;
+            if(pos) window.editor.setPosition(pos);
+        }
+    });
+    checkTkinterForCode(files[currentFile]);
+
+    // Al entrar a "🎨 Diseño visual" a mano (código vacío o ya escrito, con
+    // o sin tkinter detectado aún) vinculamos el diseñador al archivo que
+    // se está viendo, para que cualquier widget que se añada, mueva o
+    // redimensione se escriba de inmediato en ese archivo y en Monaco.
+    const tabDisenoBtnEl = document.getElementById('tabDisenoBtn');
+    if(tabDisenoBtnEl){
+        tabDisenoBtnEl.addEventListener('click', () => {
+            tkBoundFile = currentFile;
+            tkAutoShown = true;
+            actualizarBadgeTkinter(false);
+        });
+    }
+}
+
+if(window.TkDesigner){
+    initTkDesignerIntegration();
+} else {
+    window.addEventListener("tkdesigner:ready", initTkDesignerIntegration);
+}
+
+/* ══════════════════════════════════════════
+   PESTAÑA "▶ EJECUTANDO" — ventana Tkinter en vivo
+   ------------------------------------------
+   Cuando el código corrido con "Ejecutar" usa tkinter, la ventana ya
+   no aparece en "Gráficas": aparece aquí, en una tercera pestaña del
+   editor (junto a "Código" y "Diseño visual"), real e interactiva.
+   El bloque Python principal llama a estas funciones (vía window.*)
+   para mostrarla/renombrarla/ocultarla.
+══════════════════════════════════════════ */
+window.__spy_stop_requested = false;
+
+function _tkTabs(){
+    return document.querySelectorAll('#editor-tabs .editor-tab');
+}
+
+// Si la ventana Tk en vivo (#tkRunWrapper) no cabe a lo ancho del panel
+// (típicamente en móvil vertical), la encoge con transform:scale() hasta
+// que quepa entera, igual que el lienzo del diseñador. #tkRunScaler
+// reserva exactamente el hueco ya escalado, así no queda recortada por el
+// borde del panel ni deja espacio vacío de más.
+function fitRunWindow(){
+    const pane = document.getElementById('tkRunPane');
+    const scaler = document.getElementById('tkRunScaler');
+    const wrapper = document.getElementById('tkRunWrapper');
+    if(!pane || !scaler || !wrapper) return;
+    wrapper.style.transform = 'none';
+    const naturalW = wrapper.offsetWidth;
+    const naturalH = wrapper.offsetHeight;
+    const cs = window.getComputedStyle(pane);
+    const availW = pane.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+    let scale = 1;
+    if(naturalW > 0 && availW > 30 && naturalW > availW){
+        scale = Math.max(0.35, availW / naturalW);
+    }
+    wrapper.style.transformOrigin = 'top left';
+    wrapper.style.transform = scale < 1 ? ('scale(' + scale + ')') : '';
+    scaler.style.width = (naturalW * scale) + 'px';
+    scaler.style.height = (naturalH * scale) + 'px';
+}
+window.fitRunWindow = fitRunWindow;
+window.addEventListener('resize', () => { if(window.TkRunActive && window.TkRunActive()) fitRunWindow(); });
+
+// true mientras la pestaña "▶ Ejecutando" está mostrando una ventana Tk
+// viva; lo usa el diseñador para saber si puede quitar el modo "tk-mode"
+// del body al cerrarse (no debe quitarlo si la ventana en vivo lo sigue
+// necesitando).
+function TkRunActive(){
+    const runTab = document.getElementById('tabEjecutandoBtn');
+    return !!(runTab && runTab.style.display !== 'none');
+}
+window.TkRunActive = TkRunActive;
+
+function mostrarPestanaEjecutando(titulo){
+    // Si estábamos en la pestaña de diseño, la cerramos (oculta también
+    // los widgets bajo los archivos y las propiedades sobre la terminal).
+    if(window.TkDesigner && window.TkDesigner.isOpen()){
+        window.TkDesigner.close();
+    }
+    const monacoHost = document.getElementById('editor');
+    const runTab = document.getElementById('tabEjecutandoBtn');
+    const runPane = document.getElementById('tkRunPane');
+    const stopBtn = document.getElementById('stopBtn');
+    const label = document.getElementById('tkRunningLabel');
+
+    if(label) label.textContent = titulo || 'Ejecutando';
+    if(monacoHost) monacoHost.style.display = 'none';
+    if(runTab) runTab.style.display = 'inline-block';
+    if(runPane) runPane.style.display = 'block';
+    if(stopBtn) stopBtn.style.display = 'inline-block';
+    _tkTabs().forEach(b => b.classList.remove('active'));
+    if(runTab) runTab.classList.add('active');
+    document.body.classList.add('tk-mode');
+    requestAnimationFrame(fitRunWindow);
+}
+
+function actualizarTituloEjecutando(titulo){
+    const label = document.getElementById('tkRunningLabel');
+    if(label) label.textContent = titulo || 'Ejecutando';
+}
+
+function ocultarPestanaEjecutando(volverACodigo){
+    const runTab = document.getElementById('tabEjecutandoBtn');
+    const runPane = document.getElementById('tkRunPane');
+    const stopBtn = document.getElementById('stopBtn');
+    if(runPane){
+        runPane.style.display = 'none';
+        runPane.innerHTML = '<div id="tkRunEmptyHint">Cuando ejecutes código con tkinter, su ventana aparecerá aquí — real e interactiva, no una captura.</div>';
+    }
+    if(runTab){ runTab.style.display = 'none'; runTab.classList.remove('active'); }
+    if(stopBtn) stopBtn.style.display = 'none';
+    document.body.classList.remove('tk-mode');
+    if(volverACodigo !== false){
+        const monacoHost = document.getElementById('editor');
+        const tabCodigo = document.getElementById('tabCodigoBtn');
+        if(monacoHost) monacoHost.style.display = 'block';
+        if(tabCodigo) tabCodigo.classList.add('active');
+        if(window.editor && window.editor.layout){ setTimeout(()=> window.editor.layout(), 0); }
+    }
+}
+
+window.mostrarPestanaEjecutando = mostrarPestanaEjecutando;
+window.actualizarTituloEjecutando = actualizarTituloEjecutando;
+window.ocultarPestanaEjecutando = ocultarPestanaEjecutando;
+
+// La pestaña "Ejecutando" solo se puede volver a mostrar (no se cierra
+// desde aquí); Código y Diseño la dejan en segundo plano sin destruirla,
+// así la app tkinter sigue viva e interactiva aunque no se esté mirando.
+const _tabEjecutandoBtn = document.getElementById('tabEjecutandoBtn');
+if(_tabEjecutandoBtn){
+    _tabEjecutandoBtn.addEventListener('click', () => {
+        if(window.TkDesigner && window.TkDesigner.isOpen()) window.TkDesigner.close();
+        const monacoHost = document.getElementById('editor');
+        const runPane = document.getElementById('tkRunPane');
+        if(monacoHost) monacoHost.style.display = 'none';
+        if(runPane) runPane.style.display = 'block';
+        _tkTabs().forEach(b => b.classList.remove('active'));
+        _tabEjecutandoBtn.classList.add('active');
+        document.body.classList.add('tk-mode');
+        requestAnimationFrame(fitRunWindow);
+    });
+}
+const _tabCodigoBtnForRunPane = document.getElementById('tabCodigoBtn');
+const _tabDisenoBtnForRunPane = document.getElementById('tabDisenoBtn');
+[_tabCodigoBtnForRunPane, _tabDisenoBtnForRunPane].forEach(btn => {
+    if(!btn) return;
+    btn.addEventListener('click', () => {
+        // No se destruye: solo se deja de mostrar mientras se mira otra pestaña.
+        const runPane = document.getElementById('tkRunPane');
+        const runTab = document.getElementById('tabEjecutandoBtn');
+        if(runPane) runPane.style.display = 'none';
+        if(runTab) runTab.classList.remove('active');
+    });
+});
+
+// El botón "⏹ Detener": cierra de verdad la app Tkinter en curso (borra su
+// DOM, así que sus botones dejan de responder) y marca la bandera que
+// input() revisa antes de pedir el siguiente dato. Nota honesta: un bucle
+// de Python puro sin E/S (p.ej. "while True: x = 1") bloquea el hilo del
+// navegador por completo y no se puede interrumpir desde aquí; esto sí
+// detiene apps Tkinter y cualquier espera en input().
+const stopBtn = document.getElementById('stopBtn');
+if(stopBtn){
+    stopBtn.addEventListener('click', () => {
+        window.__spy_stop_requested = true;
+        ocultarPestanaEjecutando(true);
+    });
+}
+
+// Los widgets (bajo la lista de archivos) y las propiedades (encima de la
+// terminal) son una vista temporal de trabajo: al ejecutar el programa,
+// el foco pasa al resultado (consola / pestaña "Ejecutando"), así que
+// cerramos el diseño visual si estaba abierto.
+const _runBtnTk = document.getElementById("run");
+if(_runBtnTk){
+    _runBtnTk.addEventListener("click", () => {
+        if(window.TkDesigner && window.TkDesigner.isOpen()){
+            window.TkDesigner.close();
+        }
+    });
+}
+
 /* MONACO */
 require.config({
     paths: {
@@ -832,10 +2527,13 @@ require(["vs/editor/editor.main"], function () {
     window.editor.onDidChangeModelContent(() => {
         window.current_code = window.editor.getValue();
         files[currentFile] = window.current_code;
+        if(tkApplyingDesignerCode) return; // eco de nuestro propio setValue(): nada que re-detectar
+        checkTkinterForCode(window.current_code);
     });
 
     renderFiles();
     window.monacoReady = true;
+    checkTkinterForCode(window.current_code);
 });
 
 /* EXPORT GLOBAL */

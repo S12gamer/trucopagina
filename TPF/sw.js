@@ -15,7 +15,7 @@ importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
      6) Las tipografías de Google Fonts
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION   = 'v5';
+const CACHE_VERSION   = 'v6';
 const APP_SHELL_CACHE = `tpf-app-shell-${CACHE_VERSION}`;
 const CDN_CACHE       = `tpf-cdn-libs-${CACHE_VERSION}`;
 const TEMPLATE_CACHE  = `tpf-plantillas-${CACHE_VERSION}`;
