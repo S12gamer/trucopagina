@@ -1,2 +1,1 @@
-data1,.com.my.seachs,myseach
-data2,vibe.tune,vibetune
+mkdir -p ProyectoSO/Documentos/{Apuntes,Reportes} ProyectoSO/Programas/{Java,Python} ProyectoSO/Recursos/{Datos,Imagenes} && touch ProyectoSO/Documentos/Apuntes/{Clase1.txt,Clase2.txt} ProyectoSO/Documentos/Reportes/Reporte1.txt ProyectoSO/Programas/Java/Factorial.java ProyectoSO/Programas/Python/Suma.py ProyectoSO/Recursos/Datos/Datos.txt && echo "La estructura de ProyectoSO ha sido generada exitosamente."
