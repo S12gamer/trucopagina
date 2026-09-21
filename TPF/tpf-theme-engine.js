@@ -933,7 +933,7 @@ body.tpf-theme-${tema.id} .btn-dl:hover::before{animation:none;transform:transla
   /* ────────────────────────────────────────────────────────────────────
      5. API PÚBLICA (para pruebas/consola) + AUTOEJECUCIÓN
   ──────────────────────────────────────────────────────────────────── */
-  /* window.TPFTheme = {
+  window.TPFTheme = {
     apply(id) { aplicarTema(id); },
     disable() { limpiarTemaActual(); },
     list() { return THEMES.map(t => t.id); },
@@ -942,4 +942,4 @@ body.tpf-theme-${tema.id} .btn-dl:hover::before{animation:none;transform:transla
   };
 
   aplicarTema(resolverTemaId());
-})(); */
+})(); 
