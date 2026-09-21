@@ -788,7 +788,7 @@ nav::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;
 <body>
 
   <div id="video-intro">
-  <script>if(localStorage.getItem("intro_video_visto5") === "true"){ document.getElementById("video-intro").style.display = "none"; }</script>
+  <script>if(localStorage.getItem("intro_video_visto") === "true"){ document.getElementById("video-intro").style.display = "none"; }</script>
   <video id="intro-video" autoplay muted playsinline>
     <source src="TPF_intro_horizontal.mp4" type="video/mp4">
     Tu navegador no soporta videos.
@@ -829,14 +829,11 @@ nav::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;
       <button class="nav-link" onclick="showPage('atributos',this)">
         <span class="nl-icon i-purple">🎓</span> Atributos de Egreso
       </button>
-      <button class="nav-link" onclick="showPage('winget',this)">
-        <span class="nl-icon i-blue">📦</span> Instalador de paquetes
-      </button>
       <div class="nav-section-title" style="margin-top:.7rem">Miscelaneos</div>
-      <a href="genformevs.html" class="nav-link" style="text-decoration:none">
+      <a href="https://s12gamer.github.io/trucopagina/TPF/genformevs.html" target="_blank" class="nav-link" style="text-decoration:none">
         <span class="nl-icon i-amber">⚡</span> Generador de formatos
       </a>
-      <a href="SPYidle.html" class="nav-link" style="text-decoration:none">
+      <a href="https://s12gamer.github.io/trucopagina/TPF/SPYidle.html" target="_blank" class="nav-link" style="text-decoration:none">
         <span class="nl-icon i-rust">💻</span> SPYilde
       </a>
     </div>
@@ -967,6 +964,9 @@ nav::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;
           <span class="sem-label">Semestre</span>
           <div class="sem-tabs" id="atrSemTabs">
             <div id="atr-sem-pill"></div>
+            <button class="sem-tab " data-sem="general" onclick="switchAtrSem('general',this)">
+              <span class="sem-tab-dot"></span> General
+            </button>
             <button class="sem-tab" data-sem="2" onclick="switchAtrSem('2',this)">
               <span class="sem-tab-dot"></span> 2° Semestre
             </button>
@@ -982,50 +982,6 @@ nav::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;
       </div>
 
       <div class="ae-wrap" id="aeContainer"></div>
-    </div>
-
-    <div class="page" id="page-winget">
-      <div class="page-header ph-blue">
-        <div class="ph-eyebrow">Herramientas</div>
-        <h2>Instalador de paquetes</h2>
-        <p>Selecciona programas y genera un script PowerShell de instalación masiva</p>
-      </div>
-
-      <div class="wg-wrap">
-        <div class="wg-toolbar">
-          <div class="wg-search-box">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="wgSearch" placeholder="Buscar programa…" oninput="wgFilter(this.value)"/>
-          </div>
-          <div class="wg-toolbar-actions">
-            <span class="wg-count-badge" id="wgCountBadge">0 seleccionados</span>
-            <button class="wg-btn wg-btn-ghost" onclick="wgSelectAll(true)">Seleccionar todos</button>
-            <button class="wg-btn wg-btn-ghost" onclick="wgSelectAll(false)">Deseleccionar todos</button>
-          </div>
-        </div>
-
-        <div class="wg-main">
-          <div class="wg-catalog" id="wgCatalog"></div>
-
-          <div class="wg-side">
-            <div class="wg-side-head">
-              <span>Script PowerShell</span>
-              <span class="wg-side-count" id="wgScriptCount">0 programas</span>
-            </div>
-            <pre class="wg-script" id="wgScript">// Selecciona programas para generar el script…</pre>
-            <div class="wg-side-actions">
-              <button class="wg-btn wg-btn-solid wg-blue" onclick="wgCopyScript()">
-                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                Copiar al portapapeles
-              </button>
-              <button class="wg-btn wg-btn-solid wg-teal" onclick="wgDownloadScript()">
-                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Descargar .ps1
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
   </div></div><div id="notice-popup" class="popup-overlay" onclick="closeNoticeOnBackdrop(event)">
