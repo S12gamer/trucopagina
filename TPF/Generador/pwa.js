@@ -29,13 +29,16 @@ export function initPWA() {
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
 
-  window.addEventListener('load', () => {
+  const registrar = () => {
     navigator.serviceWorker.register('./sw.js').then((reg) => {
-      console.info('[PWA] Service worker registrado.', reg.scope);
+      console.info('[PWA] Service worker registrado.', reg && reg.scope);
     }).catch((err) => {
       console.error('[PWA] No se pudo registrar el service worker:', err);
     });
-  });
+  };
+  // pwa.js ahora se carga con import() dinámico: puede llegar cuando 'load' ya ocurrió.
+  if (document.readyState === 'complete') registrar();
+  else window.addEventListener('load', registrar);
 }
 
 /* ── Captura temprana del evento de instalación ── */

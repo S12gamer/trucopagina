@@ -16,7 +16,7 @@
 
 // Sube este número cada vez que cambies archivos precacheados
 // para forzar que los usuarios reciban la versión nueva.
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `reportes-app-${CACHE_VERSION}`;
 
 const APP_SHELL = [
@@ -25,6 +25,9 @@ const APP_SHELL = [
   './styles.css',
   './app.js',
   './pwa.js',
+  './equipos.js',
+  './imagenes.js',
+  './editor-visual.js',
   './manifest.webmanifest',
 ];
 

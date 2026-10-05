@@ -10,7 +10,10 @@
  * ─────────────────────────────────────────────────────────
  */
 
-import { initPWA, offerInstall } from './pwa.js';
+/* pwa.js es opcional: se carga con import() dinámico. Si el archivo falta (404) o falla,
+   la app sigue funcionando completa; solo se pierde lo de instalar / modo sin conexión.
+   (Con un `import ... from './pwa.js'` estático, un 404 cancelaba TODO este módulo.) */
+const cargarPWA = () => import('./pwa.js');
 
 (function(){
 
@@ -610,11 +613,17 @@ function parseParagraph(pEl){
     }
   }
 
+  let tm = null;
+  for (const bm of children(pEl, 'bookmarkStart')){
+    const nm = bm.getAttribute('w:name') || bm.getAttribute('name') || '';
+    if (nm.indexOf('_tm_') === 0){ tm = nm; break; }
+  }
   return {
     type: 'paragraph',
     para: effectivePara,
     runs,
-    isEmpty: runs.length === 0
+    isEmpty: runs.length === 0,
+    tm
   };
 }
 
@@ -809,15 +818,42 @@ async function computeLayout(){
     }
   }
 
-  for (const block of state.blocks){
+  for (let bi = 0; bi < state.blocks.length; bi++){
+    const block = state.blocks[bi];
+    const snap = pages.map(p => p.ops.length);
     if (block.type === 'paragraph'){
       await layoutParagraph(block, contentLeft, contentWidth, pages, () => current, (p) => { current = p; }, ensureSpace);
     } else if (block.type === 'table'){
       await layoutTable(block, contentLeft, contentWidth, pages, () => current, (p) => { current = p; }, ensureSpace);
     }
+    pages.forEach((pg, pi) => { for (let k = (snap[pi] || 0); k < pg.ops.length; k++) pg.ops[k].blk = bi; });
   }
 
   state.pages = pages;
+
+  // Rectángulos de los bloques marcados (_tm_*) para el editor visual
+  const rects = [];
+  pages.forEach((pg, pi) => {
+    const by = new Map();
+    pg.ops.forEach(op => {
+      if (op.blk == null || (op.op !== 'text' && op.op !== 'image')) return;
+      const blk = state.blocks[op.blk];
+      if (!blk || !blk.tm) return;
+      const hh = op.op === 'image' ? op.h : (op.baseline || 0);
+      let r = by.get(op.blk);
+      if (!r){
+        r = { tm: blk.tm, page: pi, x0: op.x, x1: op.x + (op.w || 0), y0: op.y, y1: op.y + hh, img: null, fs: null, lh: 0, align: blk.para.align || 'left' };
+        by.set(op.blk, r);
+      } else {
+        r.x0 = Math.min(r.x0, op.x); r.x1 = Math.max(r.x1, op.x + (op.w || 0));
+        r.y0 = Math.min(r.y0, op.y); r.y1 = Math.max(r.y1, op.y + hh);
+      }
+      if (op.op === 'image') r.img = { x: op.x, y: op.y, w: op.w, h: op.h };
+      if (op.op === 'text' && !r.fs && op.text && op.text.trim() && op.text.trim() !== '•'){ r.fs = op.style; r.lh = op.baseline || 0; }
+    });
+    by.forEach(r => rects.push(r));
+  });
+  state.blockRects = rects;
 }
 
 async function layoutHeaderFooterBlocks(blocks, width){
@@ -1042,7 +1078,7 @@ async function layoutParagraph(block, contentLeft, contentWidth, pages, getCurre
         continue;
       }
       const w = tokenWidth(t);
-      cur.ops.push({ op:'text', text: t.text, x, y: lineY, style: t.style, baseline: maxTokenHeight });
+      cur.ops.push({ op:'text', text: t.text, x, y: lineY, w, style: t.style, baseline: maxTokenHeight });
       x += w;
       if (t.isSpace) x += extraSpacePerGap;
     }
@@ -1218,6 +1254,7 @@ async function renderAllPages(){
   }
 
   pageIndicator.textContent = `${pagesData.length} página${pagesData.length===1?'':'s'}`;
+  if (typeof window.dvOnRendered === 'function'){ try { window.dvOnRendered(); } catch(e){ console.error(e); } }
 }
 
 function sortByRelativeHeight(list){
@@ -1376,7 +1413,16 @@ document.getElementById('dv_refreshBtn').addEventListener('click', () => {
 
 window.DocxViewerEngine = {
   loadBlob: handleFile,
-  setStatus: setStatus
+  setStatus: setStatus,
+  getCanvas: () => canvas,
+  getZoom: () => state.zoom,
+  setZoom: (z) => applyZoom(z),
+  getLayout: () => ({
+    zoom: state.zoom, gap: PAGE_GAP,
+    pageW: state.page.w, pageH: state.page.h, mL: state.page.mL, mR: state.page.mR,
+    pages: state.pages.map(p => ({ h: p.h })),
+    rects: state.blockRects || []
+  })
 };
 
 })();
@@ -1883,7 +1929,7 @@ function procesarNodo(nodo, formatoActual ) {
     rPr += "</w:rPr>";
     
     xmlResultado += rPr;
-    xmlResultado += `<w:t xml:space="preserve">${nodo.nodeValue}</w:t>`;
+    xmlResultado += `<w:t xml:space="preserve">${textoEscapado}</w:t>`;
     xmlResultado += "</w:r>";
   } else {
     nodo.childNodes.forEach(hijo => {
@@ -1961,7 +2007,7 @@ async function generarDocumento() {
   // El usuario ya validó el formulario y está generando el documento:
   // es el momento de mayor intención de uso, así que es cuando le
   // ofrecemos instalar la app (si el navegador nos dio el evento).
-  offerInstall();
+  cargarPWA().then(m => m.offerInstall()).catch(() => {});
 
   const opts = recopilarDatosFormulario();
 
@@ -2292,7 +2338,7 @@ function seleccionarMateriaCard(nombre) {
    INIT
 ════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
-  initPWA();
+  cargarPWA().then(m => m.initPWA()).catch(err => console.warn('[PWA] pwa.js no está disponible; la app funciona igual, sin instalación ni modo sin conexión.', err));
   renderizarSelectorMaterias(); 
   cargarLS();
   el('fecha').value = new Date().toISOString().slice(0,10);
@@ -2326,6 +2372,10 @@ window.addEventListener('DOMContentLoaded', () => {
     el('editor_wrapper').style.display = this.checked ? 'block' : 'none';
     scheduleDocxPreview();
   });
+
+  // Avisa a equipos.js / imagenes.js / editor-visual.js que Quill y el resto ya existen
+  window.GF.ready = true;
+  window.dispatchEvent(new Event('gf:ready'));
 });
 
 /* ─────────────────────────────────────────────────────────
@@ -2354,3 +2404,38 @@ window.exportarMateriaPersonalizada = exportarMateriaPersonalizada;
 window.seleccionarMateriaCard = seleccionarMateriaCard;
 window.cargarMateriaDesdeArchivo = cargarMateriaDesdeArchivo;
 
+
+/* ─────────────────────────────────────────────────────────
+   PUENTE PARA LOS MÓDULOS OPCIONALES (equipos.js, imagenes.js, editor-visual.js)
+   Como este archivo es un módulo, sus funciones son privadas. Aquí se
+   exponen, de forma controlada, solo las que esos módulos necesitan, y
+   `wrap()` permite envolver algunas funciones internas sin editar su código:
+       GF.wrap('validar', original => function () { ...; return original(); });
+   ───────────────────────────────────────────────────────── */
+const GF_SLOTS = {
+  validar:                   [() => validar,                   f => { validar = f; }],
+  recopilarDatosFormulario:  [() => recopilarDatosFormulario,  f => { recopilarDatosFormulario = f; }],
+  aplicarSustitucionesXML:   [() => aplicarSustitucionesXML,   f => { aplicarSustitucionesXML = f; }],
+  insertarTextoEnXML:        [() => insertarTextoEnXML,        f => { insertarTextoEnXML = f; }],
+  updateStepper:             [() => updateStepper,             f => { updateStepper = f; }],
+  showSuccess:               [() => showSuccess,               f => { showSuccess = f; }]
+};
+window.GF = {
+  ready: false,
+  wrap(nombre, fabrica) {
+    const slot = GF_SLOTS[nombre];
+    if (!slot) throw new Error('GF.wrap: función no soportada: ' + nombre);
+    slot[1](fabrica(slot[0]()));
+  },
+  el,
+  escHtml, escXml,
+  showSuccess: (m) => showSuccess(m),
+  showError:   (m) => showError(m),
+  getQuill: () => quill,
+  previewVisible: () => previewVisible,
+  toggleVistaPrvia: () => toggleVistaPrvia(),
+  generarPreviewEnVivo: () => generarPreviewEnVivo(),
+  scheduleDocxPreview: () => scheduleDocxPreview(),
+  updateStepper: () => updateStepper(),
+  convertirHtmlAWordXML: (h) => convertirHtmlAWordXML(h)
+};
