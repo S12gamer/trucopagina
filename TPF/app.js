@@ -38,7 +38,7 @@ const formatos = [
   {id:14, sem:3,  name:"Formato Cultura Empresarial",   desc:"M. en TI Edith Flores Morales",     url:"https://drive.google.com/uc?export=download&id=1bQdqI4YcRz0fM9PxyQA8facak7Ct9SUL"},
    /* {id:15, sem:3,  name:"Formato Calculo Vectorial", desc:"Profr. Fernando René barbosa Morales",       url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
   {id:16, sem:3,  name:"Formato Investigacíon de Operaciones", desc:"José Juan Santana Ortiz",     url:"https://drive.google.com/uc?export=download&id=18iKV-Us_8L-N3ZdniUkZIhMyN3u_WVC6"},
-   /* {id:17, sem:3,  name:"Formato Sistemas Operativos",   desc:"Oscar Olivares López",     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  {id:17, sem:3,  name:"Formato Sistemas Operativos (con portada)",   desc:"Oscar Olivares López",     url:"https://drive.google.com/uc?export=download&id=1Wi-3LQomN6L6ng12s41NHfS5woFFZTfr"},
   {id:18, sem:3,  name:"Formato Estructura de Datos",   desc:"Luis Antonio Reynoso Sánchez",    url:"https://drive.google.com/uc?export=download&id=1lIC5zOGp55DewQdF7Wm4Cs9OFOAfp1Gm"},
   {id:19, sem:3,  name:"Formato PEAD",            desc:"Christopher Aron Rico Fonseca",           url:"https://drive.google.com/uc?export=download&id=1gIU7zCS18e7O_fYMJrHOz-qDfTw7yzYS"},
    /* {id:20, sem:3,  name:"Formato Ingles N5 y N6",   desc:"Karen Dalí Figueroa Vázquez",           url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
@@ -60,7 +60,7 @@ const instrumentaciones = [
   {id:8,sem:3,name:"Instrumentación Cultura Empresarial",          desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=19i91lh-_c7NxsOW_OsrLPbvTqqZsX2bp"},
   {id:9,sem:3,name:"Instrumentación Calculo Vectorial",         desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=1h_dkMgo884kzJ43mAgqC5oAJ8w-XoXXA"},
   {id:10,sem:3,name:"Instrumentación investigacion de Operaciones",         desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=1esdZATUZvBAIboqo83SD_E1qhipMQz5r"},
-  /* {id:11,sem:3,name:"Instrumentación Sistemas Operativos",           desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  {id:11,sem:3,name:"Instrumentación Sistemas Operativos",           desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=1ypM1xYf7ZJinPthqTXDGwKfSD0eQKEfw"},
   {id:12,sem:3,name:"Instrumentación Estructura de Datos",           desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=1fVBoiSBDm1-nDV9jsdjby5nLdlKHqVyK"},
   /* {id:13,sem:3,name:"Instrumentación Inglés N5 y N6",         desc:"Planeación — Coord. Lenguas Extranjeras", url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
   {id:14,sem:3,name:"Instrumentación PEAD",                    desc:"Planeación semestral — ISC",              url:"https://drive.google.com/uc?export=download&id=1mRj3fNFTDf168cvUqQvjli1Jt2y7rzx2"},
