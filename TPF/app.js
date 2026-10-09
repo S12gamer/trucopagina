@@ -46,6 +46,9 @@ const formatos = [
   {id:22,sem:3,  name:"Portafolio Cultura Empresarial",        desc:"M. en TI Edith Flores Morales",                     url:"https://drive.google.com/uc?export=download&id=1EWf6o0aoVpgXT2jKoy3CY4GoAiO4HYGm"},
    /* {id:23,sem:3,  name:"Portafolio Ingles N5 y N6",       desc:"By: S12/Trucoteca",          url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
    /* {id:24,sem:3,  name:"Portafolio Sitemas Operativos", desc:"By: CS",                     url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  {id:25,sem:3,  name:"Guia Evaluacion VirtualBox",        desc:"Oscar Olivares López",                     url:"https://drive.google.com/uc?export=download&id=1RK-_Agfn5XZkzcLipT2uEby0dEBwZT0q/"},
+  {id:26,sem:3,  name:"Guia Evaluacion Investigacion",        desc:"Oscar Olivares López",                     url:"https://drive.google.com/uc?export=download&id=11PAtA1HwJk8m2QAs9K4vr8kCUPSf_hTw"},
+  {id:27,sem:3,  name:"Guia Evaluacion Ejercicio Practico",        desc:"Oscar Olivares López",                     url:"https://drive.google.com/uc?export=download&id=16bZsaRtR_Dz4NJBzCNAbP2a773hE2Je-"},
 ];
 
 const instrumentaciones = [
