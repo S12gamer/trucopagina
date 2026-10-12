@@ -41,14 +41,15 @@ const formatos = [
   {id:17, sem:3,  name:"Formato Sistemas Operativos (con portada)",   desc:"Oscar Olivares López",     url:"https://drive.google.com/uc?export=download&id=1Wi-3LQomN6L6ng12s41NHfS5woFFZTfr"},
   {id:18, sem:3,  name:"Formato Estructura de Datos",   desc:"Luis Antonio Reynoso Sánchez",    url:"https://drive.google.com/uc?export=download&id=1lIC5zOGp55DewQdF7Wm4Cs9OFOAfp1Gm"},
   {id:19, sem:3,  name:"Formato PEAD",            desc:"Christopher Aron Rico Fonseca",           url:"https://drive.google.com/uc?export=download&id=1gIU7zCS18e7O_fYMJrHOz-qDfTw7yzYS"},
-   /* {id:20, sem:3,  name:"Formato Ingles N5 y N6",   desc:"Karen Dalí Figueroa Vázquez",           url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  {id:20, sem:3,  name:"Formato Ingles N5 y N6",   desc:"Karen Dalí Figueroa Vázquez",           url:"https://drive.google.com/uc?export=download&id=1mPG3f_UFDQ3ePWhcDqlXXijZFecalIzA"},
   {id:21,sem:3,  name:"Portafolio Cálculo Vectorial", desc:"By: S12/Trucoteca & CS",     url:"https://drive.google.com/uc?export=download&id=1tHxOmCXaFOP2bctnIZQfX2tDhxArMUSq"},
   {id:22,sem:3,  name:"Portafolio Cultura Empresarial",        desc:"M. en TI Edith Flores Morales",                     url:"https://drive.google.com/uc?export=download&id=1EWf6o0aoVpgXT2jKoy3CY4GoAiO4HYGm"},
-   /* {id:23,sem:3,  name:"Portafolio Ingles N5 y N6",       desc:"By: S12/Trucoteca",          url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
-  {id:24,sem:3,  name:"Portafolio Sitemas Operativos", desc:"By: CS",                     url:"https://drive.google.com/uc?export=download&id=16f8Uk2bJAy1TLvFcPJLmTNTRhWjxmSkM"},
-  {id:25,sem:3,  name:"Guia Evaluacion VirtualBox",        desc:"Oscar Olivares López",                     url:"https://drive.google.com/uc?export=download&id=1RK-_Agfn5XZkzcLipT2uEby0dEBwZT0q/"},
-  {id:26,sem:3,  name:"Guia Evaluacion Investigacion",        desc:"Oscar Olivares López",                     url:"https://drive.google.com/uc?export=download&id=11PAtA1HwJk8m2QAs9K4vr8kCUPSf_hTw"},
-  {id:27,sem:3,  name:"Guia Evaluacion Ejercicio Practico",        desc:"Oscar Olivares López",                     url:"https://drive.google.com/uc?export=download&id=16bZsaRtR_Dz4NJBzCNAbP2a773hE2Je-"},
+  {id:23,sem:3,  name:"Portafolio Estructura de datos",        desc:"By: CS",                     url:"https://drive.google.com/uc?export=download&id=1d_5z-v-qZJXK_1lMDJByT-xhXjRaCSdY"},
+   /* {id:24,sem:3,  name:"Portafolio Ingles N5 y N6",       desc:"By: S12/Trucoteca",          url:"https://drive.google.com/uc?export=download&id=cambiar id del link"},*/
+  {id:25,sem:3,  name:"Portafolio Sitemas Operativos", desc:"By: CS",                     url:"https://drive.google.com/uc?export=download&id=16f8Uk2bJAy1TLvFcPJLmTNTRhWjxmSkM"},
+  {id:26,sem:3,  name:"Guia Evaluacion VirtualBox",        desc:"Oscar Olivares López",                     url:"https://drive.google.com/uc?export=download&id=1RK-_Agfn5XZkzcLipT2uEby0dEBwZT0q/"},
+  {id:27,sem:3,  name:"Guia Evaluacion Investigacion",        desc:"Oscar Olivares López",                     url:"https://drive.google.com/uc?export=download&id=11PAtA1HwJk8m2QAs9K4vr8kCUPSf_hTw"},
+  {id:28,sem:3,  name:"Guia Evaluacion Ejercicio Practico",        desc:"Oscar Olivares López",                     url:"https://drive.google.com/uc?export=download&id=16bZsaRtR_Dz4NJBzCNAbP2a773hE2Je-"},
 ];
 
 const instrumentaciones = [
