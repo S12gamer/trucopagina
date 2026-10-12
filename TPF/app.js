@@ -79,6 +79,7 @@ const programas = [
   {id:5,name:"GeoGebra Suite",         desc:"Fernando René barbosa Morales / Calculo Vectorial",      url:"https://download.geogebra.org/package/win-suite"},
   {id:6,name:"Oracle VirtualBox",         desc:"Oscar Olivares López / Sistemas operativos",      url:"https://download.virtualbox.org/virtualbox/7.2.16/VirtualBox-7.2.16-174877-Win.exe"},
   {id:7,name:"NetBeans",         desc:"Oscar Olivares López / Sistemas operativos",      url:"https://github.com/codelerity/netbeans-packages/releases/download/v31-build1/Apache-NetBeans-31.exe"},
+  {id:8,name:"Open Visual Traceroute",         desc:"José Juan Santana Ortiz / Investigacion de operaciones",      url:"https://sourceforge.net/projects/openvisualtrace/files/2.0.0/OpenVisualTraceroute2.1.0.exe/download"},
 ];
 
 const materias = [
