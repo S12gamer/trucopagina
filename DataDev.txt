@@ -1,1 +1,3 @@
 mkdir -p ProyectoSO/Documentos/{Apuntes,Reportes} ProyectoSO/Programas/{Java,Python} ProyectoSO/Recursos/{Datos,Imagenes} && touch ProyectoSO/Documentos/Apuntes/{Clase1.txt,Clase2.txt} ProyectoSO/Documentos/Reportes/Reporte1.txt ProyectoSO/Programas/Java/Factorial.java ProyectoSO/Programas/Python/Suma.py ProyectoSO/Recursos/Datos/Datos.txt && echo "La estructura de ProyectoSO ha sido generada exitosamente."
+
+mkdir -p Proyecto/Docs/ Proyecto/src/python/ Proyecto/src/bash/ Proyecto/logs/ && touch Proyecto/Docs/{Clase1.txt,Clase2.txt,hola.txt} Proyecto/src/bash/{mundo.sh,hola.sh} Proyecto/src/logs/{log12332.log,log12123.log}
