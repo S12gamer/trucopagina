@@ -2,7 +2,7 @@
    Guarda la aplicación y lo necesario para generar formatos (librerías, plantilla .docx, materias y catálogo)
    para que todo funcione sin conexión. Las llamadas a las APIs de IA siempre van a la red.
    Si cambias index.html, sube el número de VERSION para que los dispositivos se actualicen. */
-const VERSION = 'synaps-v5';
+const VERSION = 'synaps-v6';
 const CORE = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
 const LIBS = [
   'https://unpkg.com/pizzip@3.1.4/dist/pizzip.min.js',
