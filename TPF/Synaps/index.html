@@ -1836,7 +1836,7 @@ const CATS={
 /* ───── SYNAPS: servidor propio de modelos ─────
    La clave NO va en esta página: vive como secreto en el servidor (synaps-worker.js).
    Aquí solo se pone la dirección pública de ese servidor. Si queda vacía, los modelos Synaps no aparecen. */
-const SYNAPS_API='https://synaps.disp-12-a.workers.dev';
+const SYNAPS_API='';
 /* CDA AI: página donde se consigue el código de acceso (opcional; vacía = sin botón «Obtener clave») */
 const CDA_KEY_URL='';
 const SYN_TIERS=[
@@ -1883,6 +1883,18 @@ function extractArray(src,name){
   }
   try{return new Function('return '+src.slice(s,i+1))()}catch(e){return[]}
 }
+const slug=t=>norm(String(t||'')).replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+const normName=t=>norm(String(t||'')).replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
+/* La clave ya no depende del lugar en la lista: categoría + nombre (+ semestre). La clave antigua (categoría-número) se conserva como «legacy». */
+function normCat(list){
+  const seen={};
+  return list.map(f=>{
+    const legacy=f.legacy||((/-\d+$/.test(f.key||'')&&!/:/.test(f.key||''))?f.key:undefined);
+    let key=f.cat+':'+slug(f.name)+(f.sem!==undefined?'@'+f.sem:'');
+    seen[key]=(seen[key]||0)+1;if(seen[key]>1)key+='~'+seen[key];
+    return{...f,key,legacy};
+  });
+}
 function parseCatalog(js){
   const clean=js.replace(/\/\*[\s\S]*?\*\//g,''); // descarta entradas comentadas
   const out=[];
@@ -1891,8 +1903,53 @@ function parseCatalog(js){
     if(x&&x.url&&!/cambiar id/i.test(x.url))
       out.push({key:k+'-'+n,cat:k,sem:x.sem,name:x.name,desc:x.desc||'',url:x.url});
   }));
-  return out;
+  return normCat(out);
 }
+/* Nombre que tenía cada clave antigua (categoría-número) la primera vez que se vio: así un chat viejo no apunta a otro archivo si el catálogo cambió de orden */
+const LEG_KEY='cat_legacy_v1';
+const legGet=()=>{try{return JSON.parse(localStorage.getItem(LEG_KEY)||'{}')}catch(e){return{}}};
+function rememberLegacy(list){
+  if(!Array.isArray(list))return;
+  const m=legGet();let ch=false;
+  list.forEach(f=>{const lk=f&&(f.legacy||((/-\d+$/.test(f.key||'')&&!/:/.test(f.key||''))?f.key:null));if(lk&&f.name&&!m[lk]){m[lk]={name:f.name,cat:f.cat,sem:f.sem};ch=true}});
+  if(ch)try{localStorage.setItem(LEG_KEY,JSON.stringify(m))}catch(e){}
+}
+/* Referencias a archivos: se encuentran por clave y, si esa clave ya no existe o cambió, por el nombre */
+const refOf=f=>({key:f.key,legacy:f.legacy,cat:f.cat,sem:f.sem,name:f.name,desc:f.desc,url:f.url,icon:f.icon,...(f.m?{m:f.m}:{})});
+function nameScore(a,b){
+  if(!a||!b)return 0;if(a===b)return 1;
+  const ca=a.replace(/ /g,''),cb=b.replace(/ /g,'');if(ca===cb)return .96;                // «S.E.P.» = «SEP»
+  const sub=(a.length>=4&&b.includes(a))||(b.length>=4&&a.includes(b))||(ca.length>=4&&cb.includes(ca))||(cb.length>=4&&ca.includes(cb));
+  const ta=new Set(a.split(' ').filter(w=>w.length>2)),tb=new Set(b.split(' ').filter(w=>w.length>2));
+  let inter=0;ta.forEach(w=>{if(tb.has(w))inter++});const uni=ta.size+tb.size-inter;
+  return Math.max(sub?.88:0,uni?inter/uni:0);
+}
+function resolveRef(r){
+  if(!r)return[];
+  const isStr=typeof r==='string',ref=isStr?{key:r,name:r}:r,cat=catalog,nn=normName(ref.name||'');
+  const byKey=cat.find(f=>f.key===ref.key);
+  if(byKey&&(isStr||!nn||normName(byKey.name)===nn))return[byKey];                    // clave vigente (y mismo nombre)
+  if(isStr){
+    const lm=legGet()[r];                                                                 // clave antigua: primero por el nombre que tenía
+    if(lm){const v=resolveRef({key:r,name:lm.name,cat:lm.cat,sem:lm.sem});if(v.length)return v}
+    const leg=cat.find(f=>f.legacy===r);if(leg)return[leg]                                // clave antigua (categoría-número)
+  }
+  if(nn){
+    const exact=cat.filter(f=>normName(f.name)===nn);
+    if(exact.length){
+      if(isStr)return exact.slice(0,6);                                                 // un nombre a secas: todas sus versiones (p. ej. varios semestres)
+      const pick=exact.filter(f=>(!ref.cat||f.cat===ref.cat)&&(ref.sem===undefined||f.sem===ref.sem));
+      return[pick[0]||exact.find(f=>f.cat===ref.cat)||exact[0]];
+    }
+    let best=null,bs=0;
+    cat.forEach(f=>{const sc=nameScore(nn,normName(f.name))+(ref.cat&&f.cat===ref.cat?.05:0)+(ref.sem!==undefined&&f.sem===ref.sem?.03:0);if(sc>bs){bs=sc;best=f}});
+    if(best&&bs>=.6)return[best];                                                       // nombre parecido
+  }
+  if(byKey)return[byKey];                                                                // la clave existe aunque el nombre cambió
+  if(!isStr&&(ref.url||ref.m))return[ref];                                               // copia guardada con sus datos
+  return[];
+}
+const resolveAll=l=>{const out=[],seen=new Set();(l||[]).forEach(r=>resolveRef(r).forEach(f=>{const k=f.key||f.name;if(!seen.has(k)){seen.add(k);out.push(f)}}));return out};
 const semLabel=s=>s===undefined?'':s===0?'General':s+'° Semestre';
 const ST={cat:'Cargando catálogo…',mat:'Cargando materias…'};
 function refreshStatusUI(){const a=$('st1'),b=$('st2');if(a)a.innerHTML=ST.cat;if(b)b.innerHTML=ST.mat}
@@ -1904,13 +1961,14 @@ async function loadCatalog(){
     if(!r.ok)throw new Error(r.status);
     const list=parseCatalog(await r.text());
     if(!list.length)throw new Error('vacío');
-    catalog=list;
+    try{rememberLegacy(JSON.parse(localStorage.getItem('cat_cache')||'{}').list)}catch(e){}
+    rememberLegacy(list);catalog=list;
     localStorage.setItem('cat_cache',JSON.stringify({t:Date.now(),list}));
     setStatus('Catálogo <b>en línea</b> · '+list.length+' archivos');
   }catch(e){
     try{
       const c=JSON.parse(localStorage.getItem('cat_cache'));
-      catalog=c.list;
+      catalog=normCat(c.list);rememberLegacy(catalog);
       setStatus('Sin conexión al origen. Usando <b>copia guardada</b> del '+new Date(c.t).toLocaleString('es-MX')+' · '+catalog.length+' archivos');
     }catch(_){setStatus('No se pudo cargar el catálogo y no hay copia guardada.')}
   }
@@ -1942,7 +2000,7 @@ function fileCard(f){
 function welcome(){
   $('wrap').innerHTML=`<div class="hello"><h2>¿Qué archivo necesitas hoy?</h2>
   <p>Soy Synaps. Pregúntame y te muestro los archivos listos para descargar.</p>
-  <div class="chips">${['Formatos de 3° semestre','Membretes oficiales','¿Qué programas necesito para POO?','Atributos de Cálculo Vectorial','Formato de evidencia de Cultura Empresarial','Instrumentación de Cálculo','Guias de evaluacion']
+  <div class="chips">${['Formatos de 3° semestre','Membretes oficiales','¿Qué programas necesito para POO?','Atributos de Cálculo Vectorial','Formato de evidencia de Cultura Empresarial','Instrumentación de Cálculo']
   .map(t=>`<button type="button" class="chip" data-w="${esc(t)}">${esc(t)}</button>`).join('')}</div></div>`;
 }
 
@@ -1950,9 +2008,7 @@ function welcome(){
 const DOCINT=/evidencia|fo-?205|competencia|ensayo|reporte|documento|desarrollo/i;
 const useWorker=()=>localStorage.getItem('use_worker')==='1';
 function extraRule(){
-  return useWorker()
-   ?'"redactar":{"tipo":"ensayo|reporte|arquitectura|libre","instruccion":"qué desarrollar"} SOLO si piden redactar contenido; NO escribas tú el texto, otro módulo lo redacta.'
-   :'"extra" SOLO si piden redactar contenido (ensayo, reporte, desarrollo): párrafos separados por línea en blanco, "## " títulos, "- " viñetas, **negritas**, sin relleno.';
+  return '"redactar":{"tipo":"ensayo|reporte|arquitectura|libre","instruccion":"el tema completo y todo el contexto que dio el usuario"} cuando el usuario mencione un tema o pida contenido (ensayo, reporte, investigación, desarrollo, explicación, «sobre…», «acerca de…», «del tema…»). NO escribas tú el texto: otro paso redactará un documento detallado de mínimo 1800 palabras (unas 4 páginas).';
 }
 function docInfo(){
   const q=(history.filter(h=>h.role==='user').pop()||{parts:[{text:''}]}).parts[0].text;
@@ -1964,7 +2020,7 @@ function docInfo(){
 function systemPrompt(){
   const lines=catalog.map(f=>`${f.key} | ${CATS[f.cat].label} | ${semLabel(f.sem)||'-'} | ${f.name} | ${f.desc}`).join('\n');
   return `Eres Synaps, el asistente de un centro de recursos académicos. Responde siempre en español, breve y amable.
-Cuando el usuario pida o necesite archivos, selecciona SOLO del catálogo (usa las claves exactas). Nunca inventes archivos ni enlaces.
+Cuando el usuario pida o necesite archivos, selecciona SOLO del catálogo: en "files" pon la clave exacta de cada archivo o, si no estás seguro de la clave, su nombre exacto. Nunca inventes archivos ni enlaces.
 Los elementos tipo 'Atributos' son materias (atributo de egreso, objetivo, indicadores y código de clase); no se descargan, se despliegan en una tarjeta.
 Si nada del catálogo aplica, dilo y deja "files" vacío. Puedes conversar normalmente sobre otros temas.
 Responde SOLO con JSON: {"text":"mensaje","files":["clave1"],"doc":null,"asks":null}
@@ -2100,7 +2156,7 @@ async function askChat(onText){
     pick=j=>(j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[]).map(p=>p.text||'').join('');
   }else if(P.kind==='anthropic'){
     url='https://api.anthropic.com/v1/messages';
-    opt={method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:mdl,max_tokens:4096,system:sys,messages:ms,stream:true})};
+    opt={method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:mdl,max_tokens:8192,system:sys,messages:ms,stream:true})};
     pick=j=>{if(j.type==='error')throw new Error((j.error&&j.error.message)||'error del proveedor');return j.type==='content_block_delta'&&j.delta&&j.delta.type==='text_delta'?j.delta.text:''};
   }else{
     url=P.base+'/chat/completions';
@@ -2175,7 +2231,7 @@ async function send(text){
     await sleep(550+Math.random()*950);
     res=localAnswer(text);
   }
-  const m={r:'b',ok:!err,text:res.text||'',files:res.files||[],ask:Array.isArray(res.ask)?res.ask:[],doc:null,form:null};
+  const m={r:'b',ok:!err,text:res.text||'',files:resolveAll(res.files).map(refOf),ask:Array.isArray(res.ask)?res.ask:[],doc:null,form:null};
   if(res.doc&&typeof res.doc==='object'){
     const d=res.doc,need=docNeeds(d,ctxText());
     if(need.materia||need.comp||need.ind){
@@ -2487,11 +2543,13 @@ async function buildDocx(d){
    Desactivada por defecto: se enciende con la casilla de la barra lateral. */
 const WORKER_URL='https://cda-ai-worker.disp-12-a.workers.dev/api/generate';
 const FMT='REGLAS DE FORMATO CRÍTICAS:\n1. Devuelve ÚNICAMENTE código HTML puro, sin bloques de código.\n2. Usa <h3> para subtítulos, <p> para párrafos y <ul>/<li> para viñetas.\n3. PROHIBIDO usar Markdown. Aplica negritas con <strong>.\n';
+const MIN_WORDS=1800;
+const LEN='EXTENSIÓN OBLIGATORIA: el documento debe tener AL MENOS 1800 palabras (unas 4 páginas digitales). Desarróllalo con profundidad: introducción, de 6 a 8 secciones con <h3>, definiciones, ejemplos concretos, casos prácticos, análisis, ventajas y limitaciones, y conclusiones. Prohibido resumir, repetir ideas o rellenar; no menciones el conteo de palabras.\n';
 const PROMPTS={
-  ensayo:'Actúa como un estudiante universitario. Escribe un ensayo académico formal, objetivo y con vocabulario culto.\n'+FMT,
-  reporte:'Actúa como un estudiante de Ingeniería en Sistemas Computacionales. Escribe un reporte técnico estructurado, directo y analítico.\n'+FMT,
-  arquitectura:'Actúa como un Arquitecto de Software. Describe detalladamente la arquitectura técnica, componentes o infraestructura requerida.\n'+FMT,
-  libre:'Desarrolla el siguiente tema de forma detallada, clara y bien estructurada.\n'+FMT
+  ensayo:'Actúa como un estudiante universitario. Escribe un ensayo académico formal, objetivo y con vocabulario culto.\n'+LEN+FMT,
+  reporte:'Actúa como un estudiante de Ingeniería en Sistemas Computacionales. Escribe un reporte técnico estructurado, directo y analítico.\n'+LEN+FMT,
+  arquitectura:'Actúa como un Arquitecto de Software. Describe detalladamente la arquitectura técnica, componentes o infraestructura requerida.\n'+LEN+FMT,
+  libre:'Desarrolla el siguiente tema de forma detallada, clara y bien estructurada.\n'+LEN+FMT
 };
 async function askCda(prompt,key){
   const h={'Content-Type':'application/json'};if(key)h['X-Access-Code']=key;
@@ -2551,7 +2609,7 @@ async function askDirect(p){
       return(j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[]).map(x=>x.text||'').join('');
     }
     if(P.kind==='anthropic'){
-      r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:mdl,max_tokens:4096,messages:[{role:'user',content:p}]})});
+      r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:mdl,max_tokens:8192,messages:[{role:'user',content:p}]})});
       j=await r.json();if(!r.ok)throw new Error(emsg(j,r));
       return(j.content||[]).map(c=>c.text||'').join('');
     }
@@ -2560,12 +2618,32 @@ async function askDirect(p){
     return(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'';
   }catch(e){if(e instanceof TypeError)throw new Error('no se pudo conectar con '+P.n+' (red o CORS)');throw e}
 }
+const wordCount=h=>(String(h).replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').trim().match(/\S+/g)||[]).length;
+const limpiaHtml=h=>String(h).replace(/```html|```/gi,'').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^### (.*$)/gim,'<h3>$1</h3>').trim();
+async function genTexto(p){
+  if(useWorker()){try{return await askWorker(p)}catch(e){console.warn('Módulo CDA AI falló, uso el modelo seleccionado:',e.message)}}
+  return askDirect(p);
+}
 async function redactar(d,materia){
-  const r=d.redactar,p=(PROMPTS[r.tipo]||PROMPTS.libre)+`El texto es para la asignatura de "${materia}".\nBasándote en las siguientes instrucciones o borrador del usuario, desarrolla el documento completo:\n"${r.instruccion}"\nNo incluyas el nombre de la materia al principio; continúa directamente con lo pedido a menos que se solicite.`;
-  let h;
-  if(useWorker()){try{h=await askWorker(p)}catch(e){console.warn('Módulo CDA AI falló, uso Gemini directo:',e.message);h=await askDirect(p)}}
-  else h=await askDirect(p);
-  return h.replace(/```html|```/gi,'').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^### (.*$)/gim,'<h3>$1</h3>').trim();
+  const r=d.redactar,st=t=>{try{d.onStatus&&d.onStatus(t)}catch(e){}};
+  const base=(PROMPTS[r.tipo]||PROMPTS.libre)+`El texto es para la asignatura de "${materia}".\nTema y contexto indicados por el usuario:\n"${r.instruccion}"\nNo incluyas el nombre de la materia al principio; continúa directamente con lo pedido.`;
+  st('Redactando el texto…');
+  let html=limpiaHtml(await genTexto(base)),words=wordCount(html);
+  for(let i=1;i<=2&&words<MIN_WORDS;i++){
+    st(`Ampliando el texto (${i}/2): ${words} de ${MIN_WORDS} palabras…`);
+    const titulos=(html.match(/<h3[^>]*>[\s\S]*?<\/h3>/gi)||[]).map(x=>x.replace(/<[^>]+>/g,'').trim()).join('; ');
+    const ctx=html.length>9000?html.slice(0,3000)+' […] '+html.slice(-3000):html;
+    const cont=`Estás redactando un documento largo sobre este tema: "${r.instruccion}" (asignatura: ${materia}).\nYa existe este texto (${words} palabras). Secciones actuales: ${titulos||'(sin subtítulos)'}.\nTEXTO ACTUAL:\n${ctx}\n\nEscribe ÚNICAMENTE secciones NUEVAS que profundicen el tema (ejemplos, casos prácticos, análisis, aplicaciones, comparaciones, ventajas y limitaciones, tendencias), sin repetir lo ya dicho y sin conclusiones finales. Deben sumar AL MENOS ${MIN_WORDS-words+150} palabras.\n`+FMT;
+    let extra='';
+    try{extra=limpiaHtml(await genTexto(cont))}catch(e){console.warn('No se pudo ampliar el texto:',e.message);break}
+    if(!extra||wordCount(extra)<60)break;
+    const idx=html.toLowerCase().lastIndexOf('<h3');
+    html=(idx>=0&&/conclusi|cierre|reflexi|consideraciones finales/i.test(html.slice(idx,idx+160)))?html.slice(0,idx)+extra+'\n'+html.slice(idx):html+'\n'+extra;
+    words=wordCount(html);
+  }
+  d.words=words;
+  toast(words>=MIN_WORDS?`Texto redactado: ${words} palabras.`:`El texto quedó con ${words} palabras (meta: ${MIN_WORDS}).`);
+  return html;
 }
 function convertirHtmlAWordXML(htmlContenido) {
   const parser = new DOMParser();
@@ -2974,7 +3052,7 @@ function libSave(d,p,fecha){
 function libCard(r){
   const d=r.d,key=matKey(d.materia)||d.materia,ni=(d.imgm||[]).length;
   return `<div class="file" data-rid="${esc(r.id)}"><div class="ficon t-blue">📄</div><div class="finfo"><div class="fname">${esc(d.evidencia||'Formato de evidencia')}</div>
-  <div class="fmeta"><span class="tag t-blue">Guardado</span>${r.p&&r.p.eq?'<span class="tag t-green">Equipo: '+esc(r.p.eq.nombre)+' ('+r.p.eq.miembros.length+')</span>':''}<span>${esc(key)} · Competencia ${esc(d.comp||1)} · ${new Date(r.t).toLocaleDateString('es-MX')}</span>${d.html||d.extra?'<span class="tag t-blue">+ texto adicional</span>':''}${ni?'<span class="tag t-blue">'+ni+' imagen'+(ni===1?'':'es')+'</span>':''}</div></div>
+  <div class="fmeta"><span class="tag t-blue">Guardado</span>${r.p&&r.p.eq?'<span class="tag t-green">Equipo: '+esc(r.p.eq.nombre)+' ('+r.p.eq.miembros.length+')</span>':''}<span>${esc(key)} · Competencia ${esc(d.comp||1)} · ${new Date(r.t).toLocaleDateString('es-MX')}</span>${d.html||d.extra?'<span class="tag t-blue">+ texto adicional'+(d.html?' · '+wordCount(d.html)+' palabras':'')+'</span>':''}${ni?'<span class="tag t-blue">'+ni+' imagen'+(ni===1?'':'es')+'</span>':''}</div></div>
   <div class="acts"><button type="button" class="dl soft" data-lib="${esc(r.id)}" data-fmt="preview"><span>Vista previa</span></button><button type="button" class="dl c-blue" data-lib="${esc(r.id)}">${IC.dl}<span>Descargar</span></button><button type="button" class="dl c-rust" data-lib="${esc(r.id)}" data-fmt="pdf"><span>PDF</span></button><button type="button" class="dl soft rustc" data-del="${esc(r.id)}" aria-label="Eliminar" title="Eliminar">${IC.trash}</button></div></div>`;
 }
 function renderLib(){
@@ -3034,7 +3112,7 @@ async function openImp(btn){
   p.hidden=false;impOpen=p;p.innerHTML='<div class="imp-note">Cargando…</div>';
   try{
     await ensureImgs(d);
-    if(!d.html&&d.redactar&&d.redactar.instruccion){p.innerHTML='<div class="imp-note">Redactando el texto para poder ubicar las imágenes…</div>';d.html=await redactar(d,matKey(d.materia)||d.materia)}
+    if(!d.html&&d.redactar&&d.redactar.instruccion){p.innerHTML='<div class="imp-note">Redactando el texto para poder ubicar las imágenes…</div>';d.onStatus=t=>{p.innerHTML='<div class="imp-note">'+esc(t)+'</div>'};d.html=await redactar(d,matKey(d.materia)||d.materia)}
   }catch(e){console.warn(e)}
   renderImp(p);
 }
@@ -3049,7 +3127,7 @@ async function runDoc(btn){
   const pdf=btn.dataset.fmt==='pdf',lb=btn.querySelector('span'),orig=lb.textContent;
   lb.textContent=pdf?'Preparando…':'Generando…';btn.disabled=true;
   try{
-    const dd=await docFor(btn);if(who)dd.whoP=who.p;
+    const dd=await docFor(btn);if(who)dd.whoP=who.p;dd.onStatus=t=>{lb.textContent=t};
     const {blob,fn}=await buildDocx(dd);
     if(pdf){
       const bytes=await docxToPdf(blob,fn,(i,t)=>{lb.textContent='Página '+i+'/'+t});
@@ -3090,7 +3168,7 @@ function localDoc(q){
   const n=norm(q),k=Object.keys(asignaturasData).find(k=>n.includes(norm(k)))||'';
   const ev=/(?:evidencia|t[ií]tulo|llamad[ao])\s*[:"“]\s*([^"”\n,.]+)/i.exec(q);
   const d={materia:k,comp:statedComp(q),ind:statedInd(q)||[],evidencia:ev?ev[1].trim():'',equipo:(teamIn(q)||{}).nombre};
-  const tx=/\b(ensayo|reporte|investigacion|redact\w*|resumen|desarroll\w*|escrib\w*)\b/.exec(n);
+  const tx=/\b(ensayo|reporte|investigacion|redact\w*|resumen|desarroll\w*|escrib\w*|sobre|acerca|tema)\b/.exec(n);
   if(tx)d.redactar={tipo:/ensayo/.test(n)?'ensayo':/reporte/.test(n)?'reporte':'libre',instruccion:q};
   return d;
 }
@@ -3437,7 +3515,7 @@ function chatSave(){
   renderRecents();setTitle();
 }
 function botBody(m,last){
-  const files=(m.files||[]).map(k=>catalog.find(f=>f.key===k)).filter(Boolean);
+  const files=resolveAll(m.files);
   const pend=m.form&&!m.form.done;
   const dc=!pend&&m.doc&&m.doc.materia?docCard(m.doc):'';
   const ak=last&&Array.isArray(m.ask)&&m.ask.length?'<div class="chips ask">'+m.ask.map(o=>`<span class="chip" data-ask="${esc(o)}">${esc(o)}</span>`).join('')+'</div>':'';
@@ -3649,7 +3727,7 @@ async function previewDoc(btn){
   $('pva').innerHTML=`<button type="button" class="dl c-blue" ${a}><span>Descargar</span></button><button type="button" class="dl c-rust" ${a} data-fmt="pdf"><span>PDF</span></button>`;
   $('pvb').innerHTML='<div class="pvl"><div class="typing"><i></i><i></i><i></i></div><span id="pvs">Preparando el documento…</span></div>';
   try{
-    const dd=await docFor(btn);if(who)dd.whoP=who.p;
+    const dd=await docFor(btn);if(who)dd.whoP=who.p;dd.onStatus=t=>{const e=$('pvs');if(e)e.textContent=t};
     $('pvt').textContent=dd.evidencia||'Formato de evidencia';
     const keep=dd.noSave;dd.noSave=true;let out;
     try{out=await buildDocx(dd)}finally{dd.noSave=keep}
