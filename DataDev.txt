@@ -1,3 +1,36 @@
 mkdir -p ProyectoSO/Documentos/{Apuntes,Reportes} ProyectoSO/Programas/{Java,Python} ProyectoSO/Recursos/{Datos,Imagenes} && touch ProyectoSO/Documentos/Apuntes/{Clase1.txt,Clase2.txt} ProyectoSO/Documentos/Reportes/Reporte1.txt ProyectoSO/Programas/Java/Factorial.java ProyectoSO/Programas/Python/Suma.py ProyectoSO/Recursos/Datos/Datos.txt && echo "La estructura de ProyectoSO ha sido generada exitosamente."
 
 mkdir -p Proyecto/Docs/ Proyecto/src/python/ Proyecto/src/bash/ Proyecto/logs/ && touch Proyecto/Docs/{Clase1.txt,Clase2.txt,hola.txt} Proyecto/src/bash/{mundo.sh,hola.sh} Proyecto/src/logs/{log12332.log,log12123.log}
+
+
+#!/bin/bash
+
+echo "Ingresa la ruta del directorio que deseas respaldar:"
+read directorio
+if [ ! -d "$directorio" ]; then
+    echo "Error: El directorio no existe."
+    exit 1
+fi
+
+nombre=$(basename "$directorio")
+fecha=$(date +"%Y-%m-%d")
+
+RESPALDO_DIR="$HOME/respaldos"
+if [ ! -d "$RESPALDO_DIR" ]; then
+    mkdir -p "$RESPALDO_DIR"
+fi
+
+mkdir -p "$RESPALDO_DIR/$nombre"
+for archivo in $(find "$directorio" -type f); do
+    cp "$archivo" "$RESPALDO_DIR/$nombre"
+done
+tar -czf "$RESPALDO_DIR/${nombre}_${fecha}.tar.gz" -C "$RESPALDO_DIR" "$nombre"
+
+if [ $? -eq 0 ]; then
+    echo "Respaldo creado correctamente."
+else
+    echo "Error al crear el respaldo."
+    exit 1
+fi
+rm -rf "$RESPALDO_DIR/$nombre"
+echo "Proceso finalizado."
