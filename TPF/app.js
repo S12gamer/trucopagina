@@ -629,6 +629,30 @@ function moveNavPill(linkEl){
 }
 
 document.getElementById('popup-cta').addEventListener('click', function(e) {
+
+    let textoHref = this.getAttribute('href');
+
+    // Los 4 valores permitidos
+    let valoresPermitidos = ['formatos', 'servicios', 'contacto', 'nosotros'];
+
+    // Si no coincide con ninguno, deja continuar el comportamiento normal
+    if (!valoresPermitidos.includes(textoHref)) return;
+
+    // Solo para los 4 valores anteriores evitamos la navegación
+    e.preventDefault();
+
+    let botonCorrespondiente = document.querySelector(`[onclick*="showPage('${textoHref}'"]`);
+
+    if (botonCorrespondiente) {
+        showPage(textoHref, botonCorrespondiente);
+    } else {
+        showPage(textoHref, null);
+    }
+
+    closeNotice();
+});
+/* ═════════════════════════════════════════
+document.getElementById('popup-cta').addEventListener('click', function(e) {
     e.preventDefault(); // Evita que el navegador intente navegar a la página "formatos"
     
     // Obtenemos el valor del href
@@ -636,6 +660,7 @@ document.getElementById('popup-cta').addEventListener('click', function(e) {
     let botonCorrespondiente = document.querySelector(`[onclick*="showPage('${textoHref}'"]`);
     
     // 2. Llamamos a la función original pasándole la sección y el BOTÓN REAL
+    if (textoHref)
     if (botonCorrespondiente) {
         showPage(textoHref, botonCorrespondiente);
         closeNotice();
@@ -645,7 +670,7 @@ document.getElementById('popup-cta').addEventListener('click', function(e) {
         closeNotice(); 
     }
   });
-
+═════════════════════════════════════════ */
 function showPage(pageId,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(b=>b.classList.remove('active'));

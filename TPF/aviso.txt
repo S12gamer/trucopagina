@@ -1,5 +1,4 @@
-MODO=UPDATE
-VERSION=1.1
+MODO=SESION
 TITULO=Generador de portafolios
 TEMA=sepia
 BORDE=pulso
