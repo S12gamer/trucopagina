@@ -1,23 +1,23 @@
-MODO=SESION
-TITULO=Bienvenidos de Nuevo!!!
-TEMA=rust
+MODO=UPDATE
+VERSION=1.1
+TITULO=Generador de portafolios
+TEMA=sepia
 BORDE=pulso
-TAMANO=lg
+TAMANO=md
 POSICION=centro
 ENTRADA=desvanecer
-ETIQUETA=
-ICONO=✨
+ETIQUETA=Nuevo!!!!
+ICONO=📚
 ICONO_ANIMACION=flotar
 IMAGEN=https://s12gamer.github.io/trucopagina/TPF/testzone/og-imagesd.png
 TEXTURA=true
 SOMBRA=fuerte
 ORBE=true
-BOTON_TEXTO=ver nuevas updates
-BOTON_LINK=formatos
+BOTON_TEXTO=Genera tu primer portafolio!!
+BOTON_LINK=genportevs.html
 BOTON_RECORDAR=false
 FECHA_INICIO=
 FECHA_FIN=
 ---
-¡Bienvenido al nuevo Centro de Recursos Académicos! 🚀
-Hemos rediseñado la plataforma por completo. Disfruta de un diseño moderno, nuevos filtros por semestre, la nueva sección de Atributos de Egreso y el Instalador de Paquetes Winget.
-💡 Tip: ¡Puedes descargar e instalar esta página como una App en tu dispositivo para un acceso más rápido y cómodo!
+¡Bienvenido al nuevo Generador de Portafolios de Evidencia! 🚀
+Hemos rediseñado la herramienta para armar tu paquete de tareas sin batallas ni horas uniendo documentos a mano. Disfruta de un procesamiento 100% local y seguro en tu navegador, organización modular, previsualización en tiempo real con motor Canvas y exportación impecable en PDF o Word con portadas e índices editables.

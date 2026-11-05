@@ -15,13 +15,17 @@ importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
      6) Las tipografías de Google Fonts
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION   = 'v7';
+const CACHE_VERSION   = 'v8';
 const APP_SHELL_CACHE = `tpf-app-shell-${CACHE_VERSION}`;
 const CDN_CACHE       = `tpf-cdn-libs-${CACHE_VERSION}`;
 const TEMPLATE_CACHE  = `tpf-plantillas-${CACHE_VERSION}`;
 const RUNTIME_CACHE   = `tpf-runtime-${CACHE_VERSION}`;
 
-const TODAS_LAS_CACHES = [APP_SHELL_CACHE, CDN_CACHE, TEMPLATE_CACHE, RUNTIME_CACHE];
+// Caché propia del Generador de Portafolios (la crea index.html de /portafolios/
+// para guardar los PDF de instrumentación). NO debe borrarse al limpiar versiones viejas.
+const INSTR_CACHE = 'instrumentaciones-v1';
+
+const TODAS_LAS_CACHES = [APP_SHELL_CACHE, CDN_CACHE, TEMPLATE_CACHE, RUNTIME_CACHE, INSTR_CACHE];
 
 // Carpeta donde vive la app (debe coincidir con "scope" del manifest.json)
 const BASE = '/trucopagina/TPF/';
@@ -39,6 +43,36 @@ const APP_SHELL = [
   BASE + 'CDA icon.png',
   BASE + 'CRDA icon.png'
 ];
+
+// 1b) Generador de Portafolios (Portafolios.html). Todos sus archivos son
+//     locales (fuentes, librerías, íconos y plantilla.js), así que funciona 100% offline.
+const PF = BASE;  // el generador está al mismo nivel que el resto de la app
+const PORTAFOLIOS = [
+  'genportevs.html',
+  'plantilla.js',
+  'fonts/fonts.css',
+  'fonts/dm-mono-latin-400-normal.woff2',
+  'fonts/dm-mono-latin-500-normal.woff2',
+  'fonts/dm-sans-latin-300-normal.woff2',
+  'fonts/dm-sans-latin-400-normal.woff2',
+  'fonts/dm-sans-latin-500-normal.woff2',
+  'fonts/dm-sans-latin-600-normal.woff2',
+  'fonts/dm-sans-latin-700-normal.woff2',
+  'fonts/playfair-display-latin-400-italic.woff2',
+  'fonts/playfair-display-latin-400-normal.woff2',
+  'fonts/playfair-display-latin-700-normal.woff2',
+  'fonts/playfair-display-latin-900-normal.woff2',
+  'icons/apple-touch-icon.png',
+  'icons/icon-192.png',
+  'icons/icon-512.png',
+  'libs/FileSaver.min.js',
+  'libs/heic2any.min.js',
+  'libs/jszip.min.js',
+  'libs/pdf-lib.min.js',
+  'libs/pdf.min.js',
+  'libs/pdf.worker.min.js',
+  'libs/pizzip.min.js'
+].map((f) => PF + f);
 
 // 2) Plantilla(s) .docx que normalmente se piden a GitHub en cada clic de
 //    "Generar documento". Al precachearlas, la primera vez que el usuario
@@ -73,7 +107,7 @@ const CDN_HOSTS = [
 self.addEventListener('install', (e) => {
   e.waitUntil((async () => {
     const shellCache = await caches.open(APP_SHELL_CACHE);
-    await Promise.all(APP_SHELL.map(async (url) => {
+    await Promise.all([...APP_SHELL, ...PORTAFOLIOS].map(async (url) => {
       try { await shellCache.add(new Request(url, { cache: 'reload' })); }
       catch (err) { console.warn('[SW] No se pudo precachear (app shell):', url, err); }
     }));
