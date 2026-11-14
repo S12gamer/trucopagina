@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistema auxiliar de entrega de tareas</title>
+<style>
+:root{
+  --bg:#EDE8DF; --surface:#FAF8F4; --surface-2:#F4F0E8;
+  --ink:#1C1917; --ink-m:#5C5751; --ink-faint:#9A9490; --sidebar:#1C1917;
+  --amber:#C8893A; --amber-l:rgba(200,137,58,.14); --amber-glow:rgba(200,137,58,.22);
+  --teal:#1B7A6E; --teal-l:rgba(27,122,110,.12);
+  --rust:#923A28; --rust-l:rgba(146,58,40,.12);
+  --green:#2A6545; --green-l:rgba(42,101,69,.12);
+  --purple:#5B3E8F; --purple-l:rgba(91,62,143,.12);
+  --blue:#3E5B8F; --blue-l:rgba(62,91,143,.12);
+  --sh-s:0 2px 8px rgba(28,25,23,.07); --sh-m:0 8px 28px rgba(28,25,23,.12);
+  --r-s:8px; --r-m:14px; --r-l:20px;
+  --spring:cubic-bezier(.34,1.56,.64,1); --smooth:cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,sans-serif}
+.top{background:var(--sidebar);color:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:14px 32px;gap:16px}
+.back{color:var(--amber);background:none;border:0;font:600 16px inherit;cursor:pointer}
+.right{display:flex;align-items:center;gap:18px;font-style:italic;font-size:14px}
+.btn{background:var(--amber);color:var(--ink);border:0;border-radius:var(--r-s);padding:10px 26px;font:700 15px inherit;cursor:pointer;box-shadow:0 4px 14px var(--amber-glow);transition:transform .25s var(--spring)}
+.btn:hover{transform:translateY(-2px)} .btn:disabled{opacity:.5;cursor:default;transform:none}
+.wrap{max-width:1200px;margin:0 auto;padding:36px 32px;display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:48px}
+@media(max-width:800px){.wrap{grid-template-columns:1fr;gap:20px;padding:20px}}
+h1{font-size:30px;line-height:1.25;margin:0 0 8px}
+.meta{color:var(--ink-m);font-size:15px}
+h3{font-size:13px;margin:28px 0 8px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-m)}
+.instr{white-space:pre-wrap;font-size:16px;line-height:1.5}
+.card{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid rgba(28,25,23,.14);border-radius:var(--r-s);padding:14px 16px;margin-bottom:10px;font-weight:600;color:var(--ink);text-decoration:none;box-shadow:var(--sh-s);transition:box-shadow .25s var(--smooth),transform .25s var(--spring)}
+.card:hover{box-shadow:var(--sh-m);transform:translateY(-1px)}
+.card .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ic{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;font-size:11px;font-weight:800;flex:none}
+.x{background:none;border:0;font-size:18px;color:var(--ink-faint);cursor:pointer}
+.acts{display:flex;gap:22px;margin-top:6px}
+.link{background:none;border:0;color:var(--amber);font:700 16px inherit;cursor:pointer;padding:6px 0}
+.side b{display:block;font-size:13px;margin-bottom:4px}
+input[type=text],textarea{width:100%;padding:10px 12px;border:1px solid rgba(28,25,23,.2);border-radius:var(--r-s);background:var(--surface);font:15px inherit;color:var(--ink)}
+.note{display:none;margin:10px 0}.note.on{display:block}
+.st{margin-top:14px;font-size:14px;color:var(--ink-m)}
+.ok{color:var(--green)} .err{color:var(--rust)}
+.bar{height:6px;background:var(--surface-2);border-radius:3px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--teal);transition:width .3s}
+.gate{position:fixed;inset:0;background:rgba(28,25,23,.72);backdrop-filter:blur(6px);display:grid;place-items:center;z-index:50;padding:20px}
+.gate[hidden]{display:none}
+.gbox{background:var(--surface);border-radius:var(--r-l);padding:32px;max-width:430px;width:100%;box-shadow:0 24px 56px rgba(28,25,23,.18)}
+.gbox h2{margin:0 0 6px;font-size:22px}.gbox p{margin:0 0 16px;color:var(--ink-m);font-size:14px}
+.gbox .btn{margin-top:12px;width:100%}.gbox .btn.alt{background:var(--surface-2);box-shadow:none}
+</style></head><body>
+<div class="top"><button class="back" onclick="history.back()">‹ Volver</button>
+<div class="right"><span id="quien"></span><span id="estado">◷ No entregada</span><button class="btn" id="entregar">Entregar</button></div></div>
+<div class="wrap"><main>
+<h1 id="titulo"></h1><div class="meta" id="meta"></div>
+<h3>Instrucciones</h3><div class="instr" id="instr"></div>
+<h3>Materiales de referencia</h3><div id="mats"></div>
+<h3>Mi trabajo</h3>
+<div id="hist"></div>
+<div id="files"></div>
+<div class="note" id="note"><textarea id="nt" rows="4" placeholder="Escribe tu respuesta…"></textarea><button class="btn" style="margin-top:8px;padding:8px 18px" id="addnote">Agregar nota</button></div>
+<div class="acts"><button class="link" id="adj">📎 Adjuntar</button><button class="link" id="nuevo">＋ Nuevo</button></div>
+<input type="file" id="fi" multiple hidden>
+<div class="st" id="st"></div><div class="bar" id="bar" hidden><i></i></div>
+<input type="file" id="cfg" accept=".txt" hidden>
+</main>
+<aside class="side"><b>Puntos</b><span id="puntos"></span></aside></div>
+<div class="gate" id="gate" hidden><form class="gbox" id="gform">
+<h2>¿Quién eres?</h2><p>Escribe tu nombre para ver tu estado de entrega. Si hay más de una persona con ese nombre, te pediré un dato extra para distinguirte.</p>
+<input type="text" id="gname" placeholder="Nombre (y apellidos si los tienes)" autocomplete="off">
+<div id="gdwrap" hidden><input type="text" id="gdato" style="margin-top:10px" autocomplete="off"></div>
+<div class="st" id="gmsg"></div>
+<button class="btn" type="submit">Continuar</button>
+<button class="btn alt" type="button" id="gnew" hidden>Soy nuevo/a, continuar con este nombre</button>
+<button class="btn alt" type="button" id="gotro">Soy otra persona con el mismo nombre</button>
+</form></div>
+<script>
+const $=id=>document.getElementById(id);
+let C={},files=[],alumno=localStorage.getItem("alumno")||"",pend="";
+const FALLBACK=`titulo=Tarea de ejemplo\nvence=2027-01-08 23:59\ncierra=2027-01-08 23:59\nvarios_envios=si\npuntos=Sin puntuación\n[instrucciones]\nEdita tarea.txt\n[materiales]\n`;
+function parse(t){
+  const o={mats:[],instr:""};let sec="";const ins=[];
+  for(const raw of t.replace(/\r/g,"").split("\n")){
+    const l=raw.trim();
+    if(/^\[.+\]$/.test(l)){sec=l.slice(1,-1).toLowerCase();continue}
+    if(sec==="instrucciones"){ins.push(raw);continue}
+    if(!l||l[0]==="#")continue;
+    if(sec==="materiales"){const [n,u]=l.split("|").map(s=>s.trim());o.mats.push({n,u:u||"#"});continue}
+    const i=l.indexOf("=");if(i>0)o[l.slice(0,i).trim()]=l.slice(i+1).trim();
+  }
+  o.instr=ins.join("\n").trim();return o;
+}
+function fecha(s){const d=new Date(s.replace(" ","T"));if(isNaN(d))return s;
+  return d.toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"})+" "+d.toTimeString().slice(0,5)}
+function icon(n){const e=(n.split(".").pop()||"").toLowerCase();
+  const m={pdf:["PDF","--rust"],jpg:["IMG","--teal"],jpeg:["IMG","--teal"],png:["IMG","--teal"],doc:["DOC","--blue"],docx:["DOC","--blue"],txt:["TXT","--ink-m"],xls:["XLS","--green"],xlsx:["XLS","--green"],ppt:["PPT","--amber"],pptx:["PPT","--amber"]}[e]||[e.slice(0,3).toUpperCase()||"?","--purple"];
+  const bg=m[1]==="--ink-m"?"--surface-2":m[1]+"-l";
+  return `<span class="ic" style="background:var(${bg});color:var(${m[1]})">${m[0]}</span>`}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function tam(n){return n>1048576?(n/1048576).toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB"}
+function render(){
+  document.title=C.titulo||"Tarea";$("titulo").textContent=C.titulo||"";
+  $("meta").textContent=["Vence el "+fecha(C.vence||""),C.varios_envios==="no"?"Un solo envío":"Se permiten varios envíos","Se cierra el "+fecha(C.cierra||C.vence||"")].join(" • ");
+  $("instr").textContent=C.instr;$("puntos").textContent=C.puntos||"Sin puntuación";
+  $("mats").innerHTML=C.mats.map(m=>`<a class="card" href="${esc(m.u)}" target="_blank" rel="noopener">${icon(m.n)}<span class="nm">${esc(m.n)}</span><span>⋯</span></a>`).join("");
+}
+function drawFiles(){
+  $("files").innerHTML=files.map((f,i)=>`<div class="card">${icon(f.name)}<span class="nm">${esc(f.name)}</span><button class="x" onclick="files.splice(${i},1);drawFiles()">✕</button></div>`).join("");
+}
+async function api(p){const u=new URL(C.script_url);Object.entries(p).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u);return r.json()}
+function fh(s){return new Date(s).toLocaleString("es-MX",{dateStyle:"medium",timeStyle:"short"})}
+const tid=()=>C.tarea_id||C.titulo||"";
+function showHist(a,otros){
+  const ok=a&&a.length;
+  $("estado").textContent=ok?"✔ Entregada":"◷ No entregada";
+  $("hist").innerHTML=(ok?`<div class="meta" style="margin-bottom:8px">Archivos entregados · última entrega: ${fh(a[0].fecha)}</div>`+a.map(f=>`<div class="card">${icon(f.name)}<span class="nm">${esc(f.name)}</span><span class="meta" style="font-weight:400;font-size:13px">${tam(f.size)} · ${fh(f.fecha)}</span></div>`).join(""):"")
+    +(otros?`<div class="meta" style="margin:8px 0">Además tienes ${otros} archivo(s) de otras tareas en tu misma carpeta.</div>`:"");
+  const bloq=ok&&C.varios_envios==="no";
+  $("entregar").disabled=bloq;$("entregar").textContent=bloq?"Entregada":"Entregar";
+}
+async function refresh(){
+  if(!C.script_url||!alumno){showHist(null);return}
+  $("estado").textContent="… Consultando";
+  try{const j=await api({action:"estado",alumno});if(!j.ok)throw new Error(j.error);
+    const mios=j.archivos.filter(f=>f.tarea===tid());showHist(mios,j.archivos.length-mios.length)}
+  catch(e){$("estado").textContent="⚠ Sin conexión";$("st").className="st err";$("st").textContent="No pude consultar tu estado: "+e.message}
+}
+function setQuien(){
+  $("quien").innerHTML=alumno?`👤 ${esc(alumno)} <button class="link" style="font-size:13px" id="cambiar">Cambiar</button>`:"";
+  if(alumno)$("cambiar").onclick=()=>{localStorage.removeItem("alumno");alumno="";files=[];drawFiles();$("hist").innerHTML="";$("estado").textContent="◷ No entregada";setQuien();openGate()};
+}
+let usaDato=false,otro=false;
+const lbl=()=>C.dato_extra||"grupo, matrícula u otro dato";
+function openGate(){usaDato=false;otro=false;$("gate").hidden=false;$("gmsg").textContent="";$("gnew").hidden=true;$("gotro").hidden=false;$("gdwrap").hidden=true;$("gname").value="";$("gdato").value="";setTimeout(()=>$("gname").focus(),50)}
+function pedirDato(msg,cls){usaDato=true;$("gdwrap").hidden=false;$("gdato").placeholder=lbl();$("gmsg").className="st "+(cls||"");$("gmsg").textContent=msg;$("gdato").focus()}
+function entrar(n){alumno=n;localStorage.setItem("alumno",n);$("gate").hidden=true;$("st").textContent="";setQuien();refresh()}
+function boot(){if(alumno){$("gate").hidden=true;setQuien();refresh()}else openGate()}
+function load(t){C=parse(t);render()}
+$("gotro").onclick=()=>{otro=true;$("gotro").hidden=true;pedirDato("Escribe tu nombre completo y un dato que te distinga ("+lbl()+"). Quedará guardado junto a tu nombre.")};
+$("gform").onsubmit=async e=>{
+  e.preventDefault();const q=$("gname").value.trim(),m=$("gmsg"),d=$("gdato").value.replace(/[()]/g,"").trim();if(!q)return;
+  $("gnew").hidden=true;pend=q;
+  if(otro&&!d){m.className="st err";m.textContent="Escribe el dato que te distingue.";return}
+  if(!C.script_url){entrar(otro?`${q} (${d})`:q);return}
+  m.className="st";m.textContent="Buscando…";
+  try{
+    const p={action:"buscar",q};if(usaDato)p.dato=d;
+    const j=await api(p);if(!j.ok)throw new Error(j.error);
+    if(j.coincidencias===1)entrar(j.nombre);
+    else if(j.coincidencias>1){
+      if(j.pedirDato&&!usaDato)pedirDato("Hay más de una persona con ese nombre. Escribe tu "+lbl()+" para distinguirte (déjalo vacío si nunca registraste uno).","err");
+      else if(j.pedirDato){m.className="st err";m.textContent="Sigo encontrando varias personas con ese dato. Escribe uno más específico."}
+      else{m.className="st err";m.textContent="Hay más de una persona con ese nombre. Agrega tu segundo nombre o tus apellidos."}
+    }else if(otro)entrar(`${q} (${d})`);
+    else if(usaDato){
+      m.className="st";m.textContent="No encontré ese dato. Revísalo, o si eres una persona nueva con el mismo nombre, regístralo.";
+      if(d){pend=`${q} (${d})`;$("gnew").hidden=false}
+    }else{m.className="st";m.textContent="No encontré entregas con ese nombre. Si es tu primera vez, escribe tu nombre completo y continúa.";$("gnew").hidden=false}
+  }catch(err){m.className="st err";m.textContent="Error: "+err.message}
+};
+$("gnew").onclick=()=>entrar(pend);
+fetch("tarea.txt",{cache:"no-store"}).then(r=>r.ok?r.text():Promise.reject()).then(t=>{load(t);boot()}).catch(()=>{load(FALLBACK);$("st").textContent="No pude leer tarea.txt automáticamente. Usa «Cargar tarea.txt…».";boot()});
+$("cfg").onchange=e=>{const f=e.target.files[0];if(f)f.text().then(t=>{load(t);$("st").textContent="";boot()})};
+$("adj").onclick=()=>$("fi").click();
+$("fi").onchange=e=>{files.push(...e.target.files);e.target.value="";drawFiles()};
+$("nuevo").onclick=()=>$("note").classList.toggle("on");
+$("addnote").onclick=()=>{const t=$("nt").value.trim();if(!t)return;
+  files.push(new File([t],"Nota "+(files.length+1)+".txt",{type:"text/plain"}));$("nt").value="";$("note").classList.remove("on");drawFiles()};
+const b64=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=rej;r.readAsDataURL(f)});
+$("entregar").onclick=async()=>{
+  const st=$("st"),bar=$("bar");
+  if(!alumno){openGate();return}
+  if(!files.length){st.className="st err";st.textContent="Adjunta al menos un archivo.";return}
+  if(!C.script_url){st.className="st err";st.textContent="Falta script_url en tarea.txt (ver Code.gs).";return}
+  $("entregar").disabled=true;bar.hidden=false;bar.firstElementChild.style.width="0";st.className="st";
+  try{
+    for(let i=0;i<files.length;i++){
+      const f=files[i];st.textContent=`Subiendo ${f.name} (${i+1}/${files.length})…`;
+      const r=await fetch(C.script_url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body:JSON.stringify({alumno,tarea:tid(),name:f.name,mime:f.type,data:await b64(f)})});
+      const j=await r.json();if(!j.ok)throw new Error(j.error);
+      bar.firstElementChild.style.width=((i+1)/files.length*100)+"%";
+    }
+    files=[];drawFiles();await refresh();st.className="st ok";st.textContent="Entregado correctamente.";
+  }catch(e){st.className="st err";st.textContent="Error: "+e.message;$("entregar").disabled=false}
+};
+</script></body></html>

@@ -1,0 +1,17 @@
+# Edita este archivo y recarga la página. Líneas con # son comentarios.
+titulo=ENTREGAS DESFAZADAS
+vence=2026-11-16 23:59
+cierra=2026-11-16 23:59
+varios_envios=si
+puntos=Sin puntuación
+# URL de tu Apps Script publicado como aplicación web (ver Code.gs)
+script_url=https://script.google.com/macros/s/AKfycbzKH7geBzH-hslYRXDY-zDxQCjByCfz3GEYMsZtwIxCZjs3Ru0vG4qx1JN1jmhO2sGM-g/exec
+
+[instrucciones]
+SUBIR SUS ENTREGAS TARDIAS DE LAS MATERIAS LAS CUALES NO PUDIERON DEBIDO AL DOWNTIME DE LOS SERVICIOS DE MICROSOFT
+
+ENTREGEN TODAS LAS ACTIVIDADES DESFAZADAS
+[materiales]
+# nombre | enlace (puede ser archivo relativo o enlace de Drive)
+# Radianes.jpg | Radianes.jpg
+# Tabla de ángulos equivalentes trigonométricos.pdf | tabla.pdf
