@@ -50,6 +50,8 @@ const formatos = [
   {id:26,sem:3,  name:"Guia Evaluacion VirtualBox",        desc:"Oscar Olivares López",                     url:"https://drive.google.com/uc?export=download&id=1RK-_Agfn5XZkzcLipT2uEby0dEBwZT0q/"},
   {id:27,sem:3,  name:"Guia Evaluacion Investigacion",        desc:"Oscar Olivares López",                     url:"https://drive.google.com/uc?export=download&id=11PAtA1HwJk8m2QAs9K4vr8kCUPSf_hTw"},
   {id:28,sem:3,  name:"Guia Evaluacion Ejercicio Practico",        desc:"Oscar Olivares López",                     url:"https://drive.google.com/uc?export=download&id=16bZsaRtR_Dz4NJBzCNAbP2a773hE2Je-"},
+  {id:29, sem:3,  name:"Formato Sistemas Operativos Ejercicio practico (con portada/Guia)",   desc:"by: S12/Trucoteca",     url:"https://drive.google.com/uc?export=download&id=112p_mZ8GMjTRlcGYGb1CGSLUVSLtx6hL"},
+  {id:17, sem:3,  name:"Formato Sistemas Operativos Investigacion (con portada/Guia)",   desc:"by: S12/Trucoteca",     url:"https://drive.google.com/uc?export=download&id=1JcirAmv2DHs5LbhqA1n4t66iJFV00-xT"},
 ];
 
 const instrumentaciones = [
