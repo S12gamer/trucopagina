@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Control de pagos 332M</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f5f6f8;--card:#fff;--tx:#1b1f24;--mu:#667085;--pr:#1f6feb;--ok:#1a9b4b;--bd:#e3e6ea;--bar:#e8ebef}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101316;--card:#1a1e23;--tx:#eceff3;--mu:#98a2b3;--pr:#5b9dff;--ok:#43c874;--bd:#2a3037;--bar:#2a3037}}
+:root[data-theme="dark"]{--bg:#101316;--card:#1a1e23;--tx:#eceff3;--mu:#98a2b3;--pr:#5b9dff;--ok:#43c874;--bd:#2a3037;--bar:#2a3037}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,Roboto,sans-serif;max-width:640px;margin-inline:auto}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:12px 14px 8px;z-index:5}
+h1{font-size:19px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.sum div{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px;font-size:12px;color:var(--mu)}
+.sum b{display:block;font-size:15px;color:var(--tx)}
+input,button,textarea{font:inherit;color:var(--tx)}
+input[type=text],input[type=number],input[type=date],textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--card)}
+button{border:0;border-radius:10px;padding:10px 14px;background:var(--pr);color:#fff;cursor:pointer}
+button.g{background:var(--bar);color:var(--tx)}button.d{background:#d92d20}
+.row{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin:8px 14px;padding:10px 12px}
+.top{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.top span{color:var(--mu);white-space:nowrap}.bar{height:8px;background:var(--bar);border-radius:6px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pr)}.done .bar i{background:var(--ok)}.done .top span{color:var(--ok)}
+dialog{border:0;border-radius:14px;padding:16px;width:min(92vw,420px);background:var(--card);color:var(--tx)}
+dialog::backdrop{background:#0008}
+.f{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.f>*{flex:1}
+.h{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:14px;align-items:center}
+.h button{padding:2px 8px;background:none;color:#d92d20}
+label{font-size:13px;color:var(--mu);display:block;margin-top:10px}
+</style></head><body>
+<header>
+<h1>Pagos 332M <span><button class="g" onclick="openDebt()">Deuda</button> <button class="g" onclick="openBk()">Respaldo</button></span></h1>
+<div class="sum"><div>Deuda por alumno<b id="sD"></b></div><div>Recaudado<b id="sC"></b></div><div>Liquidados<b id="sL"></b></div></div>
+<input type="text" id="q" placeholder="Buscar alumno o número de control" oninput="render()">
+</header>
+<main id="list"></main>
+
+<dialog id="dDebt"><h3 style="margin:0">Deuda a cubrir</h3>
+<label>Monto por alumno (MXN)</label><input type="number" id="iDebt" inputmode="decimal" min="1">
+<label id="lClr" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="cClr" style="width:auto"> Borrar pagos anteriores (nuevo ciclo)</label>
+<div class="f"><button class="g" id="bCancel" onclick="dDebt.close()">Cancelar</button><button onclick="saveDebt()">Guardar</button></div></dialog>
+
+<dialog id="dSt"><h3 style="margin:0" id="tN"></h3><div id="tI" style="color:var(--mu);font-size:14px"></div>
+<label>Monto del pago</label><input type="number" id="iAmt" inputmode="decimal" min="0">
+<label>Fecha</label><input type="date" id="iDate">
+<div class="f"><button onclick="addPay()">Registrar pago</button><button class="g" onclick="payRest()">Pagar lo que falta</button></div>
+<div id="hist" style="margin-top:12px"></div>
+<div class="f"><button class="g" onclick="dSt.close()">Cerrar</button></div></dialog>
+
+<dialog id="dBk"><h3 style="margin:0">Respaldo</h3>
+<p style="font-size:13px;color:var(--mu)">Tus datos se guardan en este dispositivo. Copia el respaldo para guardarlo en otro lugar o pégalo aquí para restaurarlo.</p>
+<textarea id="tBk" rows="6"></textarea>
+<div class="f"><button onclick="cpBk()">Copiar respaldo</button><button class="g" onclick="rsBk()">Restaurar</button></div>
+<div class="f"><button class="g" onclick="dBk.close()">Cerrar</button></div></dialog>
+
+<script>
+const ST=[[1,253107183,"AGUILAR SEDAS EDITH"],[2,253107238,"AGUSTIN ORTIZ IAN BRANDON"],[3,253107390,"ALVARADO HERNANDEZ BRYANT ALEXIS"],[4,253107158,"AVILA VILLALVA VANESSA"],[5,253107296,"CLORIO SANCHEZ HECTOR RAUL"],[6,253107298,"DIAZ CONTRERAS LUNA JOACELYN"],[7,253107363,"DIAZ HERNANDEZ EMMANUEL"],[8,253107220,"ESCALONA VEGA DORIAN IOREL"],[9,253107291,"ESTEVEZ QUINTANAR DONOVAN ALEJANDRO"],[10,253107161,"GABINO GALVAN MIA SOFIA"],[11,253107172,"GALO VALLE YARED"],[12,253107335,"GARCIA COLIN LILI YAMILE"],[13,253107378,"GARCIA PACHECO CRISTINA YUNNUEN"],[14,253107175,"GARCIA PEREZ GIOVANNI"],[15,253107164,"GARCIA QUIROZ LESLY VALERIA"],[16,253107407,"GOMEZ GARCIA ITZEL DONAJI"],[17,253107348,"GONZALEZ TORRES ALAN DONOVAN"],[18,253107383,"GUERRA RODRIGUEZ SHARENNY JUNEHI"],[19,253107217,"HERNANDEZ RUIZ OMAR"],[20,253107168,"HERRERA CAMACHO ERICK GEOVANI"],[21,253107418,"IBANEZ MARTINEZ SAMANTHA"],[22,253107286,"JIMENEZ GARCIA JIMENA JOCELYN"],[23,253107318,"LOPEZ BARAJAS DIEGO EMILIANO"],[24,253107273,"LOPEZ MAYEN JUAN MANUEL"],[25,253107330,"MARTINEZ AVENDAÑO LEONEL"],[26,253107204,"MAURICIO ATILANO MARIA FERNANDA"],[27,253107310,"MENDEZ URBINA GUADALUPE VALERIA"],[28,253107345,"MOLINA CHAVARRIA JESUS ENRIQUE"],[29,253107325,"MONTAÑO BUTANDA LORENA"],[30,253107186,"MORAN LOPEZ LUIS ANGEL"],[31,253107285,"MUÑOZ HERNANDEZ DANIEL"],[32,253107263,"NAVA MORALES EMMA LETICIA"],[33,253107372,"NAVARRETE CISNEROS AARON"],[34,253107268,"OLVERA MEDINA SANTIAGO EMANUEL"],[35,253107374,"ORTEGA LOPEZ EDGAR JAIR"],[36,253107311,"PARRA INIESTRA ABRAHAM"],[37,253107200,"PEREZ AGUILAR CRISTIAN JASSIEL"],[38,253107417,"PEREZ BECERRA ALEJANDRO"],[39,253107306,"PEREZ RAMOS VALENTINA GUADALUPE"],[40,253107366,"PEREZ ROJAS ERICK YUREM"],[41,253107235,"PEREZ VAZQUEZ RODRIGO"],[42,253107259,"RAMIREZ BAUTISTA JARED RICARDO"],[43,253107243,"RAMIREZ VAZQUEZ ARATH NEPHTALI"],[44,253107189,"REYES ISLAS CAMILA"],[45,253107385,"REYES JUAREZ CONSTANZA SUA"],[46,253107250,"REYES LUGO ANGEL GABRIEL"],[47,253107300,"RICO CORONA EDUARDO RUBEN"],[48,253107224,"RODRIGUEZ CISNEROS RAFAEL"],[49,253107210,"RUISECO ESCALONA DIEGO JESUS"],[50,253107232,"RUIZ KREUSCH JORGE ALAN"],[51,263107131,"SANCHEZ CALDERON ALDO"],[52,253107192,"SOBERANIS SILVA ALEJANDRO"],[53,253107358,"UGALDE BERNAL GAEL IZAID"],[54,253107178,"VALLE LARA ZOE URIEL"],[55,253107367,"ZARATE DE LA CRUZ GUILLERMO"],[56,253107430,"VAYLON HERNANDEZ LUIS ALBERTO"],[57,253107400,"BLANCO GARCIA CARLOS DAVID"]];
+const K="pagos332m_v1";let S={debt:0,pay:{}},cur=null;
+const $=id=>document.getElementById(id);
+const money=n=>(n||0).toLocaleString("es-MX",{style:"currency",currency:"MXN"});
+const today=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const fdate=s=>{const[a,b,c]=s.split("-");return c+"/"+b+"/"+a};
+function load(){try{const r=localStorage.getItem(K);if(r)S=JSON.parse(r)}catch(e){}}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){alert("No se pudo guardar en este dispositivo.")}}
+const paid=c=>(S.pay[c]||[]).reduce((s,p)=>s+p.a,0);
+function render(){
+  const q=$("q").value.trim().toLowerCase();let tot=0,ok=0;
+  ST.forEach(s=>{const p=paid(s[1]);tot+=p;if(S.debt&&p>=S.debt)ok++});
+  $("sD").textContent=money(S.debt);$("sC").textContent=money(tot);$("sL").textContent=ok+" / "+ST.length;
+  $("list").innerHTML=ST.filter(s=>!q||s[2].toLowerCase().includes(q)||String(s[1]).includes(q)).map(s=>{
+    const p=paid(s[1]),pc=S.debt?Math.min(100,p/S.debt*100):0,fin=S.debt&&p>=S.debt;
+    return `<div class="row ${fin?"done":""}" onclick="openSt(${s[1]})"><div class="top"><div>${s[0]}. ${s[2]}</div><span>${fin?"Liquidado":"Debe "+money(Math.max(0,S.debt-p))}</span></div><div class="top" style="color:var(--mu);font-size:12px"><div>${s[1]}</div><div>${money(p)}</div></div><div class="bar"><i style="width:${pc}%"></i></div></div>`}).join("");
+}
+function openDebt(force){$("iDebt").value=S.debt||"";$("cClr").checked=false;$("lClr").style.display=force?"none":"flex";$("bCancel").style.display=force?"none":"";$("dDebt").showModal()}
+function saveDebt(){const v=parseFloat($("iDebt").value);if(!(v>0)){alert("Escribe un monto mayor a 0");return}
+  S.debt=v;if($("cClr").checked)S.pay={};save();$("dDebt").close();render()}
+$("dDebt").addEventListener("cancel",e=>{if(!S.debt)e.preventDefault()});
+function openSt(c){cur=c;const s=ST.find(x=>x[1]===c);$("tN").textContent=s[2];$("iAmt").value="";$("iDate").value=today();drawSt();$("dSt").showModal()}
+function drawSt(){const p=paid(cur);$("tI").textContent="Pagado "+money(p)+" de "+money(S.debt)+" · Falta "+money(Math.max(0,S.debt-p));
+  $("hist").innerHTML=(S.pay[cur]||[]).slice().sort((a,b)=>b.d.localeCompare(a.d)||b.id-a.id).map(x=>`<div class="h"><span>${fdate(x.d)}</span><b>${money(x.a)}</b><button onclick="delPay(${x.id})">Quitar</button></div>`).join("")||'<div style="color:var(--mu);font-size:14px">Sin pagos registrados</div>'}
+function add(a){if(!(a>0)){alert("Escribe un monto válido");return}
+  (S.pay[cur]=S.pay[cur]||[]).push({id:Date.now(),d:$("iDate").value||today(),a});save();$("iAmt").value="";drawSt();render()}
+function addPay(){add(parseFloat($("iAmt").value))}
+function payRest(){add(Math.max(0,S.debt-paid(cur)))}
+function delPay(id){if(!confirm("¿Quitar este pago?"))return;S.pay[cur]=S.pay[cur].filter(x=>x.id!==id);save();drawSt();render()}
+function openBk(){$("tBk").value=JSON.stringify(S);$("dBk").showModal()}
+async function cpBk(){try{await navigator.clipboard.writeText($("tBk").value);alert("Respaldo copiado")}catch(e){$("tBk").select();alert("Selecciona y copia el texto manualmente")}}
+function rsBk(){try{const o=JSON.parse($("tBk").value);if(typeof o.debt!=="number"||typeof o.pay!=="object")throw 0;
+  if(!confirm("Esto reemplaza los datos actuales. ¿Continuar?"))return;S=o;save();$("dBk").close();render()}catch(e){alert("El respaldo no es válido")}}
+load();render();try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+if(!S.debt)openDebt(true);
+</script></body></html>
