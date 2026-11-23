@@ -21,7 +21,8 @@
     values:    { label:'Valores (separados por coma)', type:'text' },
     state:     { label:'Estado', type:'select', options:['readonly','normal','disabled'] }
   };
-
+  // 3==D
+// TODO ESTA MAL 
   const WIDGET_DEFS = {
     Button:      { label:'Button', py:'Button', ttk:false, w:100, h:32,
                    fields:['text','command','bg','fg','fontFamily','fontSize'],

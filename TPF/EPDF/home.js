@@ -1,0 +1,123 @@
+"use strict";
+/* ===== Pantalla de inicio + herramientas extra (todo sin conexión) ===== */
+const CAT=[['Ordenar PDF',[['Unir PDF','🔗','var(--rust)','merge'],['Dividir PDF','✂️','var(--rust)','org'],['Eliminar páginas','🗑','var(--rust)','org'],['Extraer páginas','📤','var(--rust)','org'],['Ordenar PDF','↕️','var(--rust)','org'],['Escanear a PDF','📷','var(--rust)','scan']]],
+['Optimizar PDF',[['Comprimir PDF','🗜','var(--green)','t:comp'],['Reparar PDF (Beta)','🔧','var(--green)','t:rep'],['OCR PDF','🔤','var(--green)','t:ocr']]],
+['Convertir a PDF',[['JPG a PDF','🖼','var(--amber)','c:pdf'],['Word a PDF','W','var(--blue)','c:pdf'],['HTML a PDF(Alpha)','‹›','var(--rose)','t:html'],['PowerPoint a PDF(Beta)','P','var(--orange)','c:pdf'],['Excel a PDF (Alpha)','X','var(--green)','c:pdf']]],
+['Convertir desde PDF (Experimental)',[['PDF a JPG','🖼','var(--amber)','c:jpg'],['PDF a Word','W','var(--blue)','c:docx'],['PDF a PowerPoint','P','var(--orange)','c:pptx'],['PDF a Excel','X','var(--green)','c:xlsx']]],
+['Editar PDF',[['Editar PDF','✏️','var(--purple)','ed'],['Rotar PDF','⟳','var(--purple)','org'],['Números de página','🔢','var(--purple)','org'],['Marca de agua','💧','var(--purple)','org'],['Recortar PDF (Experimental)','⛶','var(--purple)','org']]],
+['Mis archivos',[['Archivos guardados','🗄','var(--slate)','store'],['Escanear con cámara (Recomendable Telefono)','📷','var(--rust)','scan']]],
+['Seguridad (Experimental)',[['Desbloquear PDF','🔓','var(--teal)','t:unl'],['Proteger PDF','🔒','var(--teal)','t:pro'],['Firmar PDF','✍','var(--teal)','ed:sign'],['Censurar PDF','⬛','var(--teal)','ed:cen'],['Comparar PDF','⚖','var(--teal)','t:cmp']]]];
+const css=document.createElement('style');css.textContent=`
+body[data-v=home] #v-home,body[data-v=t] #v-t{display:flex}#v-home h1{margin:0;font-size:24px}#hg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px}#hg h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;color:var(--ink-m)}
+.tc{display:flex;gap:10px;align-items:center;width:100%;border:0;background:none;text-align:left;padding:7px 4px;font-size:14px;color:inherit}.tc:hover{background:var(--surface-2)}.tc i{width:32px;height:32px;border-radius:7px;display:grid;place-items:center;font-style:normal;color:#fff;font-weight:700;flex:none}
+#tR{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}#tR canvas{width:100%;background:#fff;border:1px solid rgba(28,25,23,.16)}
+#sg{position:fixed;inset:0;background:rgba(28,25,23,.55);display:none;place-items:center;z-index:50}#sg.on{display:grid}#sg>div{background:#fff;padding:14px;border-radius:10px;max-width:96vw}#sg canvas{border:1px dashed #9ca3af;touch-action:none;max-width:100%;background:#fff}#hg>div{background:var(--surface);padding:14px;border-radius:var(--r-m);box-shadow:var(--sh-s)}.tc{border-radius:var(--r-s);transition:all .2s var(--smooth)}.tc:hover{background:var(--amber-l);transform:translateX(3px)}.tc i{box-shadow:var(--sh-s)}`;document.head.appendChild(css);
+document.body.appendChild(HT(`<section class="view" id="v-home"><h1>Todas las herramientas de PDF</h1><p>Funcionan sin conexión: tus archivos no salen de tu dispositivo.</p><div id="hg">${CAT.map(c=>`<div><h3>${c[0].toUpperCase()}</h3>${c[1].map(t=>`<button class="tc" data-go="${t[3]}"><i style="background:${t[2]}">${t[1]}</i><span>${t[0]}</span></button>`).join('')}</div>`).join('')}</div></section>`));
+document.body.appendChild(HT(`<section class="view" id="v-t"><h2 id="tT"></h2><p id="tD"></p><div class="bar" id="tO"></div><div class="bar"><button data-g="pick">📂 Elegir archivo(s)</button><button class="pri" data-g="go">▶ Ejecutar</button></div><div class="bar"><label>Nombre del archivo <input id="tN" class="nm"></label></div><div id="tL" class="drop"></div><div id="tR"></div></section>`));
+document.body.appendChild(HT(`<div id="sg"><div><b>Dibuja tu firma</b><br><canvas id="sgc" width="480" height="180"></canvas><div class="bar" style="margin-top:8px"><button data-g="sgClr">Limpiar</button><button data-g="sgNo">Cancelar</button><button class="pri" data-g="sgOk">Usar firma</button></div></div></div>`));
+/* utilidades */
+const open1=async(ab,pw)=>{await cargarPdfJs();return pdfjsLib.getDocument({data:new Uint8Array(ab.slice(0)),password:pw}).promise};
+async function rend(ab,scale,q,pw,keep){const doc=await open1(ab,pw),out=[];for(let i=1;i<=doc.numPages;i++){showLoading(`Procesando página ${i}/${doc.numPages}…`);const pg=await doc.getPage(i),vp=pg.getViewport({scale}),cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);await pg.render({canvasContext:c,viewport:vp}).promise;out.push({cv,w:vp.width/scale,h:vp.height/scale,jpg:keep?null:await new Promise(r=>cv.toBlob(r,'image/jpeg',q))});if(!keep)cv.width=cv.height=0}await doc.destroy();return out}
+async function desdeImgs(pgs){const o=await PDFLib.PDFDocument.create();for(const p of pgs){const im=await o.embedJpg(new Uint8Array(await p.jpg.arrayBuffer())),pg=o.addPage([p.w,p.h]);pg.drawImage(im,{x:0,y:0,width:p.w,height:p.h})}return o.save()}
+const PDFB=b=>new Blob([b],{type:'application/pdf'}),LD=ab=>PDFLib.PDFDocument.load(ab,{ignoreEncryption:true,throwOnInvalidObject:false});
+const noPw=async ab=>{try{(await open1(ab)).destroy()}catch(e){if(e.name=='PasswordException')throw new Error('Este PDF pide contraseña: escríbela arriba')}};
+const base=f=>f.name.replace(/\.[^.]+$/,'');
+/* herramientas */
+const G={
+html:{t:'HTML a PDF',d:'Convierte un archivo .html o código pegado a PDF. Las imágenes deben ir incrustadas (data:) para funcionar sin conexión.',acc:'.html,.htm,.xhtml,text/html',noFile:1,o:'<label><input type="checkbox" id="g2" checked> Ejecutar scripts de la página (apps dinámicas)</label><textarea id="g1" rows="4" placeholder="Pega aquí tu HTML o elige un archivo .html" style="width:100%;padding:8px"></textarea>',
+ run:async fs=>{const src=fs.length?await fs[0].text():$('g1').value;if(!src.trim())throw new Error('Pega código HTML o elige un archivo');const n=fs.length?base(fs[0]):'pagina';return[[n+'.pdf',await genPdf(await htmlPages(src,$('g2').checked),n)]]}},
+comp:{sfx:'_comprimido',t:'Comprimir PDF',d:'Reduce el tamaño. Las páginas pasan a imagen (se pierde el texto seleccionable; usa OCR para recuperarlo).',acc:'.pdf',o:'<label>Nivel <select id="g1"><option value="0">Fuerte</option><option value="1" selected>Equilibrado</option><option value="2">Ligera</option></select></label>',
+ run:async fs=>{const[s,q]=[[1,.45],[1.4,.6],[2,.75]][+$('g1').value],r=[];for(const f of fs){const ab=await f.arrayBuffer(),b=PDFB(await desdeImgs(await rend(ab,s,q)));msg(`${kb(f.size)} → ${kb(b.size)}`);r.push([base(f)+'_comprimido.pdf',b])}return r}},
+rep:{sfx:'_reparado',t:'Reparar PDF',d:'Intenta reconstruir un PDF dañado. Si no es posible, lo regenera como imágenes.',acc:'.pdf',o:'',
+ run:async fs=>{const r=[];for(const f of fs){const ab=await f.arrayBuffer();let b;try{b=PDFB(await(await LD(ab)).save())}catch(e){b=PDFB(await desdeImgs(await rend(ab,2,.8)))}r.push([base(f)+'_reparado.pdf',b])}return r}},
+unl:{sfx:'_desbloqueado',t:'Desbloquear PDF',d:'Quita restricciones de edición/impresión. Si pide contraseña para abrirlo, escríbela.',acc:'.pdf',o:'<input id="g1" type="password" placeholder="Contraseña (si la pide)" style="min-height:40px">',
+ run:async fs=>{const pw=$('g1').value,r=[];for(const f of fs){const ab=await f.arrayBuffer();r.push([base(f)+'_desbloqueado.pdf',PDFB(pw?await desdeImgs(await rend(ab,2,.85,pw)):(await noPw(ab),await(await LD(ab)).save()))])}return r}},
+pro:{sfx:'_protegido',t:'Proteger PDF',d:'Cifra el PDF con contraseña (sin servidor).',acc:'.pdf',o:'<input id="g1" type="password" placeholder="Contraseña" style="min-height:40px">',
+ run:async fs=>{const pw=$('g1').value;if(!pw)throw new Error('Escribe una contraseña');const r=[];for(const f of fs){const d=await LD(await f.arrayBuffer());await d.encrypt({userPassword:pw,ownerPassword:pw+'·propietario',permissions:{printing:'highResolution',copying:false,modifying:false}});r.push([base(f)+'_protegido.pdf',PDFB(await d.save())])}return r}},
+ocr:{sfx:'_ocr',t:'OCR PDF',d:'Reconoce el texto de PDFs escaneados o imágenes y crea un PDF con texto seleccionable y buscable (sin internet).',acc:'.pdf,image/*,.heic',o:'<label>Idioma <select id="g1"><option value="spa+eng">Español + Inglés</option><option value="spa">Español</option><option value="eng">Inglés</option></select></label>',
+ run:async fs=>{const u=p=>new URL(p,location.href).href,w=await Tesseract.createWorker($('g1').value.split('+'),1,{workerPath:u('libs/ocr/worker.min.js'),corePath:u('libs/ocr/core'),langPath:u('libs/ocr/lang'),gzip:true,workerBlobURL:false}),r=[];
+  try{for(const f of fs){const src=/\.pdf$/i.test(f.name)?await rend(await f.arrayBuffer(),2,.7,'',true):await(async()=>{const{bytes}=await imagenAJpeg(f),im=new Image();im.src=URL.createObjectURL(new Blob([bytes]));await im.decode();const cv=document.createElement('canvas');cv.width=im.naturalWidth;cv.height=im.naturalHeight;cv.getContext('2d').drawImage(im,0,0);return[{cv,w:cv.width*.75,h:cv.height*.75}]})(),out=[];
+   for(let i=0;i<src.length;i++){showLoading(`OCR ${f.name}: página ${i+1}/${src.length}…`);const p=src[i],{data}=await w.recognize(p.cv),k=p.w/.75/p.cv.width;
+    out.push({jpeg:await canvasAJpeg(p.cv),wPx:p.cv.width,hPx:p.cv.height,wPt:p.w,hPt:p.h,texts:(data.words||[]).filter(x=>x.text.trim()).map(x=>({x:x.bbox.x0*k,y:x.bbox.y0*k,w:(x.bbox.x1-x.bbox.x0)*k,size:(x.bbox.y1-x.bbox.y0)*k*.85,bold:false,text:x.text}))});p.cv.width=0}
+   r.push([base(f)+'_ocr.pdf',new Blob([construirPdf(out,base(f))],{type:'application/pdf'})])}}finally{await w.terminate()}return r}},
+cmp:{t:'Comparar PDF',d:'Elige dos PDFs (original y modificado). Las diferencias se marcan en rojo.',acc:'.pdf',o:'',
+ run:async fs=>{if(fs.length!=2)throw new Error('Elige exactamente 2 PDFs');const[a,b]=[await rend(await fs[0].arrayBuffer(),1,0,'',true),await rend(await fs[1].arrayBuffer(),1,0,'',true)],R=$('tR');R.innerHTML='';
+  for(let i=0;i<Math.max(a.length,b.length);i++){const A=a[i],B=b[i];if(!A||!B){R.appendChild(HT(`<p>Pág. ${i+1}: solo existe en ${A?'el original':'el modificado'}</p>`));continue}
+   const cv=document.createElement('canvas');cv.width=A.cv.width;cv.height=A.cv.height;const c=cv.getContext('2d');c.drawImage(B.cv,0,0,cv.width,cv.height);const d2=c.getImageData(0,0,cv.width,cv.height),d1=A.cv.getContext('2d').getImageData(0,0,cv.width,cv.height);let n=0;
+   for(let j=0;j<d1.data.length;j+=4){if(Math.abs(d1.data[j]-d2.data[j])+Math.abs(d1.data[j+1]-d2.data[j+1])+Math.abs(d1.data[j+2]-d2.data[j+2])>90){d2.data[j]=229;d2.data[j+1]=50;d2.data[j+2]=45;n++}else{d2.data[j]=d2.data[j+1]=d2.data[j+2]=Math.round(d1.data[j]*.25+191)}}
+   c.putImageData(d2,0,0);const w=HT(`<div><small>Pág. ${i+1}: ${(n*100/(cv.width*cv.height)).toFixed(2)}% distinto</small></div>`);w.appendChild(cv);R.appendChild(w)}msg('✓ Comparación lista');return[]}}};
+let TS=null,TF=[];
+const tDraw=()=>{if(!$('tN').dataset.u)$('tN').value=TF[0]?base(TF[0])+(TS&&TS.sfx||''):(TS&&TS.noFile?'pagina':'');$('tL').className=TF.length?'':'drop';$('tL').innerHTML=TF.length?TF.map((f,i)=>`<div class="row"><b>${i+1}</b><span>${esc(f.name)}</span><small>${kb(f.size)}</small><button data-g="tX" data-i="${i}">✕</button></div>`).join(''):'Arrastra aquí tus archivos o usa «Elegir archivo(s)»'};
+const tOpen=id=>{TS=G[id];TF=[];$('tN').dataset.u='';$('tT').textContent=TS.t;$('tD').textContent=TS.d;$('tO').innerHTML=TS.o;$('tR').innerHTML='';tDraw();setV('t')};
+const goTool=a=>{const[v,p]=a.split(':');
+ if(v=='t')tOpen(p);else if(v=='c'){setV('conv');$('cFmt').value=p}else if(v=='merge')setV('merge');
+ else if(v=='org'){setV('org');if(!O)T.oOpen()}
+ else if(v=='scan')setV('scan');else if(v=='store'){setV('store');sScan()}
+ else{setV('ed');pick('.pdf,image/*,.docx,.xlsx,.pptx,.heic',a=>{abrirTodos(a);busy=busy.then(()=>p&&ACT[p]&&ACT[p]())})}};
+/* firma */
+let sgd=false;const sc=$('sgc'),sx=sc.getContext('2d');sx.lineWidth=3;sx.lineCap='round';sx.strokeStyle='#111';
+const sp=e=>{const r=sc.getBoundingClientRect();return[(e.clientX-r.left)*sc.width/r.width,(e.clientY-r.top)*sc.height/r.height]};
+sc.onpointerdown=e=>{sgd=true;sc.setPointerCapture(e.pointerId);sx.beginPath();sx.moveTo(...sp(e))};sc.onpointermove=e=>{if(sgd){sx.lineTo(...sp(e));sx.stroke()}};sc.onpointerup=()=>sgd=false;
+ACT.sign=()=>$('sg').classList.add('on');ACT.cen=()=>add({t:'rect',w:200,h:24,fill:'#000000',st:'#000000',sw:0,cen:1});
+const hdr=document.querySelector('.grp[data-g=ins]');hdr.appendChild(HT('<button data-a="sign">✍ Firmar</button>'));hdr.appendChild(HT('<button data-a="cen" title="Censurar: oculta definitivamente al exportar">⬛ Censurar</button>'));
+document.addEventListener('click',async e=>{const c=e.target.closest('[data-go]');if(c)return goTool(c.dataset.go);const b=e.target.closest('[data-g]');if(!b)return;const g=b.dataset.g,i=+b.dataset.i;
+ try{if(g=='pick')pick(TS.acc,a=>{TF=TS===G.cmp?a.slice(0,2):a;tDraw()});else if(g=='tX'){TF.splice(i,1);tDraw()}
+ else if(g=='go'){if(!TF.length&&!TS.noFile)return msg('Elige archivo(s) primero','err');const r=await TS.run(TF);const tn=fn($('tN').value);if(r.length==1)saveAs(r[0][1],tn?tn+r[0][0].slice(r[0][0].lastIndexOf('.')):r[0][0]);else if(r.length){const z=new JSZip();r.forEach(([n,x])=>z.file(n,x));saveAs(await z.generateAsync({type:'blob'}),(tn||'resultado')+'.zip')}if(r.length)msg('✓ Listo')}
+ else if(g=='sgClr')sx.clearRect(0,0,sc.width,sc.height);else if(g=='sgNo')$('sg').classList.remove('on');
+ else if(g=='sgOk'){$('sg').classList.remove('on');const bl=await new Promise(r=>sc.toBlob(r,'image/png'));add({t:'img',a:await addAsset(new Uint8Array(await bl.arrayBuffer())),w:180,h:68});sx.clearRect(0,0,sc.width,sc.height)}}catch(x){console.error(x);msg('Error: '+x.message,'err')}});
+addEventListener('drop',e=>{if(document.body.dataset.v=='t'){TF=[...e.dataTransfer.files];tDraw()}});
+
+/* ===== Escáner con cámara (todo local) ===== */
+const st2=document.createElement('style');st2.textContent=`body[data-v=scan] #v-scan,body[data-v=store] #v-store{display:flex}#scV{width:100%;max-height:52vh;background:#000;border-radius:var(--r-m);object-fit:contain}
+.th{position:relative;flex:none}.th img{height:96px;border-radius:8px;border:1px solid rgba(28,25,23,.2);display:block}.th button{position:absolute;top:3px;right:3px;min-height:26px;padding:0 7px}.th small{position:absolute;left:4px;bottom:3px;background:#000a;color:#fff;border-radius:4px;padding:0 4px}`;document.head.appendChild(st2);
+document.body.appendChild(HT(`<section class="view" id="v-scan"><h2>Escanear a PDF</h2><p id="scMsg">Abriendo cámara…</p><video id="scV" playsinline muted autoplay></video>
+<div class="bar"><button class="pri" data-c="shot">📸 Capturar</button><button data-c="flip">🔄 Cambiar cámara</button><select id="scF"><option value="doc">Documento (B/N nítido)</option><option value="gray">Escala de grises</option><option value="color">Color</option></select><button data-c="file">🖼 Desde galería</button></div>
+<div id="scL" class="bar" style="overflow-x:auto;flex-wrap:nowrap"></div>
+<div class="bar"><label>Nombre del archivo <input id="scName" class="nm"></label><button class="pri" data-c="pdf">⬇ Crear PDF</button><button data-c="ed">✏️ Abrir en editor</button><button data-c="clr">Vaciar</button></div></section>`));
+let ST=null,face='environment',SC=[];
+const camOff=()=>{if(ST){ST.getTracks().forEach(q=>q.stop());ST=null}},stamp=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return`escaneo_${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`};
+async function camOn(){camOff();const m=$('scMsg');if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){m.textContent='La cámara requiere HTTPS o localhost. Usa «Desde galería» para tomar la foto con la app de cámara.';return}
+ try{ST=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:face},width:{ideal:2560},height:{ideal:1440}},audio:false});const v=$('scV');v.srcObject=ST;await v.play();m.textContent='Encuadra el documento y toca Capturar. Puedes añadir varias páginas.'}catch(e){m.textContent='No se pudo abrir la cámara ('+e.message+'). Usa «Desde galería».'}}
+function enhance(cv,mode){if(mode=='color')return;const c=cv.getContext('2d'),im=c.getImageData(0,0,cv.width,cv.height),d=im.data,n=d.length/4,hist=new Uint32Array(256);
+ for(let i=0;i<d.length;i+=4){const l=(d[i]*.299+d[i+1]*.587+d[i+2]*.114)|0;d[i]=d[i+1]=d[i+2]=l;hist[l]++}
+ if(mode=='doc'){let a=0,lo=0,hi=255;for(let i=0;i<256;i++){a+=hist[i];if(a>n*.04){lo=i;break}}a=0;for(let i=255;i>=0;i--){a+=hist[i];if(a>n*.35){hi=i;break}}hi=Math.max(hi,lo+30);
+  for(let i=0;i<d.length;i+=4){let v=(d[i]-lo)/(hi-lo);v=v<0?0:v>1?1:v;v=Math.pow(v,1.8);d[i]=d[i+1]=d[i+2]=v*255}}c.putImageData(im,0,0)}
+async function addScan(src,w,h){const M=2200,k=Math.min(1,M/Math.max(w,h)),cv=document.createElement('canvas');cv.width=Math.round(w*k);cv.height=Math.round(h*k);cv.getContext('2d').drawImage(src,0,0,cv.width,cv.height);enhance(cv,$('scF').value);
+ const bl=await new Promise(r=>cv.toBlob(r,'image/jpeg',.86)),bytes=new Uint8Array(await bl.arrayBuffer());SC.push({bytes,w:cv.width,h:cv.height,url:URL.createObjectURL(bl)});cv.width=0;scDraw()}
+const scDraw=()=>{$('scL').innerHTML=SC.map((s,i)=>`<div class="th"><img src="${s.url}"><small>${i+1}</small><button data-c="del" data-i="${i}">✕</button></div>`).join('');if(!$('scName').dataset.u)$('scName').value=SC.length?($('scName').dataset.n||($('scName').dataset.n=stamp())):''};
+async function scPdf(){if(!SC.length)throw new Error('Captura al menos una página');const o=await PDFLib.PDFDocument.create();
+ for(const s of SC){const im=await o.embedJpg(s.bytes),[PW,PH]=s.w>s.h?[841.89,595.28]:[595.28,841.89],k=Math.min(PW/s.w,PH/s.h),pg=o.addPage([PW,PH]);pg.drawImage(im,{x:(PW-s.w*k)/2,y:(PH-s.h*k)/2,width:s.w*k,height:s.h*k})}
+ saveAs(new Blob([await o.save()],{type:'application/pdf'}),(fn($('scName').value)||stamp())+'.pdf');msg('✓ PDF creado')}
+const SCA={shot:async()=>{const v=$('scV');if(!v.videoWidth)throw new Error('La cámara aún no está lista');await addScan(v,v.videoWidth,v.videoHeight)},
+ flip:()=>{face=face=='environment'?'user':'environment';return camOn()},
+ file:()=>pick('image/*,.heic,.heif',async a=>{try{for(const f of a){showLoading('Procesando '+f.name+'…');const{bytes}=await imagenAJpeg(f),im=new Image();im.src=URL.createObjectURL(new Blob([bytes]));await im.decode();await addScan(im,im.naturalWidth,im.naturalHeight)}msg('✓ Listo')}catch(e){msg('Error: '+e.message,'err')}}),
+ pdf:scPdf,clr:()=>{SC=[];$('scName').dataset.n='';$('scName').dataset.u='';scDraw()},del:b=>{SC.splice(+b.dataset.i,1);scDraw()},
+ ed:async()=>{if(!SC.length)throw new Error('Captura al menos una página');const pgs=[];for(const s of SC){const w=595.28;pgs.push({w:s.w>s.h?841.89:w,h:s.w>s.h?841.89*s.h/s.w:w*s.h/s.w,bg:await addAsset(s.bytes),items:[]})}
+  if(P.length==1&&!P[0].bg&&!P[0].items.length)P=[];cur=P.length;P.push(...pgs);if($('fname').value=='documento')$('fname').value=fn($('scName').value)||stamp();setV('ed');done()}};
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-c]');if(!b)return;try{await SCA[b.dataset.c](b)}catch(x){msg('Error: '+x.message,'err')}});
+window.onView=v=>{if(v=='scan')camOn();else camOff()};document.addEventListener('visibilitychange',()=>{if(document.hidden)camOff()});
+
+/* ===== Archivos guardados por otras apps (IndexedDB y caché del mismo sitio) ===== */
+document.body.appendChild(HT(`<section class="view" id="v-store"><h2>Archivos guardados</h2><p>Busca archivos (PDF, imágenes, Word, Excel, PowerPoint) guardados en IndexedDB o en la caché por otras apps que estén en el <b>mismo sitio</b> (mismo dominio y puerto) que esta.</p>
+<div class="bar"><button class="pri" data-s="scan">🔄 Buscar de nuevo</button><input id="sDb" class="nm" placeholder="Nombre de una base IndexedDB (opcional)"><button data-s="add">Añadir y buscar</button></div><div id="sList"></div></section>`));
+const sReq=r=>new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}),EXT={'application/pdf':'pdf','image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/heic':'heic','image/heif':'heif','application/vnd.openxmlformats-officedocument.wordprocessingml.document':'docx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':'xlsx','application/vnd.openxmlformats-officedocument.presentationml.presentation':'pptx','text/csv':'csv'};
+async function kind(b,nm){const u=new Uint8Array(await b.slice(0,12).arrayBuffer()),s=String.fromCharCode(...u);
+ if(s.startsWith('%PDF'))return'application/pdf';if(u[0]==255&&u[1]==216)return'image/jpeg';if(s.startsWith('\x89PNG'))return'image/png';if(s.startsWith('RIFF')&&s.slice(8,12)=='WEBP')return'image/webp';
+ if(s.startsWith('PK')){try{const z=await JSZip.loadAsync(b);if(z.file(/^word\//).length)return Object.keys(EXT).find(k=>EXT[k]=='docx');if(z.file(/^xl\//).length)return Object.keys(EXT).find(k=>EXT[k]=='xlsx');if(z.file(/^ppt\//).length)return Object.keys(EXT).find(k=>EXT[k]=='pptx')}catch(e){}}
+ return EXT[b.type]?b.type:/\.(pdf|docx|xlsx|pptx|jpe?g|png|webp|heic|heif|csv|ods|odp)$/i.test(nm||'')?b.type||'x':''}
+async function cands(v,name,d,out){if(!v||d>3)return;
+ if(v instanceof Blob)out.push({n:v.name||name,b:v});else if(v instanceof ArrayBuffer||ArrayBuffer.isView(v))out.push({n:name,b:new Blob([v])});
+ else if(typeof v=='string'){if(/^data:/.test(v)&&v.length>200)try{out.push({n:name,b:await(await fetch(v)).blob()})}catch(e){}}
+ else if(typeof v=='object'){const nm=String(v.name||v.filename||v.fileName||v.title||v.id||name);for(const k of Object.keys(v)){const x=v[k];if(x&&(typeof x=='object'||(typeof x=='string'&&x.startsWith('data:'))))await cands(x,nm,d+1,out)}}}
+async function mkItem(c,src,key){if(c.b.size<150)return null;const k=await kind(c.b,c.n);if(!k)return null;let n=String(c.n||key||'archivo').replace(/[\\/:*?"<>|]+/g,'_');const ex=EXT[k];if(ex&&!new RegExp('\\.'+ex+'$','i').test(n))n=n.replace(/\.[a-z0-9]{2,5}$/i,'')+'.'+ex;return{src,file:new File([c.b],n,{type:EXT[k]?k:c.b.type})}}
+let SI=[],sExtra=[];
+async function sScan(){const L=$('sList');L.innerHTML='<p>Buscando…</p>';SI=[];const dbs=new Set(sExtra);try{if(indexedDB.databases)for(const d of await indexedDB.databases())dbs.add(d.name)}catch(e){}
+ for(const nm of dbs){let db;try{db=await new Promise((ok,no)=>{const r=indexedDB.open(nm);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);r.onblocked=()=>no('b')});
+  for(const s of [...db.objectStoreNames]){const os=db.transaction(s,'readonly').objectStore(s),keys=await sReq(os.getAllKeys()),vals=await sReq(os.getAll());
+   for(let i=0;i<vals.length;i++){const out=[];await cands(vals[i],String(keys[i]),0,out);for(const c of out){const it=await mkItem(c,`IndexedDB · ${nm} › ${s}`,keys[i]);if(it)SI.push(it)}}}}catch(e){console.warn('IDB',nm,e)}finally{db&&db.close()}}
+ try{for(const cn of await caches.keys()){if(/^editor-pdf/.test(cn))continue;const c=await caches.open(cn);for(const rq of await c.keys()){const rs=await c.match(rq);if(!rs)continue;const b=await rs.blob(),nm=decodeURIComponent((rq.url.split('?')[0].split('/').pop())||'archivo'),it=await mkItem({n:nm,b},'Caché · '+cn,nm);if(it)SI.push(it)}}}catch(e){console.warn('cache',e)}
+ L.innerHTML=SI.length?SI.map((s,i)=>`<div class="row"><b>${i+1}</b><span>${esc(s.file.name)}</span><small>${esc(s.src)} · ${kb(s.file.size)}</small><button data-s="ed" data-i="${i}" title="Abrir en el editor">✏️</button><button data-s="mg" data-i="${i}" title="Añadir a Unir">🔗</button><button data-s="cv" data-i="${i}" title="Añadir a Convertir">🔄</button><button data-s="dl" data-i="${i}" title="Descargar">⬇</button></div>`).join(''):'<p class="drop">No se encontraron archivos. Solo se pueden leer los datos de apps que estén en este mismo sitio (mismo dominio y puerto). Si conoces el nombre de la base IndexedDB, escríbelo arriba.</p>'}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-s]');if(!b)return;const s=b.dataset.s,it=SI[+b.dataset.i];try{
+ if(s=='scan')await sScan();else if(s=='add'){const n=$('sDb').value.trim();if(n){sExtra.push(n);$('sDb').value=''}await sScan()}
+ else if(s=='ed'){setV('ed');abrirTodos([it.file])}else if(s=='mg'){await mAdd([it.file]);setV('merge')}else if(s=='cv'){C.push(it.file);cDraw();setV('conv')}else if(s=='dl')saveAs(it.file,it.file.name)}catch(x){msg('Error: '+x.message,'err')}});
+setV('home');
